@@ -28,7 +28,7 @@ for xx_name in [['a', 'pre'], ['b', 'post']]:
             allShapes[sh_ann][1].append(path_input)
         else:
             allShapes[sh_ann] = [1, [path_input]]
-
+ 
         if sh_ann[1:] in allYXDim:
             allYXDim[sh_ann[1:]][0] += 1
             allYXDim[sh_ann[1:]][1].append(path_input)
