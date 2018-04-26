@@ -14,14 +14,16 @@ def main():
             if i == 20 and xx_name[0] == 'a':
                 continue
                 # Sizes annotation and input of i == 20 are not equal
-            path_ann = '{0}annotations/staple_{1}_{2}.gipl'.format(PATH_TO_DATA, xx_name[0], i)
-            I_ann = sitk.GetArrayFromImage(sitk.ReadImage(path_ann))
-            sh_ann = I_ann.shape
-            print(sh_ann)
 
+            path_ann = '{0}annotations/staple_{1}_{2}.gipl'.format(PATH_TO_DATA, xx_name[0], i)
             path_input = '{0}input/{2}/p{1}/de_{3}_{1}.nrrd'.format(PATH_TO_DATA, i, xx_name[1], xx_name[0])
+
+            I_ann = sitk.GetArrayFromImage(sitk.ReadImage(path_ann))
             I_input = sitk.GetArrayFromImage(sitk.ReadImage(path_input))
+
+            sh_ann = I_ann.shape
             sh_input = I_input.shape
+
             if sh_ann != sh_input:
                 raise Exception('size of {} != size of {}, ({} != {})'.format(path_ann, path_input, sh_ann, sh_input))
 
