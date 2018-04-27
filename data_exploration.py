@@ -6,10 +6,14 @@ from settings import *
 
 
 def main():
-    # Get image sizes
-    allShapes = {}
-    allYXDim = {}
+    # Nr of ones in the annotations
+    nrOfOnes = {'a': [[], []], 'b': [[], []]}
+
     for xx_name in [['a', 'pre'], ['b', 'post']]:
+        # Get image sizes
+        allShapes = {}
+        allYXDim = {}
+
         for i in range(1, 31):
             if i == 20 and xx_name[0] == 'a':
                 continue
@@ -20,6 +24,9 @@ def main():
 
             I_ann = sitk.GetArrayFromImage(sitk.ReadImage(path_ann))
             I_input = sitk.GetArrayFromImage(sitk.ReadImage(path_input))
+
+            nrOfOnes[xx_name[0]][0].append(i)
+            nrOfOnes[xx_name[0]][1].append(np.sum(I_ann))
 
             sh_ann = I_ann.shape
             sh_input = I_input.shape
@@ -39,21 +46,62 @@ def main():
             else:
                 allYXDim[sh_ann[1:]] = [1, [path_input]]
 
-    print("Unique shapes ({}): {}".format(len(allShapes), allShapes))
-    print("Unique YX dimensions ({}): {}".format(len(allYXDim), allYXDim))
+        print("Unique shapes in {} ({}): {}".format(xx_name[1], len(allShapes), allShapes))
+        print("Unique YX dimensions in {} ({}): {}".format(xx_name[1], len(allYXDim), allYXDim))
 
-    for yx in allYXDim:
-        print(yx)
-        toShow = []
-        for path_input in allYXDim[yx][1]:
-            I_input = sitk.GetArrayFromImage(sitk.ReadImage(path_input))
-            I_input = I_input[round(I_input.shape[0] / 2)]
-            I_input = I_input / np.max(I_input)
+        for yx in allYXDim:
+            print(yx)
+            toShow = []
+            for path_input in allYXDim[yx][1]:
+                I_input = sitk.GetArrayFromImage(sitk.ReadImage(path_input))
+                I_input = I_input[round(I_input.shape[0] / 2)]
+                I_input = I_input / np.max(I_input)
 
-            toShow.append(I_input)
+                toShow.append(I_input)
 
-        I_out = sitk.GetImageFromArray(np.array(np.concatenate(toShow, axis=1) * 255, dtype=np.uint8))
-        sitk.WriteImage(I_out, "{0}data_exploration/shape={1}.png".format(PATH_TO_RESULTS, yx))
+            I_out = sitk.GetImageFromArray(np.array(np.concatenate(toShow, axis=1) * 255, dtype=np.uint8))
+            sitk.WriteImage(I_out, "{0}data_exploration/{1}_shape={2}.png".format(PATH_TO_RESULTS, xx_name[1], yx))
+
+    print("Pre: Minimum nr of positive voxels: {} has {}".format(np.argmin(nrOfOnes['a'])+1, np.min(nrOfOnes['a'])))
+    print("Pre: Maximum nr of positive voxels: {} has {}".format(np.argmax(nrOfOnes['a'])+1, np.max(nrOfOnes['a'])))
+
+    print("Post: Minimum nr of positive voxels: {} has {}".format(np.argmin(nrOfOnes['b'])+1, np.min(nrOfOnes['b'])))
+    print("Post: Maximum nr of positive voxels: {} has {}".format(np.argmax(nrOfOnes['b'])+1, np.max(nrOfOnes['b'])))
+
+    nrOfOnesNumpy = np.array(nrOfOnes['b'][1])
+    print(nrOfOnesNumpy)
+    nrOfOnesSorted = np.sort(nrOfOnesNumpy)
+    nrOfOnesArgSorted = [nrOfOnes['b'][0][i] for i in np.argsort(nrOfOnesNumpy)]
+
+    plt.figure()
+    plt.scatter(range(len(nrOfOnesSorted)), nrOfOnesSorted)
+
+    training = []
+    validation = []
+    testing = []
+    train_per_step = [3, 3, 3, 3, 3]
+    val_per_step = [1, 2, 1, 2, 1]
+    print(nrOfOnesArgSorted)
+    for i in range(0, 5):
+        p = np.random.permutation(nrOfOnesArgSorted[i * 6: (i+1)*6])
+        training += list(p[0:train_per_step[i]])
+        validation += list(p[train_per_step[i]:train_per_step[i]+val_per_step[i]])
+        testing += list(p[train_per_step[i]+val_per_step[i]:])
+
+    print(training)
+    print(validation)
+    print(testing)
+
+    for i, txt in enumerate(nrOfOnesArgSorted):
+        plt.annotate(txt, (i, nrOfOnesSorted[i]))
+    plt.show()
+
+    plt.figure()
+    plt.subplot(2, 1, 1)
+    plt.hist(nrOfOnes['a'], bins=40)
+    plt.subplot(2, 1, 2)
+    plt.hist(nrOfOnes['b'], bins=40)
+    plt.show()
 
 
 if __name__ == "__main__":
