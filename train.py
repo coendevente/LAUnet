@@ -17,7 +17,6 @@ from augment import augment
 
 import random
 import time
-import os
 
 
 def custom_loss(y_true, y_pred):
@@ -68,8 +67,7 @@ def getRandomPatches(x_full, y_full, nr):
 
             # Pick current image randomly
             i_nr = random.randint(0, len(x_full) - 1)
-            x_full_i = augment(x_full[i_nr])
-            y_full_i = augment(y_full[i_nr])
+            x_full_i, y_full_i = augment(x_full[i_nr], y_full[i_nr])
 
             x_j, y_j = getRandomPatch(x_full_i, y_full_i)
 
@@ -90,11 +88,7 @@ def main():
 
     print(device_lib.list_local_devices())
 
-    x_all_path = []
-    y_all_path = []
-    for i in range(1, 31):
-        x_all_path.append('{0}input/{1}/p{2}/de_{3}_{2}.nrrd'.format(PATH_TO_DATA, PRE_OR_POST_NAME, i, PRE_OR_POST_XX))
-        y_all_path.append('{0}annotations/staple_{2}_{1}.gipl'.format(PATH_TO_DATA, i, PRE_OR_POST_XX))
+    x_all_path, y_all_path = getImagePaths(range(1, 31))
 
     # Full images
     x_full_all = loadImages(x_all_path)
@@ -138,11 +132,8 @@ def main():
         if lowest_loss_value > val_loss[0]:
             lowest_loss_value = val_loss[0]
             lowest_loss_model = model
-
-    model_folder = '{}{}/'.format(PATH_TO_MODELS, MODEL_NAME)
-    if not os.path.exists(model_folder):
-        os.makedirs(model_folder)
-    lowest_loss_model.save('{}model.h5'.format(model_folder))
+    model_path = getModelPath(MODEL_NAME)
+    lowest_loss_model.save(model_path)
 
     print('Training took {} seconds.'.format((round(time.time() - start_time))))
 

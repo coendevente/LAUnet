@@ -1,3 +1,3 @@
-def augment(I):
+def augment(I, J):
     # TODO
-    return I
+    return I, J
