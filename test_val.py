@@ -93,8 +93,7 @@ def main():
     if CALC_PROBS:
         for model_name in VALTEST_MODEL_NAMES:
             model_path = getModelPath(model_name)
-            # model = load_model(model_path)
-            model = ''
+            model = load_model(model_path)
 
             for i in range(len(x_full_all)):
                 for j in [-1] + list(range(VALTEST_AUG_NR)):
