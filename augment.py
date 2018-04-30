@@ -47,7 +47,7 @@ def augment(I, J):
 
         I_aug_slice = sitk.AdditiveGaussianNoise(I_aug_slice, noise_mean, noise_std)
 
-        I_aug[i] = I_aug_slice
-        J_aug[i] = J_aug_slice
+        I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
+        J_aug[i] = sitk.GetArrayFromImage(J_aug_slice)
 
     return I_aug, J_aug
