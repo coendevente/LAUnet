@@ -8,7 +8,7 @@ import math
 # Thanks to http://simpleitk-prototype.readthedocs.io/en/latest/user_guide/transforms/plot_transforms.html
 def resample(image, transform):
     reference_image = image
-    interpolator = sitk.sitkCosineWindowedSinc
+    interpolator = sitk.sitkNearestNeighbor
     default_value = 0.0
     return sitk.Resample(image, reference_image, transform,
                          interpolator, default_value)
@@ -40,7 +40,7 @@ def augment(I, J):
     J_aug = np.zeros(J.shape).astype(int)
     for i in range(I.shape[0]):
         I_slice = sitk.GetImageFromArray(I[i])
-        J_slice = sitk.GetImageFromArray(I[i])
+        J_slice = sitk.GetImageFromArray(J[i])
 
         I_aug_slice = resample(I_slice, affine)
         J_aug_slice = resample(J_slice, affine)

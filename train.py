@@ -19,6 +19,8 @@ import time
 
 import pickle
 
+from imshow_3D import imshow3D
+
 
 def buildUNet():
     """
@@ -33,16 +35,76 @@ def buildUNet():
 
 
 def getRandomPatch(x_full, y_full):
-    if x_full.shape != y_full.shape:
-        raise Exception('x_full.shape != y_full.shape ({} != {})'.format(x_full.shape, y_full.shape))
+    i = random.randint(0, len(x_full) - 1)
+    x = x_full[i]
+    y = y_full[i]
 
-    z_corner = random.randint(0, x_full.shape[0] - PATCH_SIZE[0])
-    y_corner = random.randint(0, x_full.shape[1] - PATCH_SIZE[1])
-    x_corner = random.randint(0, x_full.shape[2] - PATCH_SIZE[2])
+    z_corner = random.randint(0, x.shape[0] - PATCH_SIZE[0])
+    y_corner = random.randint(0, x.shape[1] - PATCH_SIZE[1])
+    x_corner = random.randint(0, x.shape[2] - PATCH_SIZE[2])
     corner = (z_corner, y_corner, x_corner)
 
-    x_patch = cropImage(x_full, corner, PATCH_SIZE)
-    y_patch = cropImage(y_full, corner, PATCH_SIZE)
+    x_patch = cropImage(x, corner, PATCH_SIZE)
+    y_patch = cropImage(y, corner, PATCH_SIZE)
+
+    return x_patch, y_patch
+
+
+def getRandomPositiveImage(x_full, y_full):
+    i = random.randint(0, len(x_full) - 1)
+
+    if np.sum(y_full[i]) == 0:
+        y_full = getRandomPositiveImage(x_full, y_full)
+
+    return x_full[i], y_full[i]
+
+
+def getRandomPositiveSlices(x_i, y_i):
+    its = 0
+    while its == 0 or nz_z + PATCH_SIZE[0] > x_i.shape[0]:
+        its += 1
+        nz = np.nonzero(y_i)
+        nz_z = random.choice(nz[0])
+
+    x_s = x_i[nz_z:nz_z + x_i.shape[0]]
+    y_s = y_i[nz_z:nz_z + y_i.shape[0]]
+    return x_s, y_s
+
+
+def getRandomPositivePatchAllSlices(x, y):
+    if np.sum(y) == 0:
+        return 0, 0, False
+
+    nz = np.nonzero(y)
+    nz_i = random.randint(0, nz[0].shape[0])
+    nz_yx = (nz[1][nz_i], nz[2][nz_i])
+    ranges = ([-PATCH_SIZE[1] + 1, PATCH_SIZE[1] - 1], [-PATCH_SIZE[2] + 1, PATCH_SIZE[2] - 1])
+
+    for i in range(2):
+        if nz_yx[i] - PATCH_SIZE[i + 1] + 1 < 0:
+            ranges[i][0] = nz_yx[i]
+        if nz_yx[i] + PATCH_SIZE[i + 1] - 1 >= x.shape[i + 1]:
+            ranges[i][0] = x.shape[i + 1] - nz_yx[i] - 1
+
+    z_corner = 0
+    y_corner = nz_yx[0] + random.randint(ranges[0][0], ranges[0][1])
+    x_corner = nz_yx[1] + random.randint(ranges[1][0], ranges[1][1])
+    corner = (z_corner, y_corner, x_corner)
+
+    x_patch = cropImage(x, corner, PATCH_SIZE)
+    y_patch = cropImage(y, corner, PATCH_SIZE)
+
+    return x_patch, y_patch, True
+
+
+def getRandomPositivePatch(x_full, y_full):
+    x_i, y_i = getRandomPositiveImage(x_full, y_full)
+    x_s, y_s = getRandomPositiveSlices(x_i, y_i)
+    x_aug, y_aug = augment(x_s, y_s)
+    x_patch, y_patch, found = getRandomPositivePatchAllSlices(x_aug, y_aug)
+
+    if not found:
+        x_patch, y_patch = getRandomPositivePatch(x_full, y_full)
 
     return x_patch, y_patch
 
@@ -51,20 +113,13 @@ def getRandomPatches(x_full, y_full, nr):
     x = []
     y = []
     for j in range(nr):
-        positive_batch = random.random() < POS_NEG_PATCH_PROP  # Whether batch should be positive
+        positive_patch = random.random() < POS_NEG_PATCH_PROP  # Whether batch should be positive
 
-        its = 0
-        while its == 0 or (np.sum(y_j) > 0 and not positive_batch) \
-                or (np.sum(y_j) == 0 and positive_batch):
-            its += 1
-
-            # Pick current image randomly
-            i_nr = random.randint(0, len(x_full) - 1)
-            x_full_i, y_full_i = augment(x_full[i_nr], y_full[i_nr])
-
-            x_j, y_j = getRandomPatch(x_full_i, y_full_i)
-
-        print('Found {} batch after {} iterations'.format(bool(positive_batch), its))
+        if not positive_patch:
+            x_j, y_j = getRandomPatch(x_full, y_full)
+        else:
+            x_j, y_j = getRandomPositivePatch(x_full, y_full)
+            # imshow3D(np.concatenate((x_j / np.max(x_j), y_j), axis=2))
 
         x.append(x_j)
         y.append(y_j)
@@ -105,6 +160,7 @@ def main():
 
     print("Start training...")
     for i in range(NR_BATCHES):
+
         x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE)
         x_val, y_val = getRandomPatches(x_full_val, y_full_val, NR_VAL_PATCH_PER_ITER)
 
