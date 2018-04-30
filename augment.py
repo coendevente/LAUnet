@@ -8,7 +8,7 @@ import math
 # Thanks to http://simpleitk-prototype.readthedocs.io/en/latest/user_guide/transforms/plot_transforms.html
 def resample(image, transform):
     reference_image = image
-    interpolator = sitk.sitkNearestNeighbor
+    interpolator = sitk.sitkLinear
     default_value = 0.0
     return sitk.Resample(image, reference_image, transform,
                          interpolator, default_value)
@@ -28,6 +28,7 @@ def augment(I, J):
     noise_std = random.uniform(NOISE_STD_MIN, NOISE_STD_MAX)
 
     affine = sitk.AffineTransform(2)
+    affine.SetCenter((round(I.shape[1] / 2), round(I.shape[2] / 2)))
     affine.Rotate(axis1=0, axis2=1, angle=rot)
     affine.Scale((zoom_x, zoom_y))
 

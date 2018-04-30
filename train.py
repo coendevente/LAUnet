@@ -161,8 +161,10 @@ def main():
     print("Start training...")
     for i in range(NR_BATCHES):
 
+        print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time), ))
         x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE)
         x_val, y_val = getRandomPatches(x_full_val, y_full_val, NR_VAL_PATCH_PER_ITER)
+        print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time), ))
 
         train_loss = model.train_on_batch(x_train, y_train)
         loss['training']['loss'].append(train_loss[0])
@@ -183,7 +185,7 @@ def main():
         if lowest_train_loss > train_loss[0]:
             lowest_train_loss = train_loss[0]
 
-        print(('{}s passed. Start training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
+        print(('{}s passed. Finished training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
               ' Latest, lowest validation loss: {}, {}.').format(
             round(time.time() - start_time), i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],
             lowest_val_loss, train_loss[0], lowest_train_loss))
