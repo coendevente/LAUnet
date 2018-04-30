@@ -31,12 +31,22 @@ VOXEL_OVERLAP = (0, 32, 32)
 BIN_THRESH = .5  # Threshold to binarize the probability images
 METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision']
 
-CALC_PROBS = True
+CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and results
+# will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur if these
+# images do not exist on the disk.
 
 # Data augmentation
 ROT_MIN = -10
 ROT_MAX = 10
-ZOOM_MIN = .95
-ZOOM_MAX = 1.1
-SHEER_MIN = .95
-SHEER_MAX = 1.05
+ZOOM_X_MIN = .95
+ZOOM_X_MAX = 1.1
+ZOOM_Y_MIN = .95
+ZOOM_Y_MAX = 1.1
+SHEAR_X_MIN = .95
+SHEAR_X_MAX = 1.05
+SHEAR_Y_MIN = .95
+SHEAR_Y_MAX = 1.05
+NOISE_MEAN_MIN = -40
+NOISE_MEAN_MAX = 40
+NOISE_STD_MIN = 1
+NOISE_STD_MAX = 20
