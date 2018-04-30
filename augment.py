@@ -16,6 +16,9 @@ def resample(image, transform):
 
 # I is gray scale, J should be a binary mask
 def augment(I, J):
+    if I.shape != J.shape:
+        raise Exception('Shape of I does not equal shape of J ({} != {})'.format(I.shape, J.shape))
+
     rot = random.uniform(ROT_MIN, ROT_MAX) / 360 * 2 * math.pi
     zoom_x = random.uniform(ZOOM_X_MIN, ZOOM_X_MAX)
     zoom_y = random.uniform(ZOOM_Y_MIN, ZOOM_Y_MAX)
@@ -33,7 +36,6 @@ def augment(I, J):
     matrix[1, 0] = -shear_y
     affine.SetMatrix(matrix.ravel())
 
-    assert I.shape == J.shape
     I_aug = np.zeros(I.shape).astype(int)
     J_aug = np.zeros(J.shape).astype(int)
     for i in range(I.shape[0]):
