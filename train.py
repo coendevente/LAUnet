@@ -100,18 +100,13 @@ def main():
     loss = {'training': [], 'validation': []}
 
     start_time = time.time()
-    lowest_loss_value = float("inf")
-    lowest_loss_value = float("inf")
-    val_loss = [float("inf"), 0]
-    train_loss = [float("inf"), 0]
+    lowest_val_loss = float("inf")
+    lowest_train_loss = float("inf")
+
+    print("Start training...")
     for i in range(NR_BATCHES):
         x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE)
         x_val, y_val = getRandomPatches(x_full_val, y_full_val, NR_VAL_PATCH_PER_ITER)
-
-        print(('{}s passed. Start training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.'+
-              ' Latest, lowest validation loss: {}, {}.').format(
-            round(time.time() - start_time), i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],
-            lowest_loss_value), )
 
         train_loss = model.train_on_batch(x_train, y_train)
         loss['training'].append(train_loss)
@@ -122,10 +117,18 @@ def main():
         loss_path = getLossPath(MODEL_NAME)
         pickle.dump(loss, open(loss_path, "wb"))
 
-        if lowest_loss_value > val_loss[0]:
-            lowest_loss_value = val_loss[0]
+        if lowest_val_loss > val_loss[0]:
+            lowest_val_loss = val_loss[0]
             model_path = getModelPath(MODEL_NAME)
             model.save(model_path)
+
+        if lowest_train_loss > train_loss[0]:
+            lowest_train_loss = train_loss[0]
+
+        print(('{}s passed. Start training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
+              ' Latest, lowest validation loss: {}, {}.').format(
+            round(time.time() - start_time), i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],
+            lowest_val_loss, train_loss[0], lowest_train_loss))
 
     print('Training took {} seconds.'.format((round(time.time() - start_time))))
 
