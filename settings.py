@@ -27,9 +27,16 @@ FN_CLASS_WEIGHT = 4500
 VALTEST_SET = VALIDATION_SET  # OR TESTING_SET
 VALTEST_MODEL_NAMES = ['test_unet', 'unet_depth_4']
 VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
-VOXEL_OVERLAP = (2, 32, 32)
-# IMAGES_TO_BE_SHOWN = [0, 5]  # Will be shown to the user
+VOXEL_OVERLAP = (0, 32, 32)
 BIN_THRESH = .5  # Threshold to binarize the probability images
 METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision']
 
 CALC_PROBS = True
+
+# Data augmentation
+ROT_MIN = -10
+ROT_MAX = 10
+ZOOM_MIN = .95
+ZOOM_MAX = 1.1
+SHEER_MIN = .95
+SHEER_MAX = 1.05

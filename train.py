@@ -11,20 +11,13 @@ from unet_3D import UNet
 import tensorflow as tf
 from tensorflow.python.client import device_lib
 from keras.optimizers import *
-from keras import backend as K
 
 from augment import augment
 
 import random
 import time
 
-
-def custom_loss(y_true, y_pred):
-    FNentropy = K.binary_crossentropy((y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
-    FPentropy = K.binary_crossentropy((y_pred - (K.round(y_true) == y_pred)) * y_pred, y_true)
-    TPentropy = K.binary_crossentropy((K.round(y_true) == y_pred) * y_pred, y_true)
-    TNentropy = K.binary_crossentropy((y_pred + y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
-    return FNentropy * FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy
+import pickle
 
 
 def buildUNet():
@@ -104,36 +97,35 @@ def main():
 
     model = buildUNet()
 
-    plt.figure()
-    train_loss_fig = plt.subplot(2, 2, 1)
-    train_acc_fig = plt.subplot(2, 2, 2)
-
-    val_loss_fig = plt.subplot(2, 2, 3)
-    val_acc_fig = plt.subplot(2, 2, 4)
+    loss = {'training': [], 'validation': []}
 
     start_time = time.time()
     lowest_loss_value = float("inf")
-    lowest_loss_model = model
+    lowest_loss_value = float("inf")
+    val_loss = [float("inf"), 0]
+    train_loss = [float("inf"), 0]
     for i in range(NR_BATCHES):
         x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE)
         x_val, y_val = getRandomPatches(x_full_val, y_full_val, NR_VAL_PATCH_PER_ITER)
 
-        print('{}s passed. Start training on batch {}/{} ({}%). Lowest loss so far is {}.'.format(
-            round(time.time() - start_time), i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, lowest_loss_value))
+        print(('{}s passed. Start training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.'+
+              ' Latest, lowest validation loss: {}, {}.').format(
+            round(time.time() - start_time), i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],
+            lowest_loss_value), )
 
         train_loss = model.train_on_batch(x_train, y_train)
-        train_loss_fig.plot(i, train_loss[0])
-        train_acc_fig.plot(i, train_loss[1])
+        loss['training'].append(train_loss)
 
         val_loss = model.test_on_batch(x_val, y_val)
-        val_loss_fig.plot(i, val_loss[0])
-        val_acc_fig.plot(i, val_loss[1])
+        loss['validation'].append(val_loss)
+
+        loss_path = getLossPath(MODEL_NAME)
+        pickle.dump(loss, open(loss_path, "wb"))
 
         if lowest_loss_value > val_loss[0]:
             lowest_loss_value = val_loss[0]
-            lowest_loss_model = model
-    model_path = getModelPath(MODEL_NAME)
-    lowest_loss_model.save(model_path)
+            model_path = getModelPath(MODEL_NAME)
+            model.save(model_path)
 
     print('Training took {} seconds.'.format((round(time.time() - start_time))))
 

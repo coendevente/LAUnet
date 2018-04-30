@@ -1,23 +1,32 @@
 from settings import *
 from helper_functions import *
+import keras
 from keras.models import load_model
 from augment import augment
 import SimpleITK as sitk
+keras.losses.custom_loss = custom_loss
 
 
 def patchCornersFullImage(sh):
     step_size = np.subtract(PATCH_SIZE, VOXEL_OVERLAP)
     nr_steps = np.divide(sh, step_size)
 
-    # Will be one at dimension where they are not rounded numbers, zero otherwise
+    # Will be 1 at dimension where they are not rounded numbers, 0 otherwise
     steps_are_not_round = np.array(np.not_equal(nr_steps, np.round(nr_steps) * 1.0), dtype=np.int)
     nr_steps = (np.floor(nr_steps) - 2 - steps_are_not_round).astype(int)
 
+    corners_dim = []
+    for i in range(3):
+        corners_dim[i] = np.multiply(range(nr_steps[0]), PATCH_SIZE[0])
+        if steps_are_not_round[i]:
+            corners_dim[i].append(sh[i] - PATCH_SIZE[i])
+
     patch_corners = []
-    for z in range(nr_steps[0]):
-        for y in range(nr_steps[1]):
-            for x in range(nr_steps[2]):
-                patch_corners.append(np.multiply((z, y, z), PATCH_SIZE))
+    for z in corners_dim[0]:
+        for y in corners_dim[1]:
+            for x in corners_dim[2]:
+                patch_corner = np.multiply((z, y, x), PATCH_SIZE)
+                patch_corners.append(patch_corner)
 
     return patch_corners
 
@@ -32,9 +41,17 @@ def patchesFromCorners(I, patch_corners):
 
 def probPatches(patches, model):
     prob_patches = []
+
+    print(len(patches))
+    cnt = 0
     for p in patches:
-        prob_p = model.predict(p)
+        print(cnt)
+
+        p_reshaped = np.reshape(p, (1, ) + p.shape + (1, ))
+        prob_p = model.predict(p_reshaped)
         prob_patches.append(prob_p)
+
+        cnt += 1
 
     return prob_patches
 

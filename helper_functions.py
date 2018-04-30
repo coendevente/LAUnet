@@ -2,6 +2,7 @@ import SimpleITK as sitk
 import numpy as np
 from settings import *
 import os
+from keras import backend as K
 
 
 def getImagePaths(nrs):
@@ -44,3 +45,15 @@ def getModelPredictPath(model_name):
 
 def getModelPath(model_name):
     return '{}model.h5'.format(getModelResultsPath(model_name))
+
+
+def getLossPath(model_name):
+    return "{}loss.p".format(getModelResultsPath(model_name))
+
+
+def custom_loss(y_true, y_pred):
+    FNentropy = K.binary_crossentropy((y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
+    FPentropy = K.binary_crossentropy((y_pred - (K.round(y_true) == y_pred)) * y_pred, y_true)
+    TPentropy = K.binary_crossentropy((K.round(y_true) == y_pred) * y_pred, y_true)
+    TNentropy = K.binary_crossentropy((y_pred + y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
+    return FNentropy * FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy
