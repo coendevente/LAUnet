@@ -14,13 +14,18 @@ def patchCornersFullImage(sh):
 
     # Will be 1 at dimension where they are not rounded numbers, 0 otherwise
     steps_are_not_round = np.array(np.not_equal(nr_steps, np.round(nr_steps) * 1.0), dtype=np.int)
-    nr_steps = (np.floor(nr_steps) - 2 - steps_are_not_round).astype(int)
+    nr_steps = (np.floor(nr_steps) - steps_are_not_round).astype(int)
 
     corners_dim = []
     for i in range(3):
         corners_dim.append(np.array(range(nr_steps[i] + 1)) * step_size[i])
         if steps_are_not_round[i]:
             corners_dim[i] = np.append(corners_dim[i], sh[i] - PATCH_SIZE[i])
+
+        for j in reversed(range(corners_dim[i].shape[0])):
+            if corners_dim[i][j] + PATCH_SIZE[i] > sh[i]:
+                print("i, j == {}, {}".format(i, j))
+                corners_dim[i] = np.delete(corners_dim[i], j)
 
     patch_corners = []
     for z in corners_dim[0]:
@@ -29,10 +34,6 @@ def patchCornersFullImage(sh):
                 patch_corner = (z, y, x)  # np.multiply((z, y, x), PATCH_SIZE)
                 patch_corners.append(patch_corner)
 
-    print("corners_dim[0] == {}".format(corners_dim[0]))
-    print("nr_steps == {}".format(nr_steps))
-    print("sh == {}".format(sh))
-    print(patch_corners)
     return patch_corners
 
 
