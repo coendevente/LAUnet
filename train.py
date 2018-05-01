@@ -21,6 +21,7 @@ import pickle
 
 from imshow_3D import imshow3D
 
+from shutil import copyfile
 
 def buildUNet():
     """
@@ -164,6 +165,8 @@ def main():
     lowest_val_loss = float("inf")
     lowest_train_loss = float("inf")
 
+    copyfile('settings.py', getModelSettingsPath(MODEL_NAME))
+
     print("Start training...")
     for i in range(NR_BATCHES):
 
@@ -191,12 +194,17 @@ def main():
         if lowest_train_loss > train_loss[0]:
             lowest_train_loss = train_loss[0]
 
-        print(('{}s passed. Finished training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
+        ETA = round(time.time() - start_time) / ((i + 1) / NR_BATCHES)
+        print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
               ' Latest, lowest validation loss: {}, {}.').format(
-            round(time.time() - start_time), i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],
+            round(time.time() - start_time), ETA, i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],
             lowest_val_loss, train_loss[0], lowest_train_loss))
 
-    print('Training took {} seconds.'.format((round(time.time() - start_time))))
+    training_duration = round(time.time() - start_time)
+    print('Training took {} seconds.'.format(training_duration))
+    time_file = open("training_took_{}_seconds.txt".format(), "w")
+    time_file.write('')
+    time_file.close()
 
 
 if __name__ == "__main__":

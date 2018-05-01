@@ -47,6 +47,10 @@ def getModelPath(model_name):
     return '{}model.h5'.format(getModelResultsPath(model_name))
 
 
+def getModelSettingsPath(model_name):
+    return '{}settings.py'.format(getModelResultsPath(model_name))
+
+
 def getLossPath(model_name):
     return "{}loss.p".format(getModelResultsPath(model_name))
 
