@@ -10,7 +10,7 @@ MODEL_NAME = 'test_unet'
 
 # Division of datasets
 TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 18, 22, 4, 7, 26, 5]
-VALIDATION_SET = [2]  # [25, 24, 16, 2, 14, 28, 21]
+VALIDATION_SET = [24]  # [25, 24, 16, 2, 14, 28, 21]
 TESTING_SET = [20, 29, 11, 15, 27, 9, 3, 12]
 
 # Patchsize

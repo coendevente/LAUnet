@@ -54,10 +54,8 @@ def probPatches(patches, model):
         print(cnt)
 
         p_reshaped = np.reshape(p, (1, ) + p.shape + (1, ))
-        # TODO - CHANGE THIS!
-        # prob_p = model.predict(p_reshaped)
-        # prob_p_reshaped = np.reshape(prob_p, prob_p.shape[1:4])
-        prob_p_reshaped = p
+        prob_p = model.predict(p_reshaped)
+        prob_p_reshaped = np.reshape(prob_p, prob_p.shape[1:4])
         prob_patches.append(prob_p_reshaped)
 
         cnt += 1
