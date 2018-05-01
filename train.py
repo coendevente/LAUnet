@@ -76,7 +76,13 @@ def getRandomPositivePatchAllSlices(x, y):
         return 0, 0, False
 
     nz = np.nonzero(y)
-    nz_i = random.randint(0, nz[0].shape[0])
+
+    # print("len(nz) == {}".format(len(nz)))
+    # print("nz[0].shape == {}".format(nz[0].shape))
+    # print("nz[1].shape == {}".format(nz[1].shape))
+    # print("nz[2].shape == {}".format(nz[2].shape))
+
+    nz_i = random.randint(0, nz[0].shape[0] - 1)
     nz_yx = (nz[1][nz_i], nz[2][nz_i])
     ranges = ([-PATCH_SIZE[1] + 1, PATCH_SIZE[1] - 1], [-PATCH_SIZE[2] + 1, PATCH_SIZE[2] - 1])
 
