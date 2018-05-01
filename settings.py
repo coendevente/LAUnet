@@ -6,7 +6,7 @@ PATH_TO_MODELS = '../results/models/'
 # Model to train
 PRE_OR_POST_NAME = 'post'  # OR 'pre'
 PRE_OR_POST_XX = 'b'  # OR 'a'
-MODEL_NAME = 'more_batches'
+MODEL_NAME = 'test_unet'
 
 # Division of datasets
 TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 18, 22, 4, 7, 26, 5]
@@ -25,13 +25,13 @@ FN_CLASS_WEIGHT = 4500
 
 # Testing and validation procedure
 VALTEST_SET = VALIDATION_SET  # OR TESTING_SET
-VALTEST_MODEL_NAMES = ['more_batches']
+VALTEST_MODEL_NAMES = [MODEL_NAME]
 VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
 VOXEL_OVERLAP = (0, 32, 32)
 BIN_THRESH = .5  # Threshold to binarize the probability images
 METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume']
 
-CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and results
+CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and results
 # will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur if these
 # images do not exist on the disk.
 

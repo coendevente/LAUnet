@@ -170,10 +170,10 @@ def main():
     print("Start training...")
     for i in range(NR_BATCHES):
 
-        print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time), ))
+        print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
         x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE)
         x_val, y_val = getRandomPatches(x_full_val, y_full_val, NR_VAL_PATCH_PER_ITER)
-        print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time), ))
+        print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
         train_loss = model.train_on_batch(x_train, y_train)
         loss['training']['loss'].append(train_loss[0])
@@ -202,7 +202,7 @@ def main():
 
     training_duration = round(time.time() - start_time)
     print('Training took {} seconds.'.format(training_duration))
-    time_file = open("training_took_{}_seconds.txt".format(), "w")
+    time_file = open("training_took_{}_seconds.txt".format(training_duration), "w")
     time_file.write('')
     time_file.close()
 

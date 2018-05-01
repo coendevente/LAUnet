@@ -5,6 +5,7 @@ from keras.models import load_model
 from augment import augment
 import SimpleITK as sitk
 keras.losses.custom_loss = custom_loss
+from imshow_3D import imshow3D
 
 
 def patchCornersFullImage(sh):
@@ -25,9 +26,11 @@ def patchCornersFullImage(sh):
     for z in corners_dim[0]:
         for y in corners_dim[1]:
             for x in corners_dim[2]:
-                patch_corner = (z, y, x)# np.multiply((z, y, x), PATCH_SIZE)
+                patch_corner = (z, y, x)  # np.multiply((z, y, x), PATCH_SIZE)
                 patch_corners.append(patch_corner)
 
+    print("corners_dim[0] == {}".format(corners_dim[0]))
+    print("nr_steps == {}".format(nr_steps))
     print("sh == {}".format(sh))
     print(patch_corners)
     return patch_corners
@@ -50,8 +53,10 @@ def probPatches(patches, model):
         print(cnt)
 
         p_reshaped = np.reshape(p, (1, ) + p.shape + (1, ))
-        prob_p = model.predict(p_reshaped)
-        prob_p_reshaped = np.reshape(prob_p, prob_p.shape[1:4])
+        # TODO - CHANGE THIS!
+        # prob_p = model.predict(p_reshaped)
+        # prob_p_reshaped = np.reshape(prob_p, prob_p.shape[1:4])
+        prob_p_reshaped = p
         prob_patches.append(prob_p_reshaped)
 
         cnt += 1
@@ -68,6 +73,7 @@ def fullImageFromPatches(sh, prob_patches, patch_corners):
 
         prob_image[c[0]:c[0]+PATCH_SIZE[0], c[1]:c[1]+PATCH_SIZE[1], c[2]:c[2]+PATCH_SIZE[2]] += p
         count_image[c[0]:c[0]+PATCH_SIZE[0], c[1]:c[1]+PATCH_SIZE[1], c[2]:c[2]+PATCH_SIZE[2]] += 1
+    imshow3D(count_image)
     prob_image /= count_image
     return prob_image
 
