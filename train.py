@@ -152,7 +152,9 @@ def getRandomPatches(x_full, y_full, nr):
 
 
 def main():
-    # sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
+
+    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
     print(device_lib.list_local_devices())
 
@@ -209,8 +211,8 @@ def main():
 
         ETA = round(time.time() - start_time) * (1/((i + 1) / NR_BATCHES) - 1)
         # ETA = 0
-        print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
-              ' Latest, lowest validation loss: {}, {}.').format(
+        print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest validation loss: {}, {}.' +
+              ' Latest, lowest training loss: {}, {}.').format(
             round(time.time() - start_time), ETA, i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],
             lowest_val_loss, train_loss[0], lowest_train_loss))
 

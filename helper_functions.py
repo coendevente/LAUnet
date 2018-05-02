@@ -75,5 +75,5 @@ def custom_loss(y_true, y_pred):
     TPentropy = K.binary_crossentropy(m * y_pred, m * y_true)
 
     m = y_pred + y_true - (y_pred_bw == y_pred)
-    TNentropy = K.binary_crossentropy(m * y_pred,m * y_true)
+    TNentropy = K.binary_crossentropy(m * y_pred, m * y_true)
     return FNentropy * FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy

@@ -8,6 +8,7 @@ from settings import *
 def main():
     # Nr of ones in the annotations
     nrOfOnes = {'a': [[], []], 'b': [[], []]}
+    total_pixels = {'a': 0, 'b': 0}
 
     for xx_name in [['a', 'pre'], ['b', 'post']]:
         # Get image sizes
@@ -46,6 +47,8 @@ def main():
             else:
                 allYXDim[sh_ann[1:]] = [1, [path_input]]
 
+            total_pixels[xx_name[0]] += np.prod(I_input.shape)
+
         print("Unique shapes in {} ({}): {}".format(xx_name[1], len(allShapes), allShapes))
         print("Unique YX dimensions in {} ({}): {}".format(xx_name[1], len(allYXDim), allYXDim))
 
@@ -67,6 +70,12 @@ def main():
 
     print("Post: Minimum nr of positive voxels: {} has {}".format(np.argmin(nrOfOnes['b'])+1, np.min(nrOfOnes['b'])))
     print("Post: Maximum nr of positive voxels: {} has {}".format(np.argmax(nrOfOnes['b'])+1, np.max(nrOfOnes['b'])))
+
+    print("Pre: Total number of foreground pixels: {}".format(np.sum(nrOfOnes['a'])))
+    print("Pre: Total number of pixels: {}".format(total_pixels['a']))
+
+    print("Post: Total number of foreground pixels: {}".format(np.sum(nrOfOnes['b'])))
+    print("Post: Total number of pixels: {}".format(total_pixels['b']))
 
     nrOfOnesNumpy = np.array(nrOfOnes['b'][1])
     print(nrOfOnesNumpy)
