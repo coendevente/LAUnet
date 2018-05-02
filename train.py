@@ -194,7 +194,7 @@ def main():
         if lowest_train_loss > train_loss[0]:
             lowest_train_loss = train_loss[0]
 
-        ETA = round(time.time() - start_time) / ((i + 1) / NR_BATCHES)
+        ETA = round(time.time() - start_time) / ((i + 1) / NR_BATCHES - 1)
         print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
               ' Latest, lowest validation loss: {}, {}.').format(
             round(time.time() - start_time), ETA, i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],

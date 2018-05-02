@@ -51,7 +51,8 @@ def probPatches(patches, model):
     print(len(patches))
     cnt = 0
     for p in patches:
-        print(cnt)
+        if cnt % 100 == 0:
+            print(cnt)
 
         p_reshaped = np.reshape(p, (1, ) + p.shape + (1, ))
         prob_p = model.predict(p_reshaped)
@@ -72,7 +73,7 @@ def fullImageFromPatches(sh, prob_patches, patch_corners):
 
         prob_image[c[0]:c[0]+PATCH_SIZE[0], c[1]:c[1]+PATCH_SIZE[1], c[2]:c[2]+PATCH_SIZE[2]] += p
         count_image[c[0]:c[0]+PATCH_SIZE[0], c[1]:c[1]+PATCH_SIZE[1], c[2]:c[2]+PATCH_SIZE[2]] += 1
-    imshow3D(count_image)
+    # imshow3D(count_image)
     prob_image /= count_image
     return prob_image
 
@@ -146,6 +147,7 @@ def main():
                     sitk.WriteImage(sitk.GetImageFromArray(input), '{}input_image_{}_{}.nrrd'.format(predict_path, VALTEST_SET[i], j))
                     sitk.WriteImage(sitk.GetImageFromArray(prob), '{}prob_image_{}_{}.nrrd'.format(predict_path, VALTEST_SET[i], j))
                     sitk.WriteImage(sitk.GetImageFromArray(anno), '{}anno_image_{}_{}.nrrd'.format(predict_path, VALTEST_SET[i], j))
+                    print("Saved in {}".format(predict_path))
 
     # Calculate the metrics
     all_metrics = {}
