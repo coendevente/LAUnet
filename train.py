@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from settings import *
 from helper_functions import *
-from unet_3D import UNet
+from unet import UNet
 
 import tensorflow as tf
 from tensorflow.python.client import device_lib
@@ -28,9 +28,12 @@ def buildUNet():
     Import Unet from unet_3D
     :return: model from Unet
     """
-    model = UNet(PATCH_SIZE + (1, ), dropout=.5, batchnorm=True, depth=3)
+    ps = PATCH_SIZE
+    if NR_DIM == 2:
+        ps = ps[1:]
+    model = UNet(ps + (1, ), dropout=.5, batchnorm=True, depth=3)
 
-    model.compile(optimizer=Adam(lr=1e-5), loss=custom_loss, metrics=['binary_accuracy'])
+    model.compile(optimizer=Adam(lr=LEARNING_RATE), loss=custom_loss, metrics=['binary_accuracy'])
 
     return model
 
@@ -85,13 +88,17 @@ def getRandomPositivePatchAllSlices(x, y):
 
     nz_i = random.randint(0, nz[0].shape[0] - 1)
     nz_yx = (nz[1][nz_i], nz[2][nz_i])
-    ranges = ([-PATCH_SIZE[1] + 1, PATCH_SIZE[1] - 1], [-PATCH_SIZE[2] + 1, PATCH_SIZE[2] - 1])
+    ranges = ([-PATCH_SIZE[1] + 1, 0], [-PATCH_SIZE[2] + 1, 0])
 
     for i in range(2):
-        if nz_yx[i] - PATCH_SIZE[i + 1] + 1 < 0:
-            ranges[i][0] = nz_yx[i]
-        if nz_yx[i] + PATCH_SIZE[i + 1] - 1 >= x.shape[i + 1]:
-            ranges[i][0] = x.shape[i + 1] - nz_yx[i] - 1
+        if nz_yx[i] - PATCH_SIZE[i + 1] < 0:
+            ranges[i][0] = -nz_yx[i]
+        if nz_yx[i] + PATCH_SIZE[i + 1] > x.shape[i + 1]:
+            ranges[i][1] = - (PATCH_SIZE[i + 1] - (x.shape[i + 1] - nz_yx[i]))
+
+    # print("x.shape == {}".format(x.shape))
+    # print("nz_yx == {}".format(nz_yx))
+    # print("ranges == {}".format(ranges))
 
     z_corner = 0
     y_corner = nz_yx[0] + random.randint(ranges[0][0], ranges[0][1])
@@ -107,7 +114,7 @@ def getRandomPositivePatchAllSlices(x, y):
 def getRandomPositivePatch(x_full, y_full):
     x_i, y_i = getRandomPositiveImage(x_full, y_full)
     x_s, y_s = getRandomPositiveSlices(x_i, y_i)
-    x_aug, y_aug = augment(x_s, y_s)
+    x_aug, y_aug = augment(x_s, y_s, False)
     x_patch, y_patch, found = getRandomPositivePatchAllSlices(x_aug, y_aug)
 
     if not found:
@@ -126,15 +133,21 @@ def getRandomPatches(x_full, y_full, nr):
             x_j, y_j = getRandomPatch(x_full, y_full)
         else:
             x_j, y_j = getRandomPositivePatch(x_full, y_full)
-            # imshow3D(np.concatenate((x_j / np.max(x_j), y_j), axis=2))
+
+        # print(positive_patch)
+        # imshow3D(np.concatenate((x_j / np.max(x_j), y_j), axis=2))
 
         x.append(x_j)
         y.append(y_j)
     x = np.array(x)
     y = np.array(y)
 
-    x = np.reshape(x, x.shape + (1, ))
-    y = np.reshape(y, y.shape + (1, ))
+    sh = x.shape
+    if NR_DIM == 2:
+        sh = sh[:1] + sh[2:]
+
+    x = np.reshape(x, sh + (1, ))
+    y = np.reshape(y, sh + (1, ))
     return x, y
 
 
@@ -194,7 +207,8 @@ def main():
         if lowest_train_loss > train_loss[0]:
             lowest_train_loss = train_loss[0]
 
-        ETA = round(time.time() - start_time) / ((i + 1) / NR_BATCHES - 1)
+        ETA = round(time.time() - start_time) * (1/((i + 1) / NR_BATCHES) - 1)
+        # ETA = 0
         print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest training loss: {}, {}.' +
               ' Latest, lowest validation loss: {}, {}.').format(
             round(time.time() - start_time), ETA, i + 1, NR_BATCHES, (i + 1) / NR_BATCHES * 100, val_loss[0],

@@ -51,12 +51,20 @@ def probPatches(patches, model):
     print(len(patches))
     cnt = 0
     for p in patches:
-        if cnt % 100 == 0:
+        if cnt % 1 == 0:
             print(cnt)
 
-        p_reshaped = np.reshape(p, (1, ) + p.shape + (1, ))
+        ps = p.shape
+        if NR_DIM == 2:
+            ps = ps[1:]
+
+        p_reshaped = np.reshape(p, (1, ) + ps + (1, ))
         prob_p = model.predict(p_reshaped)
-        prob_p_reshaped = np.reshape(prob_p, prob_p.shape[1:4])
+
+        prop_p_s = prob_p.shape[1:4]
+        if NR_DIM == 2:
+            prop_p_s = (1, ) + prob_p.shape[1:3]
+        prob_p_reshaped = np.reshape(prob_p, prop_p_s)
         prob_patches.append(prob_p_reshaped)
 
         cnt += 1
@@ -139,7 +147,7 @@ def main():
                     anno = y_full_all[i]
 
                     if j != -1:  # No augmentation
-                        input, anno = augment(input, anno)
+                        input, anno = augment(input, anno, False)
 
                     prob = probImage(input, model)
 

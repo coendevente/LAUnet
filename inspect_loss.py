@@ -3,6 +3,7 @@ from settings import *
 import pickle
 import matplotlib.pyplot as plt
 
+
 def main():
     loss_path = getLossPath(MODEL_NAME)
     loss = pickle.load(open(loss_path, "rb"))

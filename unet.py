@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from keras.models import Input, Model
-from keras.layers import Conv3D, Concatenate, MaxPooling3D, Conv3DTranspose
-from keras.layers import UpSampling3D, Dropout, BatchNormalization
+from keras.layers import Conv3D, Conv2D, Concatenate, MaxPooling3D, MaxPooling2D, UpSampling3D, UpSampling2D, Dropout, \
+    BatchNormalization
+from settings import *
 
 '''
 U-Net: Convolutional Networks for Biomedical Image Segmentation
@@ -28,10 +29,12 @@ def conv_block(m, dim, acti, bn, res, do=0):
     :param: Similar to paramaters in UNet(...)
     :return: A block of two times a convolution and batch normalization
     """
-    n = Conv3D(dim, 3, activation=acti, padding='same')(m)
+    n = Conv3D(dim, 3, activation=acti, padding='same')(m) if NR_DIM == 3 else \
+        Conv2D(dim, 3, activation=acti, padding='same')(m)
     n = BatchNormalization()(n) if bn else n
     n = Dropout(do)(n) if do else n
-    n = Conv3D(dim, 3, activation=acti, padding='same')(n)
+    n = Conv3D(dim, 3, activation=acti, padding='same')(n) if NR_DIM == 3 else \
+        Conv2D(dim, 3, activation=acti, padding='same')(m)
     n = BatchNormalization()(n) if bn else n
     return Concatenate()([m, n]) if res else n
 
@@ -44,11 +47,14 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res):
     """
     if depth > 0:
         n = conv_block(m, dim, acti, bn, res)
-        m = MaxPooling3D((1, 2, 2))(n) if mp else Conv3D(dim, 3, strides=2, padding='same')(n)
+        m = (MaxPooling3D((1, 2, 2))(n) if mp else Conv3D(dim, 3, strides=2, padding='same')(n)) if NR_DIM == 3 else \
+            (MaxPooling2D((2, 2))(n) if mp else Conv2D(dim, 3, strides=2, padding='same')(n))
         m = level_block(m, int(inc * dim), depth - 1, inc, acti, do, bn, mp, up, res)
         if up:
-            m = UpSampling3D((1, 2, 2))(m)
-            m = Conv3D(dim, 2, activation=acti, padding='same')(m)
+            m = UpSampling3D((1, 2, 2))(m) if NR_DIM == 3 else \
+                UpSampling2D((2, 2))(m)
+            m = Conv3D(dim, 2, activation=acti, padding='same')(m) if NR_DIM == 3 else \
+                Conv2D(dim, 2, activation=acti, padding='same')(m)
         else:
             raise Exception('Unet in 3D does not work without upsampling')
         n = Concatenate()([n, m])
@@ -80,5 +86,6 @@ def UNet(img_shape, out_ch=1, start_ch=64, depth=4, inc_rate=2., activation='rel
     """
     i = Input(shape=img_shape)
     o = level_block(i, start_ch, depth, inc_rate, activation, dropout, batchnorm, maxpool, upconv, residual)
-    o = Conv3D(out_ch, 1, activation='sigmoid')(o)
+    o = Conv3D(out_ch, 1, activation='sigmoid')(o) if NR_DIM == 3 else \
+        Conv2D(out_ch, 1, activation='sigmoid')(o)
     return Model(inputs=i, outputs=o)
