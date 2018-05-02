@@ -55,9 +55,25 @@ def getLossPath(model_name):
     return "{}loss.p".format(getModelResultsPath(model_name))
 
 
+# def custom_loss(y_true, y_pred):
+#     FNentropy = K.binary_crossentropy((y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
+#     FPentropy = K.binary_crossentropy((y_pred - (K.round(y_true) == y_pred)) * y_pred, y_true)
+#     TPentropy = K.binary_crossentropy((K.round(y_true) == y_pred) * y_pred, y_true)
+#     TNentropy = K.binary_crossentropy((y_pred + y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
+#     return FNentropy * FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy
+
+
 def custom_loss(y_true, y_pred):
-    FNentropy = K.binary_crossentropy((y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
-    FPentropy = K.binary_crossentropy((y_pred - (K.round(y_true) == y_pred)) * y_pred, y_true)
-    TPentropy = K.binary_crossentropy((K.round(y_true) == y_pred) * y_pred, y_true)
-    TNentropy = K.binary_crossentropy((y_pred + y_true - (K.round(y_true) == y_pred)) * y_pred, y_true)
+    y_pred_bw = K.round(y_pred)
+    m = y_true - (y_true == y_pred_bw)
+    FNentropy = K.binary_crossentropy(m * y_pred, m * y_true)
+
+    m = y_pred - (y_pred_bw == y_pred)
+    FPentropy = K.binary_crossentropy(m * y_pred, m * y_true)
+
+    m = y_pred_bw == y_pred
+    TPentropy = K.binary_crossentropy(m * y_pred, m * y_true)
+
+    m = y_pred + y_true - (y_pred_bw == y_pred)
+    TNentropy = K.binary_crossentropy(m * y_pred,m * y_true)
     return FNentropy * FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy
