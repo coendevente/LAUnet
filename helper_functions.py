@@ -47,6 +47,10 @@ def getModelPath(model_name):
     return '{}model.h5'.format(getModelResultsPath(model_name))
 
 
+def getModelTrainingTimePath(model_name):
+    return '{}training_duration.txt'.format(getModelResultsPath(model_name))
+
+
 def getModelSettingsPath(model_name):
     return '{}settings.py'.format(getModelResultsPath(model_name))
 

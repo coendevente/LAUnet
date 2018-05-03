@@ -218,8 +218,8 @@ def main():
 
     training_duration = round(time.time() - start_time)
     print('Training took {} seconds.'.format(training_duration))
-    time_file = open("training_took_{}_seconds.txt".format(training_duration), "w")
-    time_file.write('')
+    time_file = open(getModelTrainingTimePath(MODEL_NAME), "w")
+    time_file.write('Training took {}'.format(training_duration))
     time_file.close()
 
 
