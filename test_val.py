@@ -102,7 +102,7 @@ def calcMetrics(A, B):  # A is predicted, B is ground truth
     TP = np.sum(np.logical_and(A, B))
     FP = np.sum(np.logical_and(A, np.logical_not(B)))
     TN = np.sum(np.logical_and(np.logical_not(A), np.logical_not(B)))
-    FN = np.sum(np.logical_and(np.logical_not(A), np.logical_not(B)))
+    FN = np.sum(np.logical_and(np.logical_not(A), B))
 
     if 'Dice' in METRICS:
         metrics['Dice'] = 2 * TP / (2 * TP + FP + FN)
@@ -110,6 +110,7 @@ def calcMetrics(A, B):  # A is predicted, B is ground truth
         metrics['accuracy'] = (TP + TN) / (TP + TN + FP + FN)
     if 'sensitivity' in METRICS:
         metrics['sensitivity'] = TP / (TP + FN)
+        print("metrics['sensitivity'] = {}".format(metrics['sensitivity']))
     if 'specificity' in METRICS:
         metrics['specificity'] = TN / (TN + FP)
     if 'precision' in METRICS:
@@ -178,8 +179,7 @@ def main():
                 prob_thresh = prob > BIN_THRESH
 
                 predict_path = getModelPredictPath(model_name)
-                sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(int)),
-                                '{}prob_thresh_image_{}_{}.nrrd'.format(predict_path, VALTEST_SET[i], j))
+                sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(int)), '{}prob_thresh_image_{}_{}.nrrd'.format(predict_path, VALTEST_SET[i], j))
 
                 metrics = calcMetrics(prob_thresh, anno)
                 all_metrics[model_name].append(metrics)

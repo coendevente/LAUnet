@@ -10,7 +10,10 @@ def getImagePaths(nrs):
     y_all_path = []
     for i in nrs:
         x_all_path.append('{0}input/{1}/p{2}/de_{3}_{2}.nrrd'.format(PATH_TO_DATA, PRE_OR_POST_NAME, i, PRE_OR_POST_XX))
-        y_all_path.append('{0}annotations/staple_{2}_{1}.gipl'.format(PATH_TO_DATA, i, PRE_OR_POST_XX))
+        if GROUND_TRUTH == 'scar_fibrosis':
+            y_all_path.append('{0}annotations/staple_{2}_{1}.gipl'.format(PATH_TO_DATA, i, PRE_OR_POST_XX))
+        elif GROUND_TRUTH == 'left_atrium':
+            y_all_path.append('{0}input/{3}/p{1}/la_seg_{2}_{1}.nrrd'.format(PATH_TO_DATA, i, PRE_OR_POST_XX, PRE_OR_POST_NAME))
     return x_all_path, y_all_path
 
 
@@ -57,6 +60,37 @@ def getModelSettingsPath(model_name):
 
 def getLossPath(model_name):
     return "{}loss.p".format(getModelResultsPath(model_name))
+
+
+def getAugPath():
+    path = PATH_TO_AUG
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
+
+
+def getAugImagesPath(img_nr, aug_nr, z):
+    aug_path = getAugPath()
+    x_folder = '{}input/{}/p{}/'.format(aug_path, PRE_OR_POST_NAME, img_nr)
+
+    if GROUND_TRUTH == 'scar_fibrosis':
+        y_folder = '{}annotations/'.format(aug_path)
+    elif GROUND_TRUTH == 'left_atrium':
+        y_folder = '{}input/{}/p{}/'.format(aug_path, PRE_OR_POST_NAME, img_nr)
+
+    if not os.path.exists(x_folder):
+        os.makedirs(x_folder)
+    if not os.path.exists(y_folder):
+        os.makedirs(y_folder)
+
+    x_path = '{}de_{}_{}_{}_{}.nii.gz'.format(x_folder, PRE_OR_POST_XX, img_nr, z, aug_nr)
+
+    if GROUND_TRUTH == 'scar_fibrosis':
+        y_path = '{}staple_{}_{}_{}_{}.nii.gz'.format(y_folder, PRE_OR_POST_XX, img_nr, z, aug_nr)
+    elif GROUND_TRUTH == 'left_atrium':
+        y_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(y_folder, PRE_OR_POST_XX, img_nr, z, aug_nr)
+
+    return x_path, y_path
 
 
 # def custom_loss(y_true, y_pred):

@@ -16,7 +16,7 @@ def main():
         allYXDim = {}
 
         for i in range(1, 31):
-            if i == 20 and xx_name[0] == 'a':
+            if i == 20 and xx_name[0] == 'a' or i == 18 and xx_name[0] == 'b':
                 continue
                 # Sizes annotation and input of i == 20 are not equal
 
@@ -62,8 +62,8 @@ def main():
 
                 toShow.append(I_input)
 
-            I_out = sitk.GetImageFromArray(np.array(np.concatenate(toShow, axis=1) * 255, dtype=np.uint8))
-            sitk.WriteImage(I_out, "{0}data_exploration/{1}_shape={2}.png".format(PATH_TO_RESULTS, xx_name[1], yx))
+            # I_out = sitk.GetImageFromArray(np.array(np.concatenate(toShow, axis=1) * 255, dtype=np.uint8))
+            # sitk.WriteImage(I_out, "{0}data_exploration/{1}_shape={2}.png".format(PATH_TO_RESULTS, xx_name[1], yx))
 
     print("Pre: Minimum nr of positive voxels: {} has {}".format(np.argmin(nrOfOnes['a'])+1, np.min(nrOfOnes['a'])))
     print("Pre: Maximum nr of positive voxels: {} has {}".format(np.argmax(nrOfOnes['a'])+1, np.max(nrOfOnes['a'])))

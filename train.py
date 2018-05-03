@@ -13,6 +13,7 @@ from tensorflow.python.client import device_lib
 from keras.optimizers import *
 
 from augment import augment
+from offline_augment import offline_augment
 
 import random
 import time
@@ -22,6 +23,8 @@ import pickle
 from imshow_3D import imshow3D
 
 from shutil import copyfile
+
+sliceInformation = {}
 
 def buildUNet():
     """
@@ -38,15 +41,25 @@ def buildUNet():
     return model
 
 
-def getRandomPatch(x_full, y_full):
+def getRandomPatch(x_full, y_full, set_idx):
     i = random.randint(0, len(x_full) - 1)
-    x = x_full[i]
-    y = y_full[i]
+
+    if AUGMENT_ONLINE:
+        x = x_full[i]
+        y = y_full[i]
+    else:
+        zl = sliceInformation[set_idx[i]].shape[0]
+        s_nr = random.randint(0, zl - 1 - PATCH_SIZE[0])
+        x, y = offline_augment(set_idx[i], range(s_nr, s_nr + PATCH_SIZE[0]))
 
     z_corner = random.randint(0, x.shape[0] - PATCH_SIZE[0])
     y_corner = random.randint(0, x.shape[1] - PATCH_SIZE[1])
     x_corner = random.randint(0, x.shape[2] - PATCH_SIZE[2])
-    corner = (z_corner, y_corner, x_corner)
+    corner = [z_corner, y_corner, x_corner]
+
+    if AUGMENT_ONLINE:
+        x, y = augment(x[z_corner:z_corner + PATCH_SIZE[0]], y[z_corner:z_corner + PATCH_SIZE[0]], False)
+        corner[0] = 0
 
     x_patch = cropImage(x, corner, PATCH_SIZE)
     y_patch = cropImage(y, corner, PATCH_SIZE)
@@ -54,13 +67,15 @@ def getRandomPatch(x_full, y_full):
     return x_patch, y_patch
 
 
-def getRandomPositiveImage(x_full, y_full):
+def getRandomPositiveImage(x_full, y_full, set_idx):
     i = random.randint(0, len(x_full) - 1)
 
-    if np.sum(y_full[i]) == 0:
-        y_full = getRandomPositiveImage(x_full, y_full)
+    x_pos, y_pos = x_full[i], y_full[i]
 
-    return x_full[i], y_full[i]
+    if np.sum(y_pos) == 0:
+        x_pos, y_pos = getRandomPositiveImage(x_full, y_full, set_idx)
+
+    return x_pos, y_pos
 
 
 def getRandomPositiveSlices(x_i, y_i):
@@ -111,11 +126,29 @@ def getRandomPositivePatchAllSlices(x, y):
     return x_patch, y_patch, True
 
 
-def getRandomPositivePatch(x_full, y_full):
-    x_i, y_i = getRandomPositiveImage(x_full, y_full)
-    x_s, y_s = getRandomPositiveSlices(x_i, y_i)
-    x_aug, y_aug = augment(x_s, y_s, False)
-    x_patch, y_patch, found = getRandomPositivePatchAllSlices(x_aug, y_aug)
+def getRandomPositiveSlicesOffline(set_idx):
+    its = 0
+    while its == 0 or s_nr + PATCH_SIZE[0] > sliceInformation[img_nr].shape[0]:
+        its += 1
+        img_nr = random.choice(set_idx)
+        w = np.where(sliceInformation[img_nr])
+        print("w == {}".format(w))
+        s_nr = np.random.choice(w[0])
+
+    x_s, y_s = offline_augment(img_nr, range(s_nr, s_nr + PATCH_SIZE[0]))
+
+    return x_s, y_s
+
+
+def getRandomPositivePatch(x_full, y_full, set_idx):
+    if AUGMENT_ONLINE:
+        x_i, y_i = getRandomPositiveImage(x_full, y_full)
+        x_s, y_s = getRandomPositiveSlices(x_i, y_i)
+        x_s, y_s = augment(x_s, y_s, False)
+    else:
+        x_s, y_s = getRandomPositiveSlicesOffline(set_idx)
+
+    x_patch, y_patch, found = getRandomPositivePatchAllSlices(x_s, y_s)
 
     if not found:
         x_patch, y_patch = getRandomPositivePatch(x_full, y_full)
@@ -123,16 +156,16 @@ def getRandomPositivePatch(x_full, y_full):
     return x_patch, y_patch
 
 
-def getRandomPatches(x_full, y_full, nr):
+def getRandomPatches(x_full, y_full, nr, set_idx):
     x = []
     y = []
     for j in range(nr):
         positive_patch = random.random() < POS_NEG_PATCH_PROP  # Whether batch should be positive
 
         if not positive_patch:
-            x_j, y_j = getRandomPatch(x_full, y_full)
+            x_j, y_j = getRandomPatch(x_full, y_full, set_idx)
         else:
-            x_j, y_j = getRandomPositivePatch(x_full, y_full)
+            x_j, y_j = getRandomPositivePatch(x_full, y_full, set_idx)
 
         # print(positive_patch)
         # imshow3D(np.concatenate((x_j / np.max(x_j), y_j), axis=2))
@@ -149,6 +182,15 @@ def getRandomPatches(x_full, y_full, nr):
     x = np.reshape(x, sh + (1, ))
     y = np.reshape(y, sh + (1, ))
     return x, y
+
+
+def updateSliceInformation(y_all, set_idx):
+    for i in range(len(set_idx)):
+        sliceInformation[set_idx[i]] = []
+        for z in range(y_all[i].shape[0]):
+            pos = np.sum(y_all[i][z]) > 0
+            sliceInformation[set_idx[i]].append(pos)
+        sliceInformation[set_idx[i]] = np.array(sliceInformation[set_idx[i]])
 
 
 def main():
@@ -170,6 +212,10 @@ def main():
     x_full_val = [x_full_all[i - 1] for i in VALIDATION_SET]
     y_full_val = [y_full_all[i - 1] for i in VALIDATION_SET]
 
+    updateSliceInformation(y_full_train, TRAINING_SET)
+    updateSliceInformation(y_full_val, VALIDATION_SET)
+    print("sliceInformation == {}".format(sliceInformation))
+
     print('len(x_full_train) == {}'.format(len(x_full_train)))
 
     model = buildUNet()
@@ -186,8 +232,8 @@ def main():
     for i in range(NR_BATCHES):
 
         print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
-        x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE)
-        x_val, y_val = getRandomPatches(x_full_val, y_full_val, NR_VAL_PATCH_PER_ITER)
+        x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE, TRAINING_SET)
+        x_val, y_val = getRandomPatches(x_full_val, y_full_val, NR_VAL_PATCH_PER_ITER, VALIDATION_SET)
         print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
         train_loss = model.train_on_batch(x_train, y_train)
