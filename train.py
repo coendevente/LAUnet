@@ -132,7 +132,7 @@ def getRandomPositiveSlicesOffline(set_idx):
         its += 1
         img_nr = random.choice(set_idx)
         w = np.where(sliceInformation[img_nr])
-        print("w == {}".format(w))
+        # print("w == {}".format(w))
         s_nr = np.random.choice(w[0])
 
     x_s, y_s = offline_augment(img_nr, range(s_nr, s_nr + PATCH_SIZE[0]))
@@ -151,7 +151,7 @@ def getRandomPositivePatch(x_full, y_full, set_idx):
     x_patch, y_patch, found = getRandomPositivePatchAllSlices(x_s, y_s)
 
     if not found:
-        x_patch, y_patch = getRandomPositivePatch(x_full, y_full)
+        x_patch, y_patch = getRandomPositivePatch(x_full, y_full, set_idx)
 
     return x_patch, y_patch
 
