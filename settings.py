@@ -2,7 +2,7 @@
 GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
 PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
 PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-MODEL_NAME = 'la_lower_lr'
+MODEL_NAME = 'la_auto_class_weight'
 
 # Path to folders
 PATH_TO_DATA = '../data/'
@@ -21,12 +21,13 @@ PATCH_SIZE = (1, 400, 400)
 NR_DIM = 2  # Only 2D and 3D are supported
 
 # Training hyperparameters
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 5e-5
 BATCH_SIZE = 4
 NR_BATCHES = 15000
 NR_VAL_PATCH_PER_ITER = 4
 POS_NEG_PATCH_PROP = 0.5
-FN_CLASS_WEIGHT = 500
+FN_CLASS_WEIGHT_SETTINGS = 'auto'  # custom number OR 'auto'
+AUTO_CLASS_WEIGHT_N = 500  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
 AUGMENT_ONLINE = False
 
 # Testing and validation procedure
@@ -37,7 +38,7 @@ VOXEL_OVERLAP = (0, 200, 200)
 BIN_THRESH = .5  # Threshold to binarize the probability images
 METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume']
 
-CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and results
+CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and results
 # will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur if these
 # images do not exist on the disk.
 

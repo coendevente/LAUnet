@@ -1,10 +1,10 @@
+from settings import *
 import numpy as np
 import h5py
 import SimpleITK as sitk
 from itertools import chain
 import matplotlib.pyplot as plt
 
-from settings import *
 from helper_functions import *
 from unet import UNet
 
@@ -193,6 +193,14 @@ def updateSliceInformation(y_all, set_idx):
         sliceInformation[set_idx[i]] = np.array(sliceInformation[set_idx[i]])
 
 
+def getClassWeightAuto(x_full, y_full, set_idx):
+    x_patches, y_patches = getRandomPatches(x_full, y_full, BATCH_SIZE, set_idx)
+    n_pos = np.sum(y_patches)
+    n_neg = np.sum((y_patches == 0).astype(int))
+
+    return n_neg / n_pos
+
+
 def main():
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
 
@@ -217,6 +225,10 @@ def main():
     print("sliceInformation == {}".format(sliceInformation))
 
     print('len(x_full_train) == {}'.format(len(x_full_train)))
+
+    if FN_CLASS_WEIGHT_SETTINGS == 'auto':
+        w = getClassWeightAuto(x_full_train + x_full_val, y_full_train + y_full_val, TRAINING_SET + VALIDATION_SET)
+        set_fn_class_weight(w)
 
     model = buildUNet()
 

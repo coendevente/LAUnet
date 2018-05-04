@@ -101,6 +101,14 @@ def getAugImagesPath(img_nr, aug_nr, z):
 #     return FNentropy * FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy
 
 
+FN_CLASS_WEIGHT = FN_CLASS_WEIGHT_SETTINGS
+
+
+def set_fn_class_weight(w):
+    global FN_CLASS_WEIGHT
+    FN_CLASS_WEIGHT = w
+
+
 def custom_loss(y_true, y_pred):
     y_pred_bw = K.round(y_pred)
     m = y_true - (y_true == y_pred_bw)
@@ -114,4 +122,5 @@ def custom_loss(y_true, y_pred):
 
     m = y_pred + y_true - (y_pred_bw == y_pred)
     TNentropy = K.binary_crossentropy(m * y_pred, m * y_true)
+    print("FN_CLASS_WEIGHT == {}".format(FN_CLASS_WEIGHT))
     return FNentropy * FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy
