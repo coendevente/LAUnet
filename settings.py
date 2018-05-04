@@ -1,8 +1,9 @@
 # Model to train
-GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
+GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
 PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
 PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-MODEL_NAME = 'la_auto_class_weight'
+# MODEL_NAME = 'sf_cw_1000'
+MODEL_NAME = 'sf_lower_lr'
 
 # Path to folders
 PATH_TO_DATA = '../data/'
@@ -12,7 +13,7 @@ PATH_TO_AUG = '../data/augmentations_{}/'.format(GROUND_TRUTH)
 
 # Division of datasets
 TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 26, 5]  # 18 left out because of orientation
-VALIDATION_SET = [10]  # [25, 24, 16, 2, 14, 28, 21]
+VALIDATION_SET = [24]  # [25, 24, 16, 2, 14, 28, 21]
 TESTING_SET = [20, 29, 11, 15, 27, 9, 3, 12]
 
 # Patchsize
@@ -21,13 +22,13 @@ PATCH_SIZE = (1, 400, 400)
 NR_DIM = 2  # Only 2D and 3D are supported
 
 # Training hyperparameters
-LEARNING_RATE = 5e-5
-BATCH_SIZE = 4
-NR_BATCHES = 15000
+LEARNING_RATE = 1e-5
+BATCH_SIZE = 10
+NR_BATCHES = 7500
 NR_VAL_PATCH_PER_ITER = 4
 POS_NEG_PATCH_PROP = 0.5
-FN_CLASS_WEIGHT_SETTINGS = 'auto'  # custom number OR 'auto'
-AUTO_CLASS_WEIGHT_N = 500  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+FN_CLASS_WEIGHT_SETTINGS = 1000  # custom number OR 'auto'
+AUTO_CLASS_WEIGHT_N = 1000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
 AUGMENT_ONLINE = False
 
 # Testing and validation procedure
@@ -36,7 +37,7 @@ VALTEST_MODEL_NAMES = [MODEL_NAME]
 VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
 VOXEL_OVERLAP = (0, 200, 200)
 BIN_THRESH = .5  # Threshold to binarize the probability images
-METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume']
+METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 
 CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and results
 # will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur if these

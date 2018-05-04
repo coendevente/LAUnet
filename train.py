@@ -193,14 +193,6 @@ def updateSliceInformation(y_all, set_idx):
         sliceInformation[set_idx[i]] = np.array(sliceInformation[set_idx[i]])
 
 
-def getClassWeightAuto(x_full, y_full, set_idx):
-    x_patches, y_patches = getRandomPatches(x_full, y_full, BATCH_SIZE, set_idx)
-    n_pos = np.sum(y_patches)
-    n_neg = np.sum((y_patches == 0).astype(int))
-
-    return n_neg / n_pos
-
-
 def main():
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
 
@@ -227,12 +219,15 @@ def main():
     print('len(x_full_train) == {}'.format(len(x_full_train)))
 
     if FN_CLASS_WEIGHT_SETTINGS == 'auto':
-        w = getClassWeightAuto(x_full_train + x_full_val, y_full_train + y_full_val, TRAINING_SET + VALIDATION_SET)
+        _, y_patches = getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val, AUTO_CLASS_WEIGHT_N,
+                                        TRAINING_SET + VALIDATION_SET)
+        w = getClassWeightAuto(y_patches)
+        print("w == {}".format(w))
         set_fn_class_weight(w)
 
     model = buildUNet()
 
-    loss = {'training': {'loss': [], 'accuracy': []}, 'validation': {'loss': [], 'accuracy': []}}
+    log = {'training': {'loss': [], 'accuracy': []}, 'validation': {'loss': [], 'accuracy': []}}
 
     start_time = time.time()
     lowest_val_loss = float("inf")
@@ -241,6 +236,10 @@ def main():
     copyfile('settings.py', getModelSettingsPath(MODEL_NAME))
 
     print("Start training...")
+
+    log_path = getLogPath(MODEL_NAME)
+    log['fn_class_weight'] = get_fn_class_weight()
+
     for i in range(NR_BATCHES):
 
         print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
@@ -249,15 +248,13 @@ def main():
         print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
         train_loss = model.train_on_batch(x_train, y_train)
-        loss['training']['loss'].append(train_loss[0])
-        loss['training']['accuracy'].append(train_loss[1])
+        log['training']['loss'].append(train_loss[0])
+        log['training']['accuracy'].append(train_loss[1])
 
         val_loss = model.test_on_batch(x_val, y_val)
-        loss['validation']['loss'].append(val_loss[0])
-        loss['validation']['accuracy'].append(val_loss[1])
-
-        loss_path = getLossPath(MODEL_NAME)
-        pickle.dump(loss, open(loss_path, "wb"))
+        log['validation']['loss'].append(val_loss[0])
+        log['validation']['accuracy'].append(val_loss[1])
+        pickle.dump(log, open(log_path, "wb"))
 
         if lowest_val_loss > val_loss[0]:
             lowest_val_loss = val_loss[0]

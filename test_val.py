@@ -110,7 +110,6 @@ def calcMetrics(A, B):  # A is predicted, B is ground truth
         metrics['accuracy'] = (TP + TN) / (TP + TN + FP + FN)
     if 'sensitivity' in METRICS:
         metrics['sensitivity'] = TP / (TP + FN)
-        print("metrics['sensitivity'] = {}".format(metrics['sensitivity']))
     if 'specificity' in METRICS:
         metrics['specificity'] = TN / (TN + FP)
     if 'precision' in METRICS:
@@ -123,10 +122,10 @@ def calcMetrics(A, B):  # A is predicted, B is ground truth
         metrics['TN'] = TN
     if 'FN' in METRICS:
         metrics['FN'] = FN
-    if 'volume' in METRICS:
+    if 'volume_diff' in METRICS:
         V_A = np.sum(A)
         V_B = np.sum(B)
-        metrics['volume'] = abs(V_A - V_B)
+        metrics['volume_diff'] = abs(V_A - V_B)
 
     return metrics
 
@@ -136,6 +135,8 @@ def main():
 
     x_full_all = loadImages(x_all_path)
     y_full_all = loadImages(y_all_path)
+
+    set_fn_class_weight(0)  # Needs to be set for Keras, but is not used when testing and validating
 
     if CALC_PROBS:
         for model_name in VALTEST_MODEL_NAMES:
@@ -175,7 +176,7 @@ def main():
                 prob = sitk.GetArrayFromImage(prob)
                 anno = sitk.GetArrayFromImage(anno)
 
-                print(np.unique(prob))
+                # print(np.unique(prob))
                 prob_thresh = prob > BIN_THRESH
 
                 predict_path = getModelPredictPath(model_name)
@@ -192,8 +193,9 @@ def main():
             metric_means[model_name][metric[0]] = np.mean(all)
             metric_sds[model_name][metric[0]] = np.std(all)
 
-        print('Means of metrics: {}'.format(metric_means))
-        print('Standard deviations of metrics: {}'.format(metric_sds))
+        print('=========== Results of {} ==========='.format(model_name))
+        print('Means of metrics: {}'.format(metric_means[model_name]))
+        print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
 
 
 if __name__ == "__main__":

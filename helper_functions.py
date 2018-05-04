@@ -58,8 +58,8 @@ def getModelSettingsPath(model_name):
     return '{}settings.py'.format(getModelResultsPath(model_name))
 
 
-def getLossPath(model_name):
-    return "{}loss.p".format(getModelResultsPath(model_name))
+def getLogPath(model_name):
+    return "{}log.p".format(getModelResultsPath(model_name))
 
 
 def getAugPath():
@@ -107,6 +107,18 @@ FN_CLASS_WEIGHT = FN_CLASS_WEIGHT_SETTINGS
 def set_fn_class_weight(w):
     global FN_CLASS_WEIGHT
     FN_CLASS_WEIGHT = w
+
+
+def get_fn_class_weight():
+    global FN_CLASS_WEIGHT
+    return FN_CLASS_WEIGHT
+
+
+def getClassWeightAuto(y_patches):
+    n_pos = np.sum(y_patches)
+    n_neg = np.sum((y_patches == 0).astype(int))
+
+    return n_neg / n_pos
 
 
 def custom_loss(y_true, y_pred):
