@@ -180,7 +180,8 @@ def main():
                 prob_thresh = prob > BIN_THRESH
 
                 predict_path = getModelPredictPath(model_name)
-                sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(int)), '{}prob_thresh_image_{}_{}.nrrd'.format(predict_path, VALTEST_SET[i], j))
+                sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(np.uint16)),
+                                '{}prob_thresh_image_{}_{}.nrrd'.format(predict_path, VALTEST_SET[i], j))
 
                 metrics = calcMetrics(prob_thresh, anno)
                 all_metrics[model_name].append(metrics)

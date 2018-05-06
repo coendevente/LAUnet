@@ -2,7 +2,7 @@
 GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
 PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
 PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-# MODEL_NAME = 'sf_cw_1000'
+# MODEL_NAME = 'sf_auto_cw'
 MODEL_NAME = 'sf_lower_lr'
 
 # Path to folders
@@ -13,7 +13,7 @@ PATH_TO_AUG = '../data/augmentations_{}/'.format(GROUND_TRUTH)
 
 # Division of datasets
 TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 26, 5]  # 18 left out because of orientation
-VALIDATION_SET = [24]  # [25, 24, 16, 2, 14, 28, 21]
+VALIDATION_SET = [24] # [25, 24, 16, 2, 14, 28, 21]
 TESTING_SET = [20, 29, 11, 15, 27, 9, 3, 12]
 
 # Patchsize
@@ -22,24 +22,29 @@ PATCH_SIZE = (1, 400, 400)
 NR_DIM = 2  # Only 2D and 3D are supported
 
 # Training hyperparameters
+UNET_DEPTH = 4
 LEARNING_RATE = 1e-5
-BATCH_SIZE = 10
-NR_BATCHES = 7500
-NR_VAL_PATCH_PER_ITER = 4
+BATCH_SIZE = 7
+NR_BATCHES = 10000
+NR_VAL_PATCH_PER_ITER = 7
 POS_NEG_PATCH_PROP = 0.5
-FN_CLASS_WEIGHT_SETTINGS = 1000  # custom number OR 'auto'
+FN_CLASS_WEIGHT_SETTINGS = 'auto'  # custom number OR 'auto'
 AUTO_CLASS_WEIGHT_N = 1000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+
+# Offline augmentation
 AUGMENT_ONLINE = False
+NR_AUG = 100
 
 # Testing and validation procedure
 VALTEST_SET = VALIDATION_SET  # OR TESTING_SET
 VALTEST_MODEL_NAMES = [MODEL_NAME]
 VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
-VOXEL_OVERLAP = (0, 200, 200)
+# VOXEL_OVERLAP = (0, 200, 200)
+VOXEL_OVERLAP = (0, 32, 32)
 BIN_THRESH = .5  # Threshold to binarize the probability images
 METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 
-CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and results
+CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and results
 # will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur if these
 # images do not exist on the disk.
 
@@ -63,9 +68,6 @@ SHEAR_Y_MIN = -SHEAR_MAX
 SHEAR_Y_MAX = SHEAR_MAX
 
 NOISE_MEAN_MIN = 0
-NOISE_MEAN_MAX = 30
+NOISE_MEAN_MAX = 0
 NOISE_STD_MIN = 1
 NOISE_STD_MAX = 15
-
-# Offline augmentation
-NR_AUG = 100

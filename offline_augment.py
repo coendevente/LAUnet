@@ -5,6 +5,7 @@ import time
 from joblib import Parallel, delayed
 import multiprocessing
 import random
+import matplotlib.pyplot as plt
 
 
 def offline_augment(img_nr, slices):
@@ -38,6 +39,14 @@ def doOneAug(input):
     for z in range(x_aug.shape[0]):
         x_aug_path, y_aug_path = getAugImagesPath(i + 1, j, z)
 
+        # print(x_aug[z])
+        # print(x_aug_path)
+        # print("x_aug[z].shape == {}".format(x_aug[z].shape))
+        # plt.figure()
+        # plt.imshow(x_aug[z])
+        # plt.show()
+        # print(np.min(x_aug[z]))
+        # print(np.unique(x_aug[z]))
         sitk.WriteImage(sitk.GetImageFromArray(x_aug[z]), x_aug_path)
         sitk.WriteImage(sitk.GetImageFromArray(y_aug[z]), y_aug_path)
 

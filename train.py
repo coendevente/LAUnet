@@ -34,7 +34,7 @@ def buildUNet():
     ps = PATCH_SIZE
     if NR_DIM == 2:
         ps = ps[1:]
-    model = UNet(ps + (1, ), dropout=.5, batchnorm=True, depth=3)
+    model = UNet(ps + (1, ), dropout=.5, batchnorm=True, depth=UNET_DEPTH)
 
     model.compile(optimizer=Adam(lr=LEARNING_RATE), loss=custom_loss, metrics=['binary_accuracy'])
 
@@ -142,7 +142,7 @@ def getRandomPositiveSlicesOffline(set_idx):
 
 def getRandomPositivePatch(x_full, y_full, set_idx):
     if AUGMENT_ONLINE:
-        x_i, y_i = getRandomPositiveImage(x_full, y_full)
+        x_i, y_i = getRandomPositiveImage(x_full, y_full, set_idx)
         x_s, y_s = getRandomPositiveSlices(x_i, y_i)
         x_s, y_s = augment(x_s, y_s, False)
     else:
@@ -169,6 +169,10 @@ def getRandomPatches(x_full, y_full, nr, set_idx):
 
         # print(positive_patch)
         # imshow3D(np.concatenate((x_j / np.max(x_j), y_j), axis=2))
+        # sitk.WriteImage(sitk.GetImageFromArray(x_j), 'test_x_j_{}.nii.gz'.format(positive_patch))
+        # sitk.WriteImage(sitk.GetImageFromArray(x_j), 'test_x_j_{}.nii.gz'.format(positive_patch))
+        # sitk.WriteImage(sitk.GetImageFromArray(y_j), 'test_y_j_{}.nii.gz'.format(positive_patch))
+        # sitk.WriteImage(sitk.GetImageFromArray(y_j), 'test_y_j_{}.nii.gz'.format(positive_patch))
 
         x.append(x_j)
         y.append(y_j)

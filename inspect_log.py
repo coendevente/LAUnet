@@ -29,7 +29,7 @@ def main():
         else:
             print('{} is absent in this log file'.format(log_name))
 
-    w = 15
+    w = 10
     orig_lw = 1
     smooth_lw = 2
 

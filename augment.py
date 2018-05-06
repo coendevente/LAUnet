@@ -64,8 +64,8 @@ def augment(I, J, mx):
     affine.SetMatrix(matrix.ravel())
     affine.SetCenter((round(I.shape[1] / 2), round(I.shape[2] / 2)))
 
-    I_aug = np.zeros(I.shape).astype(int)
-    J_aug = np.zeros(J.shape).astype(int)
+    I_aug = np.zeros(I.shape).astype(np.uint16)
+    J_aug = np.zeros(J.shape).astype(np.uint16)
     for i in range(I.shape[0]):
         I_slice = sitk.GetImageFromArray(I[i])
         J_slice = sitk.GetImageFromArray(J[i])
