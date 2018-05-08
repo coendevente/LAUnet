@@ -103,12 +103,7 @@ class Helper():
         return x_path, y_path
 
     def getBOPath(self):
-        folder = "{}bayesian_optimization/".format(self.s.PATH_TO_RESULTS)
-
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-
-        return "{}bo{}.p".format(folder, time.time())
+        return "{}bo{}.p".format(self.getModelResultsPath(), time.time())
 
     def getClassWeightAuto(self, y_patches):
         n_pos = np.sum(y_patches)

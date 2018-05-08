@@ -22,6 +22,8 @@ import tensorflow as tf
 import math
 import pickle
 
+import inspect
+
 
 @contextmanager
 def suppress_stdout():
@@ -35,19 +37,32 @@ def suppress_stdout():
 
 
 def target(unet_depth, learning_rate_power, patch_size_factor):
+    s = Settings()
+
+    unet_depth = int(round(unet_depth))
+    patch_size_factor = int(round(patch_size_factor))
+
+    loc = locals()
+    args_name = [arg for arg in inspect.getfullargspec(target).args]
+    # args_values = [loc[arg] for arg in inspect.getfullargspec(target).args]
+
+    s.MODEL_NAME = 'hyperpar_opt_08_05_0/'
+
+    first = True
+    for name in args_name:
+        if not first:
+            s.MODEL_NAME += ','
+        first = False
+
+        s.MODEL_NAME += name + '=' + str(locals()[name])
+
+    s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
+
+    s.UNET_DEPTH = unet_depth
+    s.LEARNING_RATE = math.pow(10, learning_rate_power)
+    s.PATCH_SIZE = (1, patch_size_factor * 64, patch_size_factor * 64)
+
     with suppress_stdout():
-        s = Settings()
-
-        unet_depth = int(round(unet_depth))
-        patch_size_factor = int(round(patch_size_factor))
-
-        s.MODEL_NAME = 'hyperpar_opt'
-        s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
-
-        s.UNET_DEPTH = unet_depth
-        s.LEARNING_RATE = math.pow(10, learning_rate_power)
-        s.PATCH_SIZE = (1, patch_size_factor * 64, patch_size_factor * 64)
-
         h = Helper(s)
 
         Train(s, h).train()
