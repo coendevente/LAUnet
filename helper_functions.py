@@ -3,6 +3,8 @@ import numpy as np
 from settings import *
 import os
 from keras import backend as K
+from imshow_3D import imshow3D
+import copy
 
 
 def getImagePaths(nrs):
@@ -27,8 +29,17 @@ def loadImages(pathNames):
 
 
 def cropImage(I, corner, dims):
+    c = copy.copy(corner)
+    for i in range(3):
+        if c[i] < 0:
+            pad_elem = [(0, 0), (0, 0), (0, 0)]
+            pad_elem[i] = (-c[i], dims[i] + c[i] - I.shape[i])
+            pad_elem = tuple(pad_elem)
+            I = np.pad(I, pad_elem, 'constant', constant_values=0)
+            c[i] = 0
+
     d, h, w = dims
-    z, y, x = corner
+    z, y, x = c
     return I[z:z+d, y:y+h, x:x+w]
 
 

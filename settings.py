@@ -2,8 +2,7 @@
 GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
 PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
 PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-# MODEL_NAME = 'sf_auto_cw'
-MODEL_NAME = 'sf_lower_lr'
+MODEL_NAME = 'sf_depth_6'
 
 # Path to folders
 PATH_TO_DATA = '../data/'
@@ -13,34 +12,38 @@ PATH_TO_AUG = '../data/augmentations_{}/'.format(GROUND_TRUTH)
 
 # Division of datasets
 TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 26, 5]  # 18 left out because of orientation
-VALIDATION_SET = [24] # [25, 24, 16, 2, 14, 28, 21]
+VALIDATION_SET = [24]  # [25, 24, 16, 2, 14, 28, 21]
 TESTING_SET = [20, 29, 11, 15, 27, 9, 3, 12]
 
 # Patchsize
 # PATCH_SIZE = (3, 64, 64)
-PATCH_SIZE = (1, 400, 400)
+# PATCH_SIZE = (1, 864, 864)
+PATCH_SIZE = (1, 384, 384)
+# PATCH_SIZE = (1, 400, 400)
 NR_DIM = 2  # Only 2D and 3D are supported
 
 # Training hyperparameters
-UNET_DEPTH = 4
+UNET_DEPTH = 6
 LEARNING_RATE = 1e-5
-BATCH_SIZE = 7
-NR_BATCHES = 10000
+BATCH_SIZE = 1
+NR_BATCHES = 15000
 NR_VAL_PATCH_PER_ITER = 7
 POS_NEG_PATCH_PROP = 0.5
 FN_CLASS_WEIGHT_SETTINGS = 'auto'  # custom number OR 'auto'
-AUTO_CLASS_WEIGHT_N = 1000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+AUTO_CLASS_WEIGHT_N = 500  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+EARLY_STOPPING = True
+PATIENTCE_ES = 1000  # Patience of early stopping
 
 # Offline augmentation
 AUGMENT_ONLINE = False
-NR_AUG = 100
+NR_AUG = 1
 
 # Testing and validation procedure
 VALTEST_SET = VALIDATION_SET  # OR TESTING_SET
 VALTEST_MODEL_NAMES = [MODEL_NAME]
 VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
 # VOXEL_OVERLAP = (0, 200, 200)
-VOXEL_OVERLAP = (0, 32, 32)
+VOXEL_OVERLAP = (0, 200, 200)
 BIN_THRESH = .5  # Threshold to binarize the probability images
 METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 

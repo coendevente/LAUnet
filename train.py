@@ -52,13 +52,20 @@ def getRandomPatch(x_full, y_full, set_idx):
         s_nr = random.randint(0, zl - 1 - PATCH_SIZE[0])
         x, y = offline_augment(set_idx[i], range(s_nr, s_nr + PATCH_SIZE[0]))
 
-    z_corner = random.randint(0, x.shape[0] - PATCH_SIZE[0])
-    y_corner = random.randint(0, x.shape[1] - PATCH_SIZE[1])
-    x_corner = random.randint(0, x.shape[2] - PATCH_SIZE[2])
-    corner = [z_corner, y_corner, x_corner]
+    # z_corner = random.randint(0, x.shape[0] - PATCH_SIZE[0])
+    # y_corner = random.randint(0, x.shape[1] - PATCH_SIZE[1])
+    # x_corner = random.randint(0, x.shape[2] - PATCH_SIZE[2])
+    # corner = [z_corner, y_corner, x_corner]
+    corner = [0, 0, 0]
+
+    for i in range(3):
+        if x.shape[i] < PATCH_SIZE[i]:
+            corner[i] = round((x.shape[i] - PATCH_SIZE[i]) / 2)
+        else:
+            corner[i] = random.randint(0, x.shape[i] - PATCH_SIZE[i])
 
     if AUGMENT_ONLINE:
-        x, y = augment(x[z_corner:z_corner + PATCH_SIZE[0]], y[z_corner:z_corner + PATCH_SIZE[0]], False)
+        x, y = augment(x[corner[2]:corner[2] + PATCH_SIZE[0]], y[corner[2]:corner[2] + PATCH_SIZE[0]], False)
         corner[0] = 0
 
     x_patch = cropImage(x, corner, PATCH_SIZE)
@@ -96,11 +103,6 @@ def getRandomPositivePatchAllSlices(x, y):
 
     nz = np.nonzero(y)
 
-    # print("len(nz) == {}".format(len(nz)))
-    # print("nz[0].shape == {}".format(nz[0].shape))
-    # print("nz[1].shape == {}".format(nz[1].shape))
-    # print("nz[2].shape == {}".format(nz[2].shape))
-
     nz_i = random.randint(0, nz[0].shape[0] - 1)
     nz_yx = (nz[1][nz_i], nz[2][nz_i])
     ranges = ([-PATCH_SIZE[1] + 1, 0], [-PATCH_SIZE[2] + 1, 0])
@@ -109,16 +111,19 @@ def getRandomPositivePatchAllSlices(x, y):
         if nz_yx[i] - PATCH_SIZE[i + 1] < 0:
             ranges[i][0] = -nz_yx[i]
         if nz_yx[i] + PATCH_SIZE[i + 1] > x.shape[i + 1]:
-            ranges[i][1] = - (PATCH_SIZE[i + 1] - (x.shape[i + 1] - nz_yx[i]))
+            ranges[i][1] = -(PATCH_SIZE[i + 1] - (x.shape[i + 1] - nz_yx[i]))
 
-    # print("x.shape == {}".format(x.shape))
-    # print("nz_yx == {}".format(nz_yx))
-    # print("ranges == {}".format(ranges))
+    # z_corner = 0
+    # y_corner = nz_yx[0] + random.randint(ranges[0][0], ranges[0][1])
+    # x_corner = nz_yx[1] + random.randint(ranges[1][0], ranges[1][1])
+    # corner = [z_corner, y_corner, x_corner]
+    corner = [0, 0, 0]
 
-    z_corner = 0
-    y_corner = nz_yx[0] + random.randint(ranges[0][0], ranges[0][1])
-    x_corner = nz_yx[1] + random.randint(ranges[1][0], ranges[1][1])
-    corner = (z_corner, y_corner, x_corner)
+    for i in range(1, 3):
+        if x.shape[i] < PATCH_SIZE[i]:
+            corner[i] = round((x.shape[i] - PATCH_SIZE[i]) / 2)
+        else:
+            corner[i] = nz_yx[i - 1] + random.randint(ranges[i - 1][0], ranges[i - 1][1])
 
     x_patch = cropImage(x, corner, PATCH_SIZE)
     y_patch = cropImage(y, corner, PATCH_SIZE)
@@ -198,7 +203,7 @@ def updateSliceInformation(y_all, set_idx):
 
 
 def main():
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
 
     sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
@@ -235,6 +240,7 @@ def main():
 
     start_time = time.time()
     lowest_val_loss = float("inf")
+    lowest_val_loss_i = 0
     lowest_train_loss = float("inf")
 
     copyfile('settings.py', getModelSettingsPath(MODEL_NAME))
@@ -244,7 +250,12 @@ def main():
     log_path = getLogPath(MODEL_NAME)
     log['fn_class_weight'] = get_fn_class_weight()
 
+    es_j = 0  # Counter for early stopping
     for i in range(NR_BATCHES):
+        if EARLY_STOPPING and PATIENTCE_ES <= es_j:
+            print("Stopped early at iteration {}".format(i))
+            break
+        es_j += 1
 
         print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
         x_train, y_train = getRandomPatches(x_full_train, y_full_train, BATCH_SIZE, TRAINING_SET)
@@ -264,6 +275,10 @@ def main():
             lowest_val_loss = val_loss[0]
             model_path = getModelPath(MODEL_NAME)
             model.save(model_path)
+            lowest_val_loss_i = i
+            log['lowest_val_loss'] = lowest_val_loss
+            log['lowest_val_loss_i'] = lowest_val_loss_i
+            es_j = 0
 
         if lowest_train_loss > train_loss[0]:
             lowest_train_loss = train_loss[0]
