@@ -13,7 +13,7 @@ class Settings:
 
     # Division of datasets
     TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 26, 5]  # 18 left out because of orientation
-    VALIDATION_SET = [24]  # [25, 24, 16, 2, 14, 28, 21]
+    VALIDATION_SET = [25, 24, 16, 2, 14, 28, 21]
     TESTING_SET = [20, 29, 11, 15, 27, 9, 3, 12]
 
     # Patchsize
@@ -24,10 +24,10 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
-    UNET_DEPTH = 6
-    LEARNING_RATE = 1e-5
+    UNET_DEPTH = 3
+    LEARNING_RATE = 1e-3
     BATCH_SIZE = 1
-    NR_BATCHES = 15
+    NR_BATCHES = 10000
     NR_VAL_PATCH_PER_ITER = 7
     POS_NEG_PATCH_PROP = 0.5
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'

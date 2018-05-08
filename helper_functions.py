@@ -5,6 +5,7 @@ import os
 from keras import backend as K
 from imshow_3D import imshow3D
 import copy
+import time
 
 
 class Helper():
@@ -100,6 +101,14 @@ class Helper():
             y_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
 
         return x_path, y_path
+
+    def getBOPath(self):
+        folder = "{}bayesian_optimization/".format(self.s.PATH_TO_RESULTS)
+
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        return "{}bo{}.p".format(folder, time.time())
 
     def getClassWeightAuto(self, y_patches):
         n_pos = np.sum(y_patches)

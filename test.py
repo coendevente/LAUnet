@@ -2,13 +2,14 @@ from settings import *
 from helper_functions import *
 import keras
 from keras.models import load_model
-from online_augment import augment
+from online_augment import OnlineAugmenter
 import SimpleITK as sitk
 from imshow_3D import imshow3D
 
 class Test:
-    s = Settings()
-    h = Helper()
+    def __init__(self, s, h):
+        self.s = s
+        self.h = h
 
     def patchCornersFullImage(self, sh):
         step_size = np.subtract(self.s.PATCH_SIZE, self.s.VOXEL_OVERLAP)
@@ -211,5 +212,7 @@ class Test:
 
 
 if __name__ == "__main__":
-    t = Test()
+    s = Settings()
+    h = Helper()
+    t = Test(s, h)
     _, _, = t.test()

@@ -196,7 +196,7 @@ class Train:
     def train(self):
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
 
-        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+        # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         self.h.s = self.s
 
@@ -231,18 +231,21 @@ class Train:
         lowest_val_loss = float("inf")
         lowest_train_loss = float("inf")
 
-        copyfile('settings.py', self.h.getModelSettingsPath(self.s.MODEL_NAME))
+        # copyfile('settings.py', self.h.getModelSettingsPath(self.s.MODEL_NAME))
 
         print("Start training...")
 
         log_path = self.h.getLogPath(self.s.MODEL_NAME)
         log['fn_class_weight'] = self.s.FN_CLASS_WEIGHT
+        log['settings'] = self.s
 
         es_j = 0  # Counter for early stopping
 
         log['stopped_early'] = False
         print("self.s.EARLY_STOPPING == {}".format(self.s.EARLY_STOPPING))
         print("self.s.PATIENTCE_ES == {}".format(self.s.PATIENTCE_ES))
+
+        pickle.dump(log, open(log_path, "wb"))
         for i in range(self.s.NR_BATCHES):
             if self.s.EARLY_STOPPING and self.s.PATIENTCE_ES <= es_j:
                 print("Stopped early at iteration {}".format(i))

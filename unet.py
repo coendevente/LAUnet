@@ -60,7 +60,7 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim):
         n = Concatenate()([n, m])
         m = conv_block(n, dim, acti, bn, res, ndim)
     else:
-        m = conv_block(m, dim, acti, bn, res, do, ndim)
+        m = conv_block(m, dim, acti, bn, res, ndim, do)
     return m
 
 
