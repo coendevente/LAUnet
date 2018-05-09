@@ -8,9 +8,13 @@ import matplotlib.pyplot as plt
 from helper_functions import *
 from unet import UNet
 
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Anaconda3/Library/bin/graphviz/'
+
 import tensorflow as tf
 from tensorflow.python.client import device_lib
 from keras.optimizers import *
+from keras.utils import plot_model
 
 from online_augment import OnlineAugmenter
 from offline_augment import OfflineAugmenter
@@ -41,7 +45,8 @@ class Train:
         ps = self.s.PATCH_SIZE
         if self.s.NR_DIM == 2:
             ps = ps[1:]
-        model = UNet(ps + (1, ), self.s.NR_DIM, dropout=.5, batchnorm=True, depth=self.s.UNET_DEPTH)
+        model = UNet(ps + (1, ), self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
+                     doeverylevel=self.s.DROPOUT_AT_EVERY_LEVEL, inc_rate=self.s.FEATURE_MAP_INC_RATE)
 
         model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss=self.h.custom_loss, metrics=['binary_accuracy'])
 
@@ -194,7 +199,11 @@ class Train:
             self.sliceInformation[set_idx[i]] = np.array(self.sliceInformation[set_idx[i]])
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
+
+        # self.s.FN_CLASS_WEIGHT = 100
+        # model = self.buildUNet()
+        # plot_model(model, to_file='model.png')
 
         # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
@@ -223,6 +232,7 @@ class Train:
                                                  + self.s.VALIDATION_SET)
             self.s.FN_CLASS_WEIGHT = self.h.getClassWeightAuto(y_patches)
             self.h.s = self.s
+
         model = self.buildUNet()
 
         log = {'training': {'loss': [], 'accuracy': []}, 'validation': {'loss': [], 'accuracy': []}}

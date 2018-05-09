@@ -36,7 +36,19 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-def target(unet_depth, learning_rate_power, patch_size_factor):
+MAIN_FOLDER = 'hyperpar_opt_09_05_1/'
+h = Helper(Settings())
+bo_path = h.getBOPath(MAIN_FOLDER)
+nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
+bo = -1
+
+
+def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_map_inc_rate):
+    global bo
+    if bo != -1:
+        pickle.dump(bo, open(bo_path, "wb"))
+    # return unet_depth * learning_rate_power * patch_size_factor * do_every_level * dropout * feature_map_inc_rate * -1
+
     s = Settings()
 
     unet_depth = int(round(unet_depth))
@@ -44,23 +56,20 @@ def target(unet_depth, learning_rate_power, patch_size_factor):
 
     loc = locals()
     args_name = [arg for arg in inspect.getfullargspec(target).args]
-    # args_values = [loc[arg] for arg in inspect.getfullargspec(target).args]
 
-    s.MODEL_NAME = 'hyperpar_opt_08_05_0/'
+    model_nr = pickle.load(open(nr_steps_path, "rb")) + 1
+    pickle.dump(model_nr, open(nr_steps_path, "wb"))
 
-    first = True
-    for name in args_name:
-        if not first:
-            s.MODEL_NAME += ','
-        first = False
-
-        s.MODEL_NAME += name + '=' + str(locals()[name])
+    s.MODEL_NAME = MAIN_FOLDER + str(model_nr)
 
     s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
 
     s.UNET_DEPTH = unet_depth
     s.LEARNING_RATE = math.pow(10, learning_rate_power)
     s.PATCH_SIZE = (1, patch_size_factor * 64, patch_size_factor * 64)
+    # s.DROPOUT_AT_EVERY_LEVEL = do_every_level >= .5
+    s.DROPOUT = dropout
+    s.FEATURE_MAP_INC_RATE = feature_map_inc_rate
 
     with suppress_stdout():
         h = Helper(s)
@@ -73,27 +82,46 @@ def target(unet_depth, learning_rate_power, patch_size_factor):
 
 
 def hyperpar_opt():
+    resume_previous = False
+    only_inspect_bo = False
+
+    global bo
+
+    if only_inspect_bo:
+        bo = pickle.load(open(bo_path, "rb"))
+        print(bo.res['all'])
+        print(bo.res['max'])
+
+        return
+
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-    bo = BayesianOptimization(target, {
-        'unet_depth': (2, 5),
-        'learning_rate_power': (-6, -1),
-        'patch_size_factor': (1, 6),
-        # 'dimensionality': (2, 3)
-    })
-    bo.explore({
-        'unet_depth': [2, 3, 4, 5, 4],
-        'learning_rate_power': [-2, -5, -3, -6, -4],
-        'patch_size_factor': [6, 5, 4, 2, 1],
-        # 'dimensionality': [2, 3, 2, 3, 2]
-    })
-    bo.maximize(init_points=0, n_iter=20, kappa=3)
+    if resume_previous:
+        bo = pickle.load(open(bo_path, "rb"))
+    else:
+        pickle.dump(0, open(nr_steps_path, "wb"))
+        bo = BayesianOptimization(target, {
+            'unet_depth': (2, 5),
+            'learning_rate_power': (-6, -1),
+            'patch_size_factor': (1, 6),
+            # 'do_every_level': (0, 1),
+            'dropout': (0, 1),
+            'feature_map_inc_rate': (1., 2.)
+        })
+        # bo.explore({
+        #     'unet_depth': [2, 3, 4, 5, 4, 3],
+        #     'learning_rate_power': [-2, -5, -3, -6, -4, -3],
+        #     'patch_size_factor': [6, 6, 6, 4, 3, 2],
+        #     'do_every_level': [0, 1, 0, 1, 0, 1],
+        #     'dropout': [0., .2, .4, .6, .8, 1.],
+        #     'feature_map_inc_rate': [1., 1.2, 1.4, 1.6, 1.8, 2.]
+        # })
+        bo.maximize(init_points=10, n_iter=0, kappa=5)
+
+    bo.maximize(init_points=0, n_iter=30, kappa=5)
 
     print(bo.res['all'])
     print(bo.res['max'])
-
-    h = Helper(Settings())
-    bo_path = h.getBOPath()
     pickle.dump(bo, open(bo_path, "wb"))
 
 

@@ -1,9 +1,11 @@
+import math
+
 class Settings:
     # Model to train
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'hyperpar_opt_08_05_0/unet_depth=2,learning_rate_power=-2,patch_size_factor=6'
+    MODEL_NAME = 'hyperpar_opt_09_05_1/1'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -24,8 +26,8 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
-    UNET_DEPTH = 3
-    LEARNING_RATE = 1e-3
+    UNET_DEPTH = 5
+    LEARNING_RATE = math.pow(10, -5)
     BATCH_SIZE = 1
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 7
@@ -34,6 +36,9 @@ class Settings:
     AUTO_CLASS_WEIGHT_N = 500  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
     PATIENTCE_ES = 500  # Patience of early stopping
+    DROPOUT_AT_EVERY_LEVEL = False
+    DROPOUT = 0.5
+    FEATURE_MAP_INC_RATE = 2.
 
     # Offline augmentation
     AUGMENT_ONLINE = False
@@ -44,7 +49,7 @@ class Settings:
     VALTEST_MODEL_NAMES = [MODEL_NAME]
     VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
     # VOXEL_OVERLAP = (0, 200, 200)
-    VOXEL_OVERLAP = (0, 0, 0)
+    VOXEL_OVERLAP = (0, 32, 32)
     BIN_THRESH = .5  # Threshold to binarize the probability images
     METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 

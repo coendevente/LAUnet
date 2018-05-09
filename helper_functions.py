@@ -102,8 +102,11 @@ class Helper():
 
         return x_path, y_path
 
-    def getBOPath(self):
-        return "{}bo{}.p".format(self.getModelResultsPath(), time.time())
+    def getBOPath(self, model_name):
+        return "{}bo.p".format(self.getModelResultsPath(model_name))
+
+    def getNrStepsPath(self, model_name):
+        return "{}nr_steps.p".format(self.getModelResultsPath(model_name))
 
     def getClassWeightAuto(self, y_patches):
         n_pos = np.sum(y_patches)

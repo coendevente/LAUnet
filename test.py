@@ -160,13 +160,13 @@ class Test:
 
                         predict_path = self.h.getModelPredictPath(model_name)
                         sitk.WriteImage(sitk.GetImageFromArray(input),
-                                        '{}input_image_{}_{}.nrrd'.format(predict_path, self.s.VALTEST_SET[i], j))
+                                        '{}input_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
 
                         sitk.WriteImage(sitk.GetImageFromArray(prob),
-                                        '{}prob_image_{}_{}.nrrd'.format(predict_path, self.s.VALTEST_SET[i], j))
+                                        '{}prob_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
 
                         sitk.WriteImage(sitk.GetImageFromArray(anno),
-                                        '{}anno_image_{}_{}.nrrd'.format(predict_path, self.s.VALTEST_SET[i], j))
+                                        '{}anno_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
                         print("Saved in {}".format(predict_path))
 
         # Calculate the metrics
@@ -180,8 +180,8 @@ class Test:
             for i in range(len(x_full_all)):
                 for j in [-1] + list(range(self.s.VALTEST_AUG_NR)):
                     predict_path = self.h.getModelPredictPath(model_name)
-                    prob = sitk.ReadImage('{}prob_image_{}_{}.nrrd'.format(predict_path, self.s.VALTEST_SET[i], j))
-                    anno = sitk.ReadImage('{}anno_image_{}_{}.nrrd'.format(predict_path, self.s.VALTEST_SET[i], j))
+                    prob = sitk.ReadImage('{}prob_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
+                    anno = sitk.ReadImage('{}anno_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
 
                     prob = sitk.GetArrayFromImage(prob)
                     anno = sitk.GetArrayFromImage(anno)
@@ -191,7 +191,7 @@ class Test:
 
                     predict_path = self.h.getModelPredictPath(model_name)
                     sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(np.uint16)),
-                                    '{}prob_thresh_image_{}_{}.nrrd'.format(predict_path, self.s.VALTEST_SET[i], j))
+                                    '{}prob_thresh_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
 
                     metrics = self.calcMetrics(prob_thresh, anno)
                     all_metrics[model_name].append(metrics)
