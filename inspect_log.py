@@ -33,7 +33,7 @@ class LogInspector:
             else:
                 print('{} is absent in this log file'.format(log_name))
 
-        w = 10
+        w = 50
         orig_lw = 1
         smooth_lw = 2
 

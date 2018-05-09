@@ -3,7 +3,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'hyperpar_opt'
+    MODEL_NAME = 'hyperpar_opt_08_05_0/unet_depth=2,learning_rate_power=-2,patch_size_factor=6'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -33,7 +33,7 @@ class Settings:
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
     AUTO_CLASS_WEIGHT_N = 500  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
-    PATIENTCE_ES = 2000  # Patience of early stopping
+    PATIENTCE_ES = 500  # Patience of early stopping
 
     # Offline augmentation
     AUGMENT_ONLINE = False
