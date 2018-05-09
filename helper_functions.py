@@ -114,7 +114,17 @@ class Helper():
 
         return n_neg / n_pos
 
-    def custom_loss(self, y_true, y_pred):
+    # Thanks to https://github.com/keras-team/keras/issues/3611
+    def dice_coef(self, y_true, y_pred, smooth=1):
+        y_true_f = K.flatten(y_true)
+        y_pred_f = K.flatten(y_pred)
+        intersection = K.sum(y_true_f * y_pred_f)
+        return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+
+    def dice_coef_loss(self, y_true, y_pred):
+        return -self.dice_coef(y_true, y_pred)
+
+    def weighted_binary_cross_entropy(self, y_true, y_pred):
         y_pred_bw = K.round(y_pred)
         m = y_true - (y_true == y_pred_bw)
         FNentropy = K.binary_crossentropy(m * y_pred, m * y_true)
@@ -129,3 +139,11 @@ class Helper():
         TNentropy = K.binary_crossentropy(m * y_pred, m * y_true)
         print("FN_CLASS_WEIGHT == {}".format(self.s.FN_CLASS_WEIGHT))
         return FNentropy * self.s.FN_CLASS_WEIGHT + FPentropy + TPentropy + TNentropy
+
+    def custom_loss(self, y_true, y_pred):
+        if self.s.LOSS_FUNCTION == 'weighted_binary_cross_entropy':
+            return self.weighted_binary_cross_entropy(y_true, y_pred)
+        elif self.s.LOSS_FUNCTION == 'dice':
+            return self.dice_coef_loss(y_true, y_pred)
+        else:
+            raise Exception('Loss function {} is not (yet) supported.'.format(self.s.LOSS_FUNCTION))

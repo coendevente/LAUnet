@@ -213,6 +213,6 @@ class Test:
 
 if __name__ == "__main__":
     s = Settings()
-    h = Helper()
+    h = Helper(s)
     t = Test(s, h)
     _, _, = t.test()

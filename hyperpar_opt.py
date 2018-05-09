@@ -36,14 +36,14 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'hyperpar_opt_09_05_1/'
+MAIN_FOLDER = 'hyperpar_opt_09_05_2/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
 bo = -1
 
 
-def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_map_inc_rate):
+def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_map_inc_rate, loss_function):
     global bo
     if bo != -1:
         pickle.dump(bo, open(bo_path, "wb"))
@@ -70,6 +70,7 @@ def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_
     # s.DROPOUT_AT_EVERY_LEVEL = do_every_level >= .5
     s.DROPOUT = dropout
     s.FEATURE_MAP_INC_RATE = feature_map_inc_rate
+    s.LOSS_FUNCTION = 'dice' if loss_function < .5 else 'weighted_binary_cross_entropy'
 
     with suppress_stdout():
         h = Helper(s)
@@ -106,7 +107,8 @@ def hyperpar_opt():
             'patch_size_factor': (1, 6),
             # 'do_every_level': (0, 1),
             'dropout': (0, 1),
-            'feature_map_inc_rate': (1., 2.)
+            'feature_map_inc_rate': (1., 2.),
+            'loss_function': (0, 1)
         })
         # bo.explore({
         #     'unet_depth': [2, 3, 4, 5, 4, 3],
