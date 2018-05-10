@@ -5,7 +5,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'hyperpar_opt_09_05_2/1'
+    MODEL_NAME = 'hyperpar_opt_09_05_2/22'
 
     # Path to folders
     PATH_TO_DATA = '../data/'

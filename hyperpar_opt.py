@@ -24,6 +24,8 @@ import pickle
 
 import inspect
 
+from tabulate import tabulate
+
 
 @contextmanager
 def suppress_stdout():
@@ -36,7 +38,7 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'hyperpar_opt_09_05_2/'
+MAIN_FOLDER = 'hyperpar_opt_10_05_0/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
@@ -47,7 +49,7 @@ def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_
     global bo
     if bo != -1:
         pickle.dump(bo, open(bo_path, "wb"))
-    # return unet_depth * learning_rate_power * patch_size_factor * do_every_level * dropout * feature_map_inc_rate * -1
+    # return unet_depth * learning_rate_power * patch_size_factor * dropout * feature_map_inc_rate * -1 * loss_function
 
     s = Settings()
 
@@ -58,7 +60,6 @@ def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_
     args_name = [arg for arg in inspect.getfullargspec(target).args]
 
     model_nr = pickle.load(open(nr_steps_path, "rb")) + 1
-    pickle.dump(model_nr, open(nr_steps_path, "wb"))
 
     s.MODEL_NAME = MAIN_FOLDER + str(model_nr)
 
@@ -79,19 +80,35 @@ def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_
 
         metric_means, metric_sds = Test(s, h).test()
 
+    pickle.dump(model_nr, open(nr_steps_path, "wb"))
     return metric_means[s.MODEL_NAME]['Dice']
 
 
+def visBoResValues(r):
+    # print(r)
+    print(r)
+    a = r['all']
+    m = r['max']
+    params = ['step'] + ['Value'] + list(a['params'][0].keys())
+    # print(params)
+    data = []
+    print(a['values'][0])
+    for i in range(len(a['values'])):
+        data.append([i] + [a['values'][i]] + list(a['params'][i].values()))
+
+    print(list(m['max_params'].values()))
+    data.append(['MAX'] + [m['max_val']] + list(m['max_params'].values()))
+    print(tabulate(data, headers=params, tablefmt='orgtbl'))
+
 def hyperpar_opt():
     resume_previous = False
-    only_inspect_bo = False
+    only_inspect_bo = True
 
     global bo
 
     if only_inspect_bo:
         bo = pickle.load(open(bo_path, "rb"))
-        print(bo.res['all'])
-        print(bo.res['max'])
+        visBoResValues(bo.res)
 
         return
 
@@ -110,22 +127,18 @@ def hyperpar_opt():
             'feature_map_inc_rate': (1., 2.),
             'loss_function': (0, 1)
         })
-        # bo.explore({
-        #     'unet_depth': [2, 3, 4, 5, 4, 3],
-        #     'learning_rate_power': [-2, -5, -3, -6, -4, -3],
-        #     'patch_size_factor': [6, 6, 6, 4, 3, 2],
-        #     'do_every_level': [0, 1, 0, 1, 0, 1],
-        #     'dropout': [0., .2, .4, .6, .8, 1.],
-        #     'feature_map_inc_rate': [1., 1.2, 1.4, 1.6, 1.8, 2.]
-        # })
-        bo.maximize(init_points=10, n_iter=0, kappa=5)
 
-    bo.maximize(init_points=0, n_iter=30, kappa=5)
+        bo.maximize(init_points=10, n_iter=0)
+        # bo.explore({'x': [-1, 3], 'y': [-2, 2]})
+        # bo.maximize(init_points=10, n_iter=0, kappa=2)
 
-    print(bo.res['all'])
-    print(bo.res['max'])
+    bo.maximize(init_points=0, n_iter=30, acq='ei')
+    # bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)
+
+    visBoResValues(bo.res)
     pickle.dump(bo, open(bo_path, "wb"))
 
 
 if __name__ == '__main__':
     hyperpar_opt()
+
