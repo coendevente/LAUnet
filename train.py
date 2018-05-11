@@ -61,7 +61,8 @@ class Train:
         else:
             zl = self.sliceInformation[set_idx[i]].shape[0]
             s_nr = random.randint(0, zl - 1 - self.s.PATCH_SIZE[0])
-            x, y = self.offline_augmenter.offline_augment(set_idx[i], range(s_nr, s_nr + self.s.PATCH_SIZE[0]))
+
+            x, y = self.offline_augmenter.offline_augment(set_idx[i], range(s_nr, s_nr + self.s.PATCH_SIZE[0]), False)
 
         corner = [0, 0, 0]
 
@@ -142,7 +143,7 @@ class Train:
             w = np.where(self.sliceInformation[img_nr])
             s_nr = np.random.choice(w[0])
 
-        x_s, y_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr + self.s.PATCH_SIZE[0]))
+        x_s, y_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr + self.s.PATCH_SIZE[0]), False)
 
         return x_s, y_s
 
@@ -211,7 +212,7 @@ class Train:
 
         print(device_lib.list_local_devices())
 
-        x_all_path, y_all_path = self.h.getImagePaths(range(1, 31))
+        x_all_path, y_all_path = self.h.getImagePaths(range(1, 31), False)
 
         # Full images
         x_full_all = self.h.loadImages(x_all_path)

@@ -5,13 +5,13 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = '11_05_0'
+    MODEL_NAME = '11_05_1'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
     PATH_TO_RESULTS = '../results/'
     PATH_TO_MODELS = '../results/models/'
-    PATH_TO_AUG = '../data/augmentations_{}/'.format(GROUND_TRUTH)
+    PATH_TO_AUG = '../data/augmentations/'
 
     # Division of datasets
     TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 26, 5]  # 18 left out because of orientation
@@ -27,15 +27,15 @@ class Settings:
 
     # Training hyperparameters
     UNET_DEPTH = 5
-    LEARNING_RATE = math.pow(10, -5)
+    LEARNING_RATE = 0.001  # math.pow(10, -5)
     BATCH_SIZE = 8
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 7
     POS_NEG_PATCH_PROP = 0.5
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
-    AUTO_CLASS_WEIGHT_N = 1000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+    AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
-    PATIENTCE_ES = 2000  # Patience of early stopping
+    PATIENTCE_ES = 1000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
     DROPOUT = 0.5
     FEATURE_MAP_INC_RATE = 2.
@@ -43,7 +43,7 @@ class Settings:
 
     # Offline augmentation
     AUGMENT_ONLINE = False
-    NR_AUG = 100
+    NR_AUG = 1
 
     # Testing and validation procedure
     VALTEST_SET = VALIDATION_SET  # OR TESTING_SET
@@ -54,9 +54,9 @@ class Settings:
     BIN_THRESH = .5  # Threshold to binarize the probability images
     METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 
-    CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and results
-    # will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur if these
-    # images do not exist on the disk.
+    CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and
+    # results will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur
+    # if these images do not exist on the disk.
 
     # Data augmentation
 

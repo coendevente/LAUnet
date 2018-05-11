@@ -5,6 +5,8 @@ from keras.models import load_model
 from online_augment import OnlineAugmenter
 import SimpleITK as sitk
 from imshow_3D import imshow3D
+import matplotlib.pyplot as plt
+
 
 class Test:
     def __init__(self, s, h):
@@ -117,7 +119,7 @@ class Test:
         if 'specificity' in self.s.METRICS:
             metrics['specificity'] = TN / (TN + FP)
         if 'precision' in self.s.METRICS:
-            metrics['precision'] = TP / (TP + FP)
+            metrics['precision'] = TP / (TP + FP) if TP + FP != 0 else 0
         if 'TP' in self.s.METRICS:
             metrics['TP'] = TP
         if 'FP' in self.s.METRICS:
@@ -134,7 +136,7 @@ class Test:
         return metrics
 
     def test(self):
-        x_all_path, y_all_path = self.h.getImagePaths(self.s.VALTEST_SET)
+        x_all_path, y_all_path = self.h.getImagePaths(self.s.VALTEST_SET, False)
 
         x_full_all = self.h.loadImages(x_all_path)
         y_full_all = self.h.loadImages(y_all_path)
@@ -207,6 +209,13 @@ class Test:
             print('=========== Results of {} ==========='.format(model_name))
             print('Means of metrics: {}'.format(metric_means[model_name]))
             print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
+
+        allDice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
+        print('All Dice values: {}'.format(allDice))
+
+        plt.figure()
+        plt.hist(allDice)
+        plt.show()
 
         return metric_means, metric_sds
 

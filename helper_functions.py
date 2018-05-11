@@ -12,20 +12,31 @@ class Helper():
     def __init__(self, s):
         self.s = s
 
-    def getImagePaths(self, nrs):
+    def getImagePaths(self, nrs, get_all):
         x_all_path = []
         y_all_path = []
+        la_all_path = []
+
         for i in nrs:
             x_all_path.append('{0}input/{1}/p{2}/de_{3}_{2}.nrrd'.format(self.s.PATH_TO_DATA, self.s.PRE_OR_POST_NAME,
                                                                          i, self.s.PRE_OR_POST_XX))
-            if self.s.GROUND_TRUTH == 'scar_fibrosis':
-                y_all_path.append('{0}annotations/staple_{2}_{1}.gipl'.format(self.s.PATH_TO_DATA, i,
-                                                                              self.s.PRE_OR_POST_XX))
-            elif self.s.GROUND_TRUTH == 'left_atrium':
-                y_all_path.append('{0}input/{3}/p{1}/la_seg_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
-                                                                                 self.s.PRE_OR_POST_XX,
-                                                                                 self.s.PRE_OR_POST_NAME))
-        return x_all_path, y_all_path
+
+            y_all_path.append('{0}annotations/staple_{2}_{1}.gipl'.format(self.s.PATH_TO_DATA, i,
+                                                                          self.s.PRE_OR_POST_XX))
+
+            la_all_path.append('{0}input/{3}/p{1}/la_seg_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
+                                                                             self.s.PRE_OR_POST_XX,
+                                                                             self.s.PRE_OR_POST_NAME))
+            # x_all_path.append('../data/ctcf/lge_PLDP_rsmp.nii.gz')
+            # y_all_path.append('../data/ctcf/la_seg_PLDP.nii.gz')
+            # la_all_path.append('../data/ctcf/la_seg_PLDP.nii.gz')
+
+        if get_all:
+            return x_all_path, y_all_path, la_all_path
+        elif self.s.GROUND_TRUTH == 'scar_fibrosis':
+            return x_all_path, y_all_path
+        elif self.s.GROUND_TRUTH == 'left_atrium':
+            return x_all_path, la_all_path
 
     def loadImages(self, pathNames):
         im_out = []
@@ -79,28 +90,30 @@ class Helper():
             os.makedirs(path)
         return path
 
-    def getAugImagesPath(self, img_nr, aug_nr, z):
+    def getAugImagesPath(self, img_nr, aug_nr, z, get_all):
         aug_path = self.getAugPath()
-        x_folder = '{}input/{}/p{}/'.format(aug_path, self.s.PRE_OR_POST_NAME, img_nr)
 
-        if self.s.GROUND_TRUTH == 'scar_fibrosis':
-            y_folder = '{}annotations/'.format(aug_path)
-        elif self.s.GROUND_TRUTH == 'left_atrium':
-            y_folder = '{}input/{}/p{}/'.format(aug_path, self.s.PRE_OR_POST_NAME, img_nr)
+        x_folder = '{}input/{}/p{}/'.format(aug_path, self.s.PRE_OR_POST_NAME, img_nr)
+        y_folder = '{}annotations/'.format(aug_path)
+        la_folder = '{}input/{}/p{}/'.format(aug_path, self.s.PRE_OR_POST_NAME, img_nr)
 
         if not os.path.exists(x_folder):
             os.makedirs(x_folder)
         if not os.path.exists(y_folder):
             os.makedirs(y_folder)
+        if not os.path.exists(la_folder):
+            os.makedirs(la_folder)
 
         x_path = '{}de_{}_{}_{}_{}.nii.gz'.format(x_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
+        y_path = '{}staple_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
+        la_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(la_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
 
-        if self.s.GROUND_TRUTH == 'scar_fibrosis':
-            y_path = '{}staple_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
+        if get_all:
+            return x_path, y_path, la_path
         elif self.s.GROUND_TRUTH == 'left_atrium':
-            y_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
-
-        return x_path, y_path
+            return x_path, la_path
+        elif self.s.GROUND_TRUTH == 'scar_fibrosis':
+            return x_path, y_path
 
     def getBOPath(self, model_name):
         return "{}bo.p".format(self.getModelResultsPath(model_name))

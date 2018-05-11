@@ -34,7 +34,7 @@ class OnlineAugmenter():
         return matrix
 
     # I is gray scale, J should be a binary mask
-    def augment(self, I, J, mx):
+    def augment(self, I, J, mx, K):
         if I.shape != J.shape:
             raise Exception('Shape of I does not equal shape of J ({} != {})'.format(I.shape, J.shape))
 
@@ -69,21 +69,28 @@ class OnlineAugmenter():
 
         I_aug = np.zeros(I.shape).astype(np.uint16)
         J_aug = np.zeros(J.shape).astype(np.uint16)
+        K_aug = np.zeros(K.shape).astype(np.uint16) if K is not None else []
         for i in range(I.shape[0]):
             I_slice = sitk.GetImageFromArray(I[i])
             J_slice = sitk.GetImageFromArray(J[i])
+            K_slice = sitk.GetImageFromArray(K[i]) if K is not None else []
 
             I_aug_slice = self.resample(I_slice, affine)
             J_aug_slice = self.resample(J_slice, affine)
+            K_aug_slice = self.resample(K_slice, affine) if K is not None else []
 
             I_aug_slice = sitk.AdditiveGaussianNoise(I_aug_slice, noise_mean, noise_std)
 
             I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
             J_aug[i] = sitk.GetArrayFromImage(J_aug_slice)
+            K_aug[i] = sitk.GetArrayFromImage(K_aug_slice) if K is not None else []
 
         # I_aug, J_aug = (I, J)
 
-        return I_aug, J_aug
+        if K is not None:
+            return I_aug, J_aug, K_aug
+        else:
+            return I_aug, J_aug
 
     def test_augment(self):
         x_all_path, y_all_path = self.h.getImagePaths(range(1, 31))
