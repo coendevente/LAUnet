@@ -5,7 +5,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'hyperpar_opt_09_05_2/22'
+    MODEL_NAME = '11_05_0'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -28,14 +28,14 @@ class Settings:
     # Training hyperparameters
     UNET_DEPTH = 5
     LEARNING_RATE = math.pow(10, -5)
-    BATCH_SIZE = 1
+    BATCH_SIZE = 8
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 7
     POS_NEG_PATCH_PROP = 0.5
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
-    AUTO_CLASS_WEIGHT_N = 500  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+    AUTO_CLASS_WEIGHT_N = 1000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
-    PATIENTCE_ES = 1000  # Patience of early stopping
+    PATIENTCE_ES = 2000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
     DROPOUT = 0.5
     FEATURE_MAP_INC_RATE = 2.
