@@ -5,7 +5,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = '11_05_1'
+    MODEL_NAME = '11_05_3'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -43,7 +43,7 @@ class Settings:
 
     # Offline augmentation
     AUGMENT_ONLINE = False
-    NR_AUG = 1
+    NR_AUG = 100
 
     # Testing and validation procedure
     VALTEST_SET = VALIDATION_SET  # OR TESTING_SET
