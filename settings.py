@@ -54,7 +54,7 @@ class Settings:
     BIN_THRESH = .5  # Threshold to binarize the probability images
     METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 
-    CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and
+    CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and
     # results will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur
     # if these images do not exist on the disk.
 
