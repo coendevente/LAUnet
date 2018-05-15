@@ -67,7 +67,7 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
 
     s.UNET_DEPTH = unet_depth
     s.LEARNING_RATE = math.pow(10, learning_rate_power)
-    s.PATCH_SIZE = [1, patch_size_factor * 64, patch_size_factor * 64]
+    s.PATCH_SIZE = (1, patch_size_factor * 64, patch_size_factor * 64)
     # s.DROPOUT_AT_EVERY_LEVEL = do_every_level >= .5
     s.DROPOUT = dropout
     s.FEATURE_MAP_INC_RATE = feature_map_inc_rate
@@ -75,7 +75,7 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
 
     s.NR_DIM = int(round(nr_dim))
     if s.NR_DIM == 3:
-        s.PATCH_SIZE[0] = 3
+        s.PATCH_SIZE[0] = (3, ) + s.PATCH_SIZE[1:]
 
     with suppress_stdout():
         h = Helper(s)
