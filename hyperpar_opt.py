@@ -38,14 +38,14 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'hyperpar_opt_10_05_0/'
+MAIN_FOLDER = 'h140500/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
 bo = -1
 
 
-def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_map_inc_rate, loss_function):
+def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, feature_map_inc_rate, loss_function):
     global bo
     if bo != -1:
         pickle.dump(bo, open(bo_path, "wb"))
@@ -73,6 +73,8 @@ def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_
     s.FEATURE_MAP_INC_RATE = feature_map_inc_rate
     s.LOSS_FUNCTION = 'dice' if loss_function < .5 else 'weighted_binary_cross_entropy'
 
+    s.NR_DIM = int(round(nr_dim))
+
     with suppress_stdout():
         h = Helper(s)
 
@@ -82,7 +84,6 @@ def target(unet_depth, learning_rate_power, patch_size_factor, dropout, feature_
 
     pickle.dump(model_nr, open(nr_steps_path, "wb"))
     return metric_means[s.MODEL_NAME]['Dice']
-
 
 def visBoResValues(r):
     # print(r)
@@ -102,7 +103,7 @@ def visBoResValues(r):
 
 def hyperpar_opt():
     resume_previous = False
-    only_inspect_bo = True
+    only_inspect_bo = False
 
     global bo
 
@@ -119,18 +120,16 @@ def hyperpar_opt():
     else:
         pickle.dump(0, open(nr_steps_path, "wb"))
         bo = BayesianOptimization(target, {
-            'unet_depth': (2, 5),
+            'unet_depth': (2, 4),
             'learning_rate_power': (-6, -1),
             'patch_size_factor': (1, 6),
-            # 'do_every_level': (0, 1),
+            'nr_dim': (2, 3),
             'dropout': (0, 1),
             'feature_map_inc_rate': (1., 2.),
             'loss_function': (0, 1)
         })
 
         bo.maximize(init_points=10, n_iter=0)
-        # bo.explore({'x': [-1, 3], 'y': [-2, 2]})
-        # bo.maximize(init_points=10, n_iter=0, kappa=2)
 
     bo.maximize(init_points=0, n_iter=30, acq='ei')
     # bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)

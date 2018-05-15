@@ -200,7 +200,7 @@ class Train:
             self.sliceInformation[set_idx[i]] = np.array(self.sliceInformation[set_idx[i]])
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
 
         # self.s.FN_CLASS_WEIGHT = 100
         # model = self.buildUNet()

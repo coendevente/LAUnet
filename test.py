@@ -213,9 +213,9 @@ class Test:
         allDice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
         print('All Dice values: {}'.format(allDice))
 
-        plt.figure()
-        plt.hist(allDice)
-        plt.show()
+        # plt.figure()
+        # plt.hist(allDice)
+        # plt.show()
 
         return metric_means, metric_sds
 
