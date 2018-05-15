@@ -33,7 +33,7 @@ class LogInspector:
                 print('{:>22} = absent in this log file'.format(log_name))
 
         settings_to_output = ['MODEL_NAME', 'FN_CLASS_WEIGHT', 'UNET_DEPTH', 'LEARNING_RATE', 'PATCH_SIZE', 'DROPOUT',
-                              'FEATURE_MAP_INC_RATE', 'LOSS_FUNCTION', 'BATCH_SIZE', 'NR_AUG']
+                              'FEATURE_MAP_INC_RATE', 'LOSS_FUNCTION', 'BATCH_SIZE', 'NR_AUG', 'NR_DIM']
         for name in settings_to_output:
             try:
                 print('s.{:>20} = {}'.format(name, eval("log['settings'].{}".format(name))))

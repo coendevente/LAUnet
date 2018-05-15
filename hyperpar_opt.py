@@ -66,7 +66,6 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
     s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
 
     s.UNET_DEPTH = unet_depth
-    s.LEARNING_RATE = math.pow(10, learning_rate_power)
     s.PATCH_SIZE = (1, patch_size_factor * 64, patch_size_factor * 64)
     # s.DROPOUT_AT_EVERY_LEVEL = do_every_level >= .5
     s.DROPOUT = dropout
@@ -75,7 +74,11 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
 
     s.NR_DIM = int(round(nr_dim))
     if s.NR_DIM == 3:
-        s.PATCH_SIZE[0] = (3, ) + s.PATCH_SIZE[1:]
+        s.PATCH_SIZE = (3, patch_size_factor * 32, patch_size_factor * 32)
+    elif s.NR_DIM == 2:
+        s.LEARNING_RATE = math.pow(10, learning_rate_power)
+    else:
+        raise Exception('Wrong number of dimensions: {}'.format(s.NR_DIM))
 
     with suppress_stdout():
         h = Helper(s)

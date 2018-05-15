@@ -5,7 +5,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'h140500/1'
+    MODEL_NAME = 'h140500/3'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -21,9 +21,10 @@ class Settings:
     # Patchsize
     # PATCH_SIZE = (3, 64, 64)
     # PATCH_SIZE = (1, 864, 864)
-    PATCH_SIZE = (1, 384, 384)
+    # PATCH_SIZE = (1, 384, 384)
+    PATCH_SIZE = (3, 128, 128)
     # PATCH_SIZE = (1, 400, 400)
-    NR_DIM = 2  # Only 2D and 3D are supported
+    NR_DIM = 3  # Only 2D and 3D are supported
 
     # Training hyperparameters
     UNET_DEPTH = 5
