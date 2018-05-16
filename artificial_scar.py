@@ -91,7 +91,7 @@ class ScarApplier:
                 art_scar_full[j] = no_scar
 
                 if np.sum(la_seg) == 0:
-                    for _ in range(2):
+                    for _ in range(self.s.BLUR_SHARPEN_ITS):
                         art_scar_full[j] = self.sharpen(self.blur(art_scar_full[j]))
                     continue
 
@@ -115,7 +115,7 @@ class ScarApplier:
 
                 mult = no_scar * la_seg
                 all_bp_values = mult[np.nonzero(mult)]
-                print(np.unique(all_bp_values))
+                # print(np.unique(all_bp_values))
 
                 bp_mean = np.mean(all_bp_values)
                 bp_std = np.std(all_bp_values)
@@ -127,7 +127,7 @@ class ScarApplier:
                 nz = sf[np.nonzero(sf)]
 
                 art_scar_full[j][np.nonzero(sf)] = nz
-                for _ in range(2):
+                for _ in range(self.s.BLUR_SHARPEN_ITS):
                     art_scar_full[j] = self.sharpen(self.blur(art_scar_full[j]))
                 ann_full[j][np.nonzero(sf)] += 1
 

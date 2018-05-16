@@ -86,7 +86,7 @@ class Settings:
 
     # Scar applier
     PATH_TO_NO_SCAR = '../data/input/pre/'
-    NO_SCAR_NRS = [5]
+    NO_SCAR_NRS = [5, 20, 17]  # 18, 16, 2
     PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
     WALL_THICKNESS_MIN = 2
     WALL_THICKNESS_MAX = 5
@@ -96,4 +96,6 @@ class Settings:
     assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001
     BP_STD_FACTOR = 3.5
     BLUR_VAR = 2
+    BLUR_SHARPEN_ITS = 1
+
 
