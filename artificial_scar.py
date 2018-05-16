@@ -14,10 +14,12 @@ class ScarApplier:
         self.s = s
 
     def get_wall(self, bw):
+        w = random.randrange(self.s.WALL_THICKNESS_MIN, self.s.WALL_THICKNESS_MAX)
+
         return bw - sitk.GetArrayFromImage(
             sitk.BinaryErode(
                 sitk.GetImageFromArray(bw),
-                self.s.WALL_THICKNESS
+                w
             )
         )
 
@@ -43,27 +45,57 @@ class ScarApplier:
 
         return group
 
+    def pre_process_seg(self, bw):
+        bw = sitk.GetArrayFromImage(
+            sitk.BinaryMorphologicalClosing(
+                sitk.BinaryMorphologicalOpening(
+                    sitk.GetImageFromArray(bw), 2
+                ), 2
+            )
+        )
+        return bw
+
+    def blur(self, image):
+        return sitk.GetArrayFromImage(
+            sitk.DiscreteGaussian(
+                sitk.GetImageFromArray(image),
+                self.s.BLUR_VAR
+            )
+        )
+
+    def sharpen(self, image):
+        return sitk.GetArrayFromImage(
+            sitk.LaplacianSharpening(
+                sitk.GetImageFromArray(image)
+            )
+        )
+
     def apply(self):
         no_scar_paths, la_seg_paths = self.h.getNoScarPaths(self.s.NO_SCAR_NRS)
         no_scar_list = self.h.loadImages(no_scar_paths)
         la_seg_list = self.h.loadImages(la_seg_paths)
-        # imshow3D(la_seg[0] * no_scar[0])
 
         for i in range(len(la_seg_list)):
             no_scar_full = no_scar_list[i]
             la_seg_full = la_seg_list[i]
 
             art_scar_full = np.zeros(no_scar_full.shape)
+            ann_full = np.zeros(no_scar_full.shape)
 
             for j in range(no_scar_full.shape[0]):
                 no_scar = no_scar_full[j]
                 la_seg = la_seg_full[j]
 
+                la_seg = self.pre_process_seg(la_seg)
+
+                art_scar_full[j] = no_scar
+
                 if np.sum(la_seg) == 0:
+                    for _ in range(2):
+                        art_scar_full[j] = self.sharpen(self.blur(art_scar_full[j]))
                     continue
 
                 wall = self.get_wall(la_seg)
-                art_scar_full[j] = no_scar
                 centroid = self.get_centroid(la_seg)
 
                 sum = 0
@@ -81,20 +113,26 @@ class ScarApplier:
 
                 groups = (groups > 0).astype(int)
 
-                # plt.figure()
-                # plt.imshow(groups + wall, cmap='Greys_r')
-                # plt.plot(centroid[1], centroid[0], 'r*')
-                # plt.show()
+                mult = no_scar * la_seg
+                all_bp_values = mult[np.nonzero(mult)]
+                print(np.unique(all_bp_values))
 
-                all_bp_values = np.nonzero(no_scar * la_seg)
                 bp_mean = np.mean(all_bp_values)
                 bp_std = np.std(all_bp_values)
 
                 print('bp = {} +/- {}'.format(bp_mean, bp_std))
 
-                art_scar_full[j] += (wall + groups) * 255
+                sf = groups * np.random.normal(bp_mean + self.s.BP_STD_FACTOR * bp_std, bp_std, groups.shape)
 
-            imshow3D(art_scar_full)
+                nz = sf[np.nonzero(sf)]
+
+                art_scar_full[j][np.nonzero(sf)] = nz
+                for _ in range(2):
+                    art_scar_full[j] = self.sharpen(self.blur(art_scar_full[j]))
+                ann_full[j][np.nonzero(sf)] += 1
+
+            imshow3D(np.concatenate((no_scar_full, art_scar_full, ann_full * np.max(no_scar_full)), axis=2))
+            # imshow3D(art_scar_full)
 
 
 if __name__ == '__main__':

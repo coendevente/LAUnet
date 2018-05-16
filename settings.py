@@ -88,8 +88,12 @@ class Settings:
     PATH_TO_NO_SCAR = '../data/input/pre/'
     NO_SCAR_NRS = [5]
     PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
-    WALL_THICKNESS = 5
-    NB_GROUPS_ODDS = [0, .7, .2, .1]
+    WALL_THICKNESS_MIN = 2
+    WALL_THICKNESS_MAX = 5
+    NB_GROUPS_ODDS = [0, .6, .2, .2]
     ANGLE_MIN = 20
-    ANGLE_MAX = 60
+    ANGLE_MAX = 40
     assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001
+    BP_STD_FACTOR = 3.5
+    BLUR_VAR = 2
+
