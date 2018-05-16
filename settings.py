@@ -1,11 +1,12 @@
 import math
+import numpy as np
 
 class Settings:
     # Model to train
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'h140500/3'
+    MODEL_NAME = 'h150500/20'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -82,3 +83,13 @@ class Settings:
     NOISE_MEAN_MAX = 0
     NOISE_STD_MIN = 1
     NOISE_STD_MAX = 15
+
+    # Scar applier
+    PATH_TO_NO_SCAR = '../data/input/pre/'
+    NO_SCAR_NRS = [5]
+    PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
+    WALL_THICKNESS = 5
+    NB_GROUPS_ODDS = [.1, .7, .1, .1]
+    ANGLE_MIN = 90
+    ANGLE_MAX = 90
+    assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001

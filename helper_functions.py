@@ -6,6 +6,7 @@ from keras import backend as K
 from imshow_3D import imshow3D
 import copy
 import time
+import matplotlib.pyplot as plt
 
 
 class Helper():
@@ -127,6 +128,19 @@ class Helper():
 
         return n_neg / n_pos
 
+    def getNoScarPaths(self, nrs):
+        no_scar_paths = []
+        la_seg_paths = []
+        for i in nrs:
+            p_folder = self.s.PATH_TO_NO_SCAR + 'p{}/'.format(i)
+
+            if not os.path.exists(p_folder):
+                os.makedirs(p_folder)
+
+            no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
+            la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
+        return no_scar_paths, la_seg_paths
+
     # Thanks to https://github.com/keras-team/keras/issues/3611
     def dice_coef(self, y_true, y_pred, smooth=1):
         y_true_f = K.flatten(y_true)
@@ -160,3 +174,8 @@ class Helper():
             return self.dice_coef_loss(y_true, y_pred)
         else:
             raise Exception('Loss function {} is not (yet) supported.'.format(self.s.LOSS_FUNCTION))
+
+    def imshow(self, img):
+        plt.figure()
+        plt.imshow(img, cmap='Greys_r')
+        plt.show()

@@ -68,8 +68,8 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
         new_value = mn + (mx - mn) * eval(k)
         hp[k] = new_value
 
-    return hp['unet_depth'] * hp['learning_rate_power'] * hp['patch_size_factor'] * hp['dropout'] * \
-           hp['feature_map_inc_rate'] * -1 * hp['loss_function']
+    # return hp['unet_depth'] * hp['learning_rate_power'] * hp['patch_size_factor'] * hp['dropout'] * \
+    #        hp['feature_map_inc_rate'] * -1 * hp['loss_function']
 
     s = Settings()
 
