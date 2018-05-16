@@ -38,7 +38,7 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'h140500/'
+MAIN_FOLDER = 'h150500/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
@@ -49,12 +49,32 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
     global bo
     if bo != -1:
         pickle.dump(bo, open(bo_path, "wb"))
-    # return unet_depth * learning_rate_power * patch_size_factor * dropout * feature_map_inc_rate * -1 * loss_function
+
+    domains = {
+        'unet_depth': (2, 4),
+        'learning_rate_power': (-6, -1),
+        'patch_size_factor': (1, 6),
+        'nr_dim': (2, 2),
+        'dropout': (0, 1),
+        'feature_map_inc_rate': (1., 2.),
+        'loss_function': (0, 1)
+    }
+
+    # print(domains.keys())
+    hp = {}
+    for k in domains.keys():
+        mx = domains[k][1]
+        mn = domains[k][0]
+        new_value = mn + (mx - mn) * eval(k)
+        hp[k] = new_value
+
+    return hp['unet_depth'] * hp['learning_rate_power'] * hp['patch_size_factor'] * hp['dropout'] * \
+           hp['feature_map_inc_rate'] * -1 * hp['loss_function']
 
     s = Settings()
 
-    unet_depth = int(round(unet_depth))
-    patch_size_factor = int(round(patch_size_factor))
+    hp['unet_depth'] = int(round(hp['unet_depth']))
+    hp['patch_size_factor'] = int(round(hp['patch_size_factor']))
 
     loc = locals()
     args_name = [arg for arg in inspect.getfullargspec(target).args]
@@ -65,18 +85,17 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
 
     s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
 
-    s.UNET_DEPTH = unet_depth
-    s.PATCH_SIZE = (1, patch_size_factor * 64, patch_size_factor * 64)
-    # s.DROPOUT_AT_EVERY_LEVEL = do_every_level >= .5
-    s.DROPOUT = dropout
-    s.FEATURE_MAP_INC_RATE = feature_map_inc_rate
-    s.LOSS_FUNCTION = 'dice' if loss_function < .5 else 'weighted_binary_cross_entropy'
+    s.UNET_DEPTH = hp['unet_depth']
+    s.PATCH_SIZE = (1, hp['patch_size_factor'] * 64, hp['patch_size_factor'] * 64)
+    s.DROPOUT = hp['dropout']
+    s.FEATURE_MAP_INC_RATE = hp['feature_map_inc_rate']
+    s.LOSS_FUNCTION = 'dice' if hp['loss_function'] < .5 else 'weighted_binary_cross_entropy'
 
-    s.NR_DIM = int(round(nr_dim))
+    s.NR_DIM = int(round(hp['nr_dim']))
     if s.NR_DIM == 3:
-        s.PATCH_SIZE = (3, patch_size_factor * 32, patch_size_factor * 32)
+        s.PATCH_SIZE = (3, hp['patch_size_factor'] * 32, hp['patch_size_factor'] * 32)
     elif s.NR_DIM == 2:
-        s.LEARNING_RATE = math.pow(10, learning_rate_power)
+        s.LEARNING_RATE = math.pow(10, hp['learning_rate_power'])
     else:
         raise Exception('Wrong number of dimensions: {}'.format(s.NR_DIM))
 
@@ -124,20 +143,29 @@ def hyperpar_opt():
         bo = pickle.load(open(bo_path, "rb"))
     else:
         pickle.dump(0, open(nr_steps_path, "wb"))
+        # bo = BayesianOptimization(target, {
+        #     'unet_depth': (2, 4),
+        #     'learning_rate_power': (-6, -1),
+        #     'patch_size_factor': (1, 6),
+        #     'nr_dim': (2, 2),
+        #     'dropout': (0, 1),
+        #     'feature_map_inc_rate': (1., 2.),
+        #     'loss_function': (0, 1)
+        # })
         bo = BayesianOptimization(target, {
-            'unet_depth': (2, 4),
-            'learning_rate_power': (-6, -1),
-            'patch_size_factor': (1, 6),
-            'nr_dim': (2, 3),
+            'unet_depth': (0, 1),
+            'learning_rate_power': (0, 1),
+            'patch_size_factor': (0, 1),
+            'nr_dim': (0, 1),
             'dropout': (0, 1),
-            'feature_map_inc_rate': (1., 2.),
+            'feature_map_inc_rate': (0, 1),
             'loss_function': (0, 1)
         })
 
         bo.maximize(init_points=10, n_iter=0)
 
-    bo.maximize(init_points=0, n_iter=30, acq='ei')
-    # bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)
+    # bo.maximize(init_points=0, n_iter=30, acq='ei')
+    bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)
 
     visBoResValues(bo.res)
     pickle.dump(bo, open(bo_path, "wb"))
