@@ -89,7 +89,7 @@ class Settings:
     NO_SCAR_NRS = [5]
     PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
     WALL_THICKNESS = 5
-    NB_GROUPS_ODDS = [.1, .7, .1, .1]
-    ANGLE_MIN = 90
-    ANGLE_MAX = 90
+    NB_GROUPS_ODDS = [0, .7, .2, .1]
+    ANGLE_MIN = 20
+    ANGLE_MAX = 60
     assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001

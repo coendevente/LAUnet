@@ -14,12 +14,12 @@ class ScarApplier:
         self.s = s
 
     def get_wall(self, bw):
-        return sitk.GetArrayFromImage(
-            sitk.BinaryDilate(
+        return bw - sitk.GetArrayFromImage(
+            sitk.BinaryErode(
                 sitk.GetImageFromArray(bw),
                 self.s.WALL_THICKNESS
             )
-        ) - bw
+        )
 
     def get_centroid(self, bw):
         coords = np.argwhere(bw == 1)
@@ -63,7 +63,7 @@ class ScarApplier:
                     continue
 
                 wall = self.get_wall(la_seg)
-                art_scar_full[j] = wall
+                art_scar_full[j] = no_scar
                 centroid = self.get_centroid(la_seg)
 
                 sum = 0
@@ -79,10 +79,20 @@ class ScarApplier:
                     group = self.get_random_group(centroid, wall)
                     groups += group
 
-                plt.figure()
-                plt.imshow(group + wall, cmap='Greys_r')
-                plt.plot(centroid[1], centroid[0], 'r*')
-                plt.show()
+                groups = (groups > 0).astype(int)
+
+                # plt.figure()
+                # plt.imshow(groups + wall, cmap='Greys_r')
+                # plt.plot(centroid[1], centroid[0], 'r*')
+                # plt.show()
+
+                all_bp_values = np.nonzero(no_scar * la_seg)
+                bp_mean = np.mean(all_bp_values)
+                bp_std = np.std(all_bp_values)
+
+                print('bp = {} +/- {}'.format(bp_mean, bp_std))
+
+                art_scar_full[j] += (wall + groups) * 255
 
             imshow3D(art_scar_full)
 
