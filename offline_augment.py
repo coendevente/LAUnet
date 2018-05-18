@@ -81,7 +81,7 @@ class OfflineAugmenter:
         print("{}s passed. ETA is {}. i, j = {}, {}".format(t_passed, ETA, i, j))
 
     def augment_all(self):
-        x_all_path, y_all_path, la_all_path = self.h.getImagePaths(range(1, 31), True)
+        x_all_path, y_all_path, la_all_path = self.h.getImagePaths(self.s.ALL_NATURAL_SET, True)
 
         print(x_all_path)
         print(y_all_path)

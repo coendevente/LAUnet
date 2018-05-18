@@ -15,7 +15,7 @@ class OnlineAugmenter():
     # Thanks to http://simpleitk-prototype.readthedocs.io/en/latest/user_guide/transforms/plot_transforms.html
     def resample(self, image, transform):
         reference_image = image
-        interpolator = sitk.sitkNearestNeighbor
+        interpolator = sitk.sitkLinear
         default_value = 0.0
         return sitk.Resample(image, reference_image, transform,
                              interpolator, default_value)

@@ -87,7 +87,6 @@ class Train:
 
     def getRandomPositiveImage(self, x_full, y_full, set_idx):
         i = random.randint(0, len(x_full) - 1)
-
         x_pos, y_pos = x_full[i], y_full[i]
 
         if np.sum(y_pos) == 0:
@@ -136,14 +135,26 @@ class Train:
         return x_patch, y_patch, True
 
     def getRandomPositiveSlicesOffline(self, set_idx):
-        its = 0
-        while its == 0 or s_nr + self.s.PATCH_SIZE[0] > self.sliceInformation[img_nr].shape[0]:
-            its += 1
-            img_nr = random.choice(set_idx)
-            w = np.where(self.sliceInformation[img_nr])
-            s_nr = np.random.choice(w[0])
+        if random.random() < self.s.ART_FRACTION:
+            x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False)
 
-        x_s, y_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr + self.s.PATCH_SIZE[0]), False)
+            # print('x_pos_path == {}'.format(x_s_path))
+            # print('y_pos_path == {}'.format(y_s_path))
+
+            x_s = self.h.loadImages([x_s_path])[0]
+            y_s = self.h.loadImages([y_s_path])[0]
+
+            x_s = np.reshape(x_s, (1,) + x_s.shape)
+            y_s = np.reshape(y_s, (1,) + y_s.shape)
+        else:
+            its = 0
+            while its == 0 or s_nr + self.s.PATCH_SIZE[0] > self.sliceInformation[img_nr].shape[0]:
+                its += 1
+                img_nr = random.choice(set_idx)
+                w = np.where(self.sliceInformation[img_nr])
+                s_nr = np.random.choice(w[0])
+
+            x_s, y_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr + self.s.PATCH_SIZE[0]), False)
 
         return x_s, y_s
 
@@ -154,6 +165,12 @@ class Train:
             x_s, y_s = self.online_augmenter.augment(x_s, y_s, False)
         else:
             x_s, y_s = self.getRandomPositiveSlicesOffline(set_idx)
+
+        # imshow3D(
+        #     np.concatenate(
+        #         (x_s, y_s * np.max(x_s)), axis=2
+        #     )
+        # )
 
         x_patch, y_patch, found = self.getRandomPositivePatchAllSlices(x_s, y_s)
 
@@ -212,7 +229,7 @@ class Train:
 
         print(device_lib.list_local_devices())
 
-        x_all_path, y_all_path = self.h.getImagePaths(range(1, 31), False)
+        x_all_path, y_all_path = self.h.getImagePaths(self.s.ALL_NATURAL_SET, False)
 
         # Full images
         x_full_all = self.h.loadImages(x_all_path)

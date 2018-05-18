@@ -45,19 +45,21 @@ nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
 bo = -1
 
 
-def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, feature_map_inc_rate, loss_function):
+def target(learning_rate_power, dropout, art_non_art_fraction):
     global bo
     if bo != -1:
         pickle.dump(bo, open(bo_path, "wb"))
 
+    # return (1 - (learning_rate_power - .6) ** 2) * (1 - (dropout - .2) ** 2) * (1 - (art_non_art_fraction - .2) ** 2)
+
     domains = {
-        'unet_depth': (2, 4),
-        'learning_rate_power': (-6, -1),
-        'patch_size_factor': (1, 6),
-        'nr_dim': (2, 2),
+        # 'unet_depth': (2, 4),
+        'learning_rate_power': (-6, -2),
+        # 'patch_size_factor': (1, 6),
         'dropout': (0, 1),
-        'feature_map_inc_rate': (1., 2.),
-        'loss_function': (0, 1)
+        'art_fraction': (0, 1),
+        # 'feature_map_inc_rate': (1., 2.),
+        # 'loss_function': (0, 1)
     }
 
     # print(domains.keys())
@@ -67,14 +69,13 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
         mn = domains[k][0]
         new_value = mn + (mx - mn) * eval(k)
         hp[k] = new_value
-
     # return hp['unet_depth'] * hp['learning_rate_power'] * hp['patch_size_factor'] * hp['dropout'] * \
     #        hp['feature_map_inc_rate'] * -1 * hp['loss_function']
 
     s = Settings()
 
-    hp['unet_depth'] = int(round(hp['unet_depth']))
-    hp['patch_size_factor'] = int(round(hp['patch_size_factor']))
+    # hp['unet_depth'] = int(round(hp['unet_depth']))
+    # hp['patch_size_factor'] = int(round(hp['patch_size_factor']))
 
     loc = locals()
     args_name = [arg for arg in inspect.getfullargspec(target).args]
@@ -85,19 +86,22 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
 
     s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
 
-    s.UNET_DEPTH = hp['unet_depth']
-    s.PATCH_SIZE = (1, hp['patch_size_factor'] * 64, hp['patch_size_factor'] * 64)
     s.DROPOUT = hp['dropout']
-    s.FEATURE_MAP_INC_RATE = hp['feature_map_inc_rate']
-    s.LOSS_FUNCTION = 'dice' if hp['loss_function'] < .5 else 'weighted_binary_cross_entropy'
+    s.LEARNING_RATE = math.pow(10, hp['learning_rate_power'])
+    s.ART_FRACTION = hp['art_fraction']
 
-    s.NR_DIM = int(round(hp['nr_dim']))
-    if s.NR_DIM == 3:
-        s.PATCH_SIZE = (3, hp['patch_size_factor'] * 32, hp['patch_size_factor'] * 32)
-    elif s.NR_DIM == 2:
-        s.LEARNING_RATE = math.pow(10, hp['learning_rate_power'])
-    else:
-        raise Exception('Wrong number of dimensions: {}'.format(s.NR_DIM))
+    # s.UNET_DEPTH = hp['unet_depth']
+    # s.PATCH_SIZE = (1, hp['patch_size_factor'] * 64, hp['patch_size_factor'] * 64)
+    # s.FEATURE_MAP_INC_RATE = hp['feature_map_inc_rate']
+    # s.LOSS_FUNCTION = 'dice' if hp['loss_function'] < .5 else 'weighted_binary_cross_entropy'
+
+    # s.NR_DIM = int(round(hp['nr_dim']))
+    # if s.NR_DIM == 3:
+    #     s.PATCH_SIZE = (3, hp['patch_size_factor'] * 32, hp['patch_size_factor'] * 32)
+    # elif s.NR_DIM == 2:
+    #     s.PATCH_SIZE = (1, hp['patch_size_factor'] * 64, hp['patch_size_factor'] * 64)
+    # else:
+    #     raise Exception('Wrong number of dimensions: {}'.format(s.NR_DIM))
 
     with suppress_stdout():
         h = Helper(s)
@@ -108,6 +112,7 @@ def target(unet_depth, learning_rate_power, patch_size_factor, nr_dim, dropout, 
 
     pickle.dump(model_nr, open(nr_steps_path, "wb"))
     return metric_means[s.MODEL_NAME]['Dice']
+
 
 def visBoResValues(r):
     # print(r)
@@ -125,9 +130,10 @@ def visBoResValues(r):
     data.append(['MAX'] + [m['max_val']] + list(m['max_params'].values()))
     print(tabulate(data, headers=params, tablefmt='orgtbl'))
 
+
 def hyperpar_opt():
     resume_previous = False
-    only_inspect_bo = False
+    only_inspect_bo = True
 
     global bo
 
@@ -153,19 +159,19 @@ def hyperpar_opt():
         #     'loss_function': (0, 1)
         # })
         bo = BayesianOptimization(target, {
-            'unet_depth': (0, 1),
+            # 'unet_depth': (0, 1),
             'learning_rate_power': (0, 1),
-            'patch_size_factor': (0, 1),
-            'nr_dim': (0, 1),
+            # 'patch_size_factor': (0, 1),
             'dropout': (0, 1),
-            'feature_map_inc_rate': (0, 1),
-            'loss_function': (0, 1)
+            'art_non_art_fraction': (0, 1),
+            # 'feature_map_inc_rate': (0, 1),
+            # 'loss_function': (0, 1)
         })
 
         bo.maximize(init_points=10, n_iter=0)
 
-    # bo.maximize(init_points=0, n_iter=30, acq='ei')
-    bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)
+    bo.maximize(init_points=0, n_iter=30, acq='ei')
+    # bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)
 
     visBoResValues(bo.res)
     pickle.dump(bo, open(bo_path, "wb"))

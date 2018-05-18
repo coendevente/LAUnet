@@ -7,11 +7,29 @@ from imshow_3D import imshow3D
 import copy
 import time
 import matplotlib.pyplot as plt
+import glob
+import random
 
 
 class Helper():
     def __init__(self, s):
         self.s = s
+        self.image_spacing_xy = -1
+
+    def mm_to_px(self, mm):
+        if self.image_spacing_xy == -1:
+            raise Exception('Helper.image_spacing was not set yet')
+
+        # print('mm == {}'.format(mm))
+        # print('self.image_spacing_xy == {}'.format(self.image_spacing_xy))
+        return mm / self.image_spacing_xy
+
+    def set_image_spacing_xy(self, spacing_3d):
+        if spacing_3d[0] != spacing_3d[1]:
+            raise Exception('Spacing is different in dimension 0 than in dimension 1 ({} != {})'.format(spacing_3d[0],
+                                                                                                        spacing_3d[1]))
+
+        self.image_spacing_xy = spacing_3d[0]
 
     def getImagePaths(self, nrs, get_all):
         x_all_path = []
@@ -46,6 +64,15 @@ class Helper():
             im_out.append(im)
 
         return im_out
+
+    def loadImageSpacing(self, pathNames):
+        spacing = []
+        for p in pathNames:
+            spacing.append(
+                sitk.ReadImage(p).GetSpacing()
+            )
+
+        return spacing
 
     def cropImage(self, I, corner, dims):
         c = copy.copy(corner)
@@ -91,6 +118,12 @@ class Helper():
             os.makedirs(path)
         return path
 
+    def getArtPath(self):
+        path = self.s.PATH_TO_ART
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return path
+
     def getAugImagesPath(self, img_nr, aug_nr, z, get_all):
         aug_path = self.getAugPath()
 
@@ -116,6 +149,54 @@ class Helper():
         elif self.s.GROUND_TRUTH == 'scar_fibrosis':
             return x_path, y_path
 
+    def getRandomArtificialPositiveImagePath(self, get_all):
+        aug_path = self.getArtPath()
+
+        x_folder = '{}input/'.format(aug_path)
+        y_folder = '{}annotations/'.format(aug_path)
+        la_folder = '{}input/'.format(aug_path)
+
+        x_path = random.choice(
+            glob.glob('{}de_*.nii.gz'.format(x_folder))
+        ).replace('\\', '/')
+
+        y_path = x_path.replace(x_folder, y_folder)
+        y_path = y_path.replace('de_', 'staple_')
+        la_path = x_path.replace(x_folder, la_folder)
+        la_path = la_path.replace('de_', 'la_seg_')
+
+        if get_all:
+            return x_path, y_path, la_path
+        elif self.s.GROUND_TRUTH == 'left_atrium':
+            return x_path, la_path
+        elif self.s.GROUND_TRUTH == 'scar_fibrosis':
+            return x_path, y_path
+
+    def getArtImagesPath(self, img_nr, art_nr, z, get_all):
+        aug_path = self.getArtPath()
+
+        x_folder = '{}input/'.format(aug_path)
+        y_folder = '{}annotations/'.format(aug_path)
+        la_folder = '{}input/'.format(aug_path)
+
+        if not os.path.exists(x_folder):
+            os.makedirs(x_folder)
+        if not os.path.exists(y_folder):
+            os.makedirs(y_folder)
+        if not os.path.exists(la_folder):
+            os.makedirs(la_folder)
+
+        x_path = '{}de_{}_{}_{}.nii.gz'.format(x_folder, img_nr, z, art_nr)
+        y_path = '{}staple_{}_{}_{}.nii.gz'.format(y_folder, img_nr, z, art_nr)
+        la_path = '{}la_seg_{}_{}_{}.nii.gz'.format(la_folder, img_nr, z, art_nr)
+
+        if get_all:
+            return x_path, y_path, la_path
+        elif self.s.GROUND_TRUTH == 'left_atrium':
+            return x_path, la_path
+        elif self.s.GROUND_TRUTH == 'scar_fibrosis':
+            return x_path, y_path
+
     def getBOPath(self, model_name):
         return "{}bo.p".format(self.getModelResultsPath(model_name))
 
@@ -131,15 +212,23 @@ class Helper():
     def getNoScarPaths(self, nrs):
         no_scar_paths = []
         la_seg_paths = []
+        sf_seg_paths = []
         for i in nrs:
-            p_folder = self.s.PATH_TO_NO_SCAR + 'p{}/'.format(i)
-
-            if not os.path.exists(p_folder):
-                os.makedirs(p_folder)
+            p_folder = self.s.PATH_TO_NO_SCAR_PRE + 'p{}/'.format(i)
+            sf_folder = '{}annotations/'.format(self.s.PATH_TO_DATA)
 
             no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
             la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
-        return no_scar_paths, la_seg_paths
+            sf_seg_paths.append(sf_folder + 'staple_a_{}.gipl'.format(i))
+
+        for i in nrs:
+            p_folder = self.s.PATH_TO_NO_SCAR_POST + 'p{}/'.format(i)
+            sf_folder = '{}annotations/'.format(self.s.PATH_TO_DATA)
+
+            no_scar_paths.append(p_folder + 'de_b_{}.nrrd'.format(i))
+            la_seg_paths.append(p_folder + 'la_seg_b_{}.nrrd'.format(i))
+            sf_seg_paths.append(sf_folder + 'staple_b_{}.gipl'.format(i))
+        return no_scar_paths, la_seg_paths, sf_seg_paths
 
     # Thanks to https://github.com/keras-team/keras/issues/3611
     def dice_coef(self, y_true, y_pred, smooth=1):
