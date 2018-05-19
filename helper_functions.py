@@ -149,16 +149,24 @@ class Helper():
         elif self.s.GROUND_TRUTH == 'scar_fibrosis':
             return x_path, y_path
 
-    def getRandomArtificialPositiveImagePath(self, get_all):
+    def getRandomArtificialPositiveImagePath(self, get_all, set_idx):
         aug_path = self.getArtPath()
 
         x_folder = '{}input/'.format(aug_path)
         y_folder = '{}annotations/'.format(aug_path)
         la_folder = '{}input/'.format(aug_path)
 
+        img_nrs = list(np.array(self.s.NO_SCAR_NRS) - 1) + list(np.array(set_idx) + len(self.s.NO_SCAR_NRS) - 1)
+        # print(img_nrs)
+
+        img_nr = random.choice(img_nrs)
+        art_nr = random.randint(0, self.s.NR_ART - 1)
+
+        # t0 = time.time()
         x_path = random.choice(
-            glob.glob('{}de_*.nii.gz'.format(x_folder))
+            glob.glob('{}de_{}_*_{}.nii.gz'.format(x_folder, img_nr, art_nr))
         ).replace('\\', '/')
+        # print('loading took {}'.format(time.time() - t0))
 
         y_path = x_path.replace(x_folder, y_folder)
         y_path = y_path.replace('de_', 'staple_')

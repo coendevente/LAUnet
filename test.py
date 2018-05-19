@@ -156,7 +156,7 @@ class Test:
                         anno = y_full_all[i]
 
                         if j != -1:  # No augmentation
-                            input, anno = augment(input, anno, False)
+                            input, anno = OnlineAugmenter(self.s, self.h).augment(input, anno, False)
 
                         prob = self.probImage(input, model)
 

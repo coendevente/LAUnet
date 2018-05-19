@@ -135,8 +135,10 @@ class Train:
         return x_patch, y_patch, True
 
     def getRandomPositiveSlicesOffline(self, set_idx):
-        if random.random() < self.s.ART_FRACTION:
-            x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False)
+        # print('set(set_idx) == {}'.format(set(set_idx)))
+        # print('set(self.s.VALIDATION_SET) == {}'.format(set(self.s.VALIDATION_SET)))
+        if random.random() < self.s.ART_FRACTION and set(set_idx) != set(self.s.VALIDATION_SET):
+            x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False, set_idx)
 
             # print('x_pos_path == {}'.format(x_s_path))
             # print('y_pos_path == {}'.format(y_s_path))
@@ -188,7 +190,9 @@ class Train:
             if not positive_patch:
                 x_j, y_j = self.getRandomPatch(x_full, y_full, set_idx)
             else:
+                # t0 = time.time()
                 x_j, y_j = self.getRandomPositivePatch(x_full, y_full, set_idx)
+                # print('all took {}'.format(time.time() - t0))
 
             # print("positive_patch == {}".format(positive_patch))
             # print("x_j.shape == {}".format(x_j.shape))
