@@ -38,7 +38,7 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'h190500/'
+MAIN_FOLDER = 'h200500/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)

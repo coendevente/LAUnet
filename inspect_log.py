@@ -32,6 +32,13 @@ class LogInspector:
             else:
                 print('{:>22} = absent in this log file'.format(log_name))
 
+        lowest_training_loss = min(log['training']['loss']) if len(log['training']['loss']) > 0 else 'absent'
+
+        print('{:>22} = {}'.format('lowest training loss', lowest_training_loss))
+
+        lowest_training_loss_i = np.argmin(log['training']['loss']) if len(log['training']['loss']) > 0 else 'absent'
+        print('{:>22} = {}'.format('lowest training loss i', lowest_training_loss_i))
+
         settings_to_output = ['MODEL_NAME', 'FN_CLASS_WEIGHT', 'UNET_DEPTH', 'LEARNING_RATE', 'PATCH_SIZE', 'DROPOUT',
                               'FEATURE_MAP_INC_RATE', 'LOSS_FUNCTION', 'BATCH_SIZE', 'NR_AUG', 'NR_DIM', 'ART_FRACTION',
                               'POS_NEG_PATCH_PROP', 'PATIENTCE_ES']

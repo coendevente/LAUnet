@@ -248,7 +248,7 @@ class Train:
         self.updateSliceInformation(y_full_train, self.s.TRAINING_SET)
         self.updateSliceInformation(y_full_val, self.s.VALIDATION_SET)
 
-        if self.s.FN_CLASS_WEIGHT == 'auto':
+        if self.s.FN_CLASS_WEIGHT == 'auto' and self.s.LOSS_FUNCTION == 'weighted_binary_cross_entropy':
             _, y_patches = self.getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val,
                                                  self.s.AUTO_CLASS_WEIGHT_N, self.s.TRAINING_SET
                                                  + self.s.VALIDATION_SET)
@@ -285,17 +285,25 @@ class Train:
                 break
             es_j += 1
 
-            print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
+            t0_get_patches = time.time()
+            # print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
             x_train, y_train = self.getRandomPatches(x_full_train, y_full_train, self.s.BATCH_SIZE, self.s.TRAINING_SET)
             x_val, y_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
                                                  self.s.VALIDATION_SET)
-            print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
+            # print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
+            t_get_patches = time.time() - t0_get_patches
 
+            t0_train = time.time()
             train_loss = model.train_on_batch(x_train, y_train)
+            t_train = time.time() - t0_train
+
             log['training']['loss'].append(train_loss[0])
             log['training']['accuracy'].append(train_loss[1])
 
+            t0_val = time.time()
             val_loss = model.test_on_batch(x_val, y_val)
+            t_val = time.time() - t0_val
+
             log['validation']['loss'].append(val_loss[0])
             log['validation']['accuracy'].append(val_loss[1])
             pickle.dump(log, open(log_path, "wb"))
@@ -314,6 +322,7 @@ class Train:
 
             ETA = round(time.time() - start_time) * (1/((i + 1) / self.s.NR_BATCHES) - 1)
             # ETA = 0
+            print('t_get_patches == {:<20} | t_train == {:<20} | t_val == {:<20}'.format(t_get_patches, t_train, t_val))
             print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest validation loss:' +
                   ' {}, {}. Latest, lowest training loss: {}, {}.').format(
                 round(time.time() - start_time), ETA, i + 1, self.s.NR_BATCHES, (i + 1) /
