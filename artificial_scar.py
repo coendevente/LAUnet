@@ -27,7 +27,9 @@ def do_one_iteration(i):
 
     print(no_scar_paths)
 
-    for i in range(len(la_seg_list)):
+    self.s.DEMO = True
+
+    for i in [24]:  # range(len(la_seg_list)):
         self.h.set_image_spacing_xy(image_spacing[i])
 
         no_scar_full = no_scar_list[i]
@@ -37,21 +39,33 @@ def do_one_iteration(i):
         art_scar_full = np.zeros(no_scar_full.shape)
         ann_full = np.zeros(no_scar_full.shape)
 
-        for j in range(no_scar_full.shape[0]):
+        for j in [27]:  # range(no_scar_full.shape[0]):
+
             print('i, art_nr, j = {}, {}, {}'.format(i, art_nr, j))
             no_scar = no_scar_full[j]
             la_seg = la_seg_full[j]
             sf_seg = sf_seg_full[j]
 
+            self.h.imshow_demo(no_scar)
+            self.h.imshow_demo(la_seg)
+
             la_seg = self.pre_process_seg(la_seg)
+
+            self.h.imshow_demo(la_seg)
 
             scar_removed, sf_seg_dilated = self.remove_scar(no_scar, sf_seg, la_seg)
             scar_removed = self.post_process_art_scar(scar_removed, sf_seg_dilated)
 
+            self.h.imshow_demo(scar_removed)
+
             art_scar_full[j] = scar_removed
             art_scar_full[j], ann_full[j] = self.add_scar(scar_removed, la_seg)
 
+            self.h.imshow_demo(art_scar_full[j])
+
             art_scar_full[j] = self.post_process_art_scar(art_scar_full[j], ann_full[j])
+
+            self.h.imshow_demo(art_scar_full[j])
 
         art_scar_aug, ann_aug, la_seg_aug = OnlineAugmenter(self.s, self.h).augment(
             art_scar_full, ann_full, False, la_seg_full)
@@ -172,6 +186,8 @@ class ScarApplier:
         scale[scale < scale_cut_off] = 0
         mri_old = copy.copy(mri)
 
+        self.h.imshow_demo(scale)
+
         for c in np.argwhere(scale > 0):
             sc = scale[c[0], c[1]]
             mri[c[0], c[1]] = self.get_gaussian(mri_old, c, sc)
@@ -241,7 +257,11 @@ class ScarApplier:
         # print('bp_std == {}'.format(bp_std))
         # print('sf_seg.shape == {}'.format(sf_seg.shape))
 
+        self.h.imshow_demo(sf_seg)
+
         sf_seg_dilated = self.dilate(sf_seg, int(round(self.h.mm_to_px(self.s.SF_REMOVE_DILATION_MM))))
+
+        self.h.imshow_demo(sf_seg_dilated)
 
         noise = self.get_resampled_random_noise(bp_mean, bp_std * self.s.BP_STD_FACTOR_STD, sf_seg.shape,
                                                 self.h.mm_to_px(self.s.NOISE_RESAMPLE_FACTOR_MM))
@@ -252,6 +272,8 @@ class ScarApplier:
         # print('noise.shape == {}'.format(noise.shape))
 
         sf = sf_seg_dilated * noise
+
+        self.h.imshow_demo(sf)
 
         scar_removed[np.nonzero(sf)] = sf[np.nonzero(sf)]
 
@@ -269,6 +291,9 @@ class ScarApplier:
             return art_scar, ann
 
         wall = self.get_wall(la_seg)
+
+        self.h.imshow_demo(wall)
+
         centroid = self.get_centroid(la_seg)
 
         sum = 0
@@ -284,11 +309,9 @@ class ScarApplier:
             group = self.get_random_group(centroid, wall)
             groups += group
 
-        # plt.figure()
-        # plt.imshow(np.concatenate((wall, la_seg, la_seg_old), axis=1))
-        # plt.show()
-
         groups = (groups > 0).astype(int)
+
+        self.h.imshow_demo(groups)
 
         bp_mean, bp_std = self.get_bp_info(no_scar, la_seg)
 
@@ -303,11 +326,12 @@ class ScarApplier:
         return art_scar, ann
 
     def apply(self):
-        num_cores = min(100, multiprocessing.cpu_count())
+        num_cores = min(1, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
 
         input = [[self, art_nr] for art_nr in range(self.s.NR_ART)]
-        Parallel(n_jobs=num_cores)(delayed(do_one_iteration)(i) for i in input)
+        do_one_iteration(input[0])
+        # Parallel(n_jobs=num_cores)(delayed(do_one_iteration)(i) for i in input)
 
 
 if __name__ == '__main__':

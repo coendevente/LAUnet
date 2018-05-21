@@ -6,7 +6,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'aux_test'
+    MODEL_NAME = 'aux_test2'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -30,21 +30,23 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
-    UNET_DEPTH = 3
-    LEARNING_RATE = 0.00005  # math.pow(10, -5)
-    BATCH_SIZE = 1
+    UNET_DEPTH = 4
+    LEARNING_RATE = math.pow(10, -5)
+    BATCH_SIZE = 8
     NR_BATCHES = 15000
-    NR_VAL_PATCH_PER_ITER = 7
-    POS_NEG_PATCH_PROP = 1  # with 1, all is positive, with 0 all is negative, in between values give a mix
+    NR_VAL_PATCH_PER_ITER = 8
+    POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
     AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
-    EARLY_STOPPING = True
+    EARLY_STOPPING = False
     PATIENTCE_ES = 2000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
     DROPOUT = 0.5
     FEATURE_MAP_INC_RATE = 2.
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
-    ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    MAIN_OUTPUT_LOSS_WEIGHT = .8
+    AUX_OUTPUT_LOSS_WEIGHT = .2
+    ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = True
 
     # Offline augmentation
@@ -94,13 +96,13 @@ class Settings:
     NO_SCAR_NRS = range(1, 31)  # 18, 16, 2
     NR_ART = 24
     PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
-    WALL_THICKNESS_MIN_MM = 2  # mm
-    WALL_THICKNESS_MAX_MM = 4  # mm
-    NB_GROUPS_ODDS = [0, 0.7, 0.2, 0.1]
+    WALL_THICKNESS_MIN_MM = 3  # mm
+    WALL_THICKNESS_MAX_MM = 3  # mm
+    NB_GROUPS_ODDS = [0, 0, 1, 0]
     ANGLE_MIN = 10
     ANGLE_MAX = 60
     assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001
-    BP_STD_FACTOR_MEAN = 4
+    BP_STD_FACTOR_MEAN = 5
     BP_STD_FACTOR_STD = 1
     MAX_SCALE_EDGE_MM = .75  # mm
     SF_REMOVE_DILATION_MM = 1.3  # mm

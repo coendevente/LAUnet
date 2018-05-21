@@ -262,6 +262,12 @@ class Helper():
             sf_seg_paths.append(sf_folder + 'staple_b_{}.gipl'.format(i))
         return no_scar_paths, la_seg_paths, sf_seg_paths
 
+    def imshow_demo(self, im):
+        if self.s.DEMO:
+            plt.figure()
+            plt.imshow(im[241:361, 146:342], cmap='Greys_r')
+            plt.show()
+
     # Thanks to https://github.com/keras-team/keras/issues/3611
     def dice_coef(self, y_true, y_pred, smooth=1):
         y_true_f = K.flatten(y_true)

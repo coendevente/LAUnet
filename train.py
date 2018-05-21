@@ -52,7 +52,8 @@ class Train:
         if self.s.USE_ANY_SCAR_AUX:
             model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss={'main_output': self.h.custom_loss,
                                                                          'aux_output': 'mean_squared_error'},
-                          metrics=['binary_accuracy'], loss_weights={'main_output': 0.5, 'aux_output': 0.5})
+                          metrics=['binary_accuracy'], loss_weights={'main_output': self.s.MAIN_OUTPUT_LOSS_WEIGHT,
+                                                                     'aux_output': self.s.AUX_OUTPUT_LOSS_WEIGHT})
         else:
             model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss=self.h.custom_loss,
                           metrics=['binary_accuracy'])
@@ -230,7 +231,7 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
 
         # self.s.FN_CLASS_WEIGHT = 100
         # model = self.buildUNet()
@@ -317,7 +318,8 @@ class Train:
             y_train_aux = self.get_aux(y_train)
             y_val_aux = self.get_aux(y_val)
 
-            print('y_aux.shape == {}'.format(y_train_aux.shape))
+            # print('y_train_aux == {}'.format(y_train_aux))
+            # print('y_train_aux.shape == {}'.format(y_train_aux.shape))
 
             train_loss = model.train_on_batch(x_train, {'main_output': y_train, 'aux_output': y_train_aux})
 
