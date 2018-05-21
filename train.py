@@ -142,10 +142,8 @@ class Train:
         return x_patch, y_patch, True
 
     def getRandomPositiveSlicesOffline(self, set_idx):
-        # print('set(set_idx) == {}'.format(set(set_idx)))
-        # print('set(self.s.VALIDATION_SET) == {}'.format(set(self.s.VALIDATION_SET)))
-        if random.random() < self.s.ART_FRACTION and set(set_idx) != set(self.s.VALIDATION_SET):
-            x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False, set_idx)
+        if random.random() < self.s.ART_FRACTION:
+            x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False)
 
             # print('x_pos_path == {}'.format(x_s_path))
             # print('y_pos_path == {}'.format(y_s_path))
@@ -197,9 +195,7 @@ class Train:
             if not positive_patch:
                 x_j, y_j = self.getRandomPatch(x_full, y_full, set_idx)
             else:
-                # t0 = time.time()
                 x_j, y_j = self.getRandomPositivePatch(x_full, y_full, set_idx)
-                # print('all took {}'.format(time.time() - t0))
 
             # print("positive_patch == {}".format(positive_patch))
             # print("x_j.shape == {}".format(x_j.shape))
@@ -261,7 +257,7 @@ class Train:
         self.updateSliceInformation(y_full_train, self.s.TRAINING_SET)
         self.updateSliceInformation(y_full_val, self.s.VALIDATION_SET)
 
-        if self.s.FN_CLASS_WEIGHT == 'auto' and self.s.LOSS_FUNCTION == 'weighted_binary_cross_entropy':
+        if self.s.FN_CLASS_WEIGHT == 'auto':
             _, y_patches = self.getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val,
                                                  self.s.AUTO_CLASS_WEIGHT_N, self.s.TRAINING_SET
                                                  + self.s.VALIDATION_SET)
@@ -300,15 +296,12 @@ class Train:
                 break
             es_j += 1
 
-            t0_get_patches = time.time()
-            # print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
+            print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
             x_train, y_train = self.getRandomPatches(x_full_train, y_full_train, self.s.BATCH_SIZE, self.s.TRAINING_SET)
             x_val, y_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
                                                  self.s.VALIDATION_SET)
-            # print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
-            t_get_patches = time.time() - t0_get_patches
+            print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
-<<<<<<< HEAD
             randomize_train_idx = np.random.permutation(range(y_train.shape[0]))
             x_train = x_train[randomize_train_idx]
             y_train = y_train[randomize_train_idx]
@@ -323,19 +316,6 @@ class Train:
             log['training']['accuracy'].append(train_loss[1])
 
             val_loss = model.test_on_batch(x_val, {'main_output': y_val, 'aux_output': y_val_aux})
-=======
-            t0_train = time.time()
-            train_loss = model.train_on_batch(x_train, y_train)
-            t_train = time.time() - t0_train
-
-            log['training']['loss'].append(train_loss[0])
-            log['training']['accuracy'].append(train_loss[1])
-
-            t0_val = time.time()
-            val_loss = model.test_on_batch(x_val, y_val)
-            t_val = time.time() - t0_val
-
->>>>>>> a33443d2663c8940e0fe431e247c46d61581da2d
             log['validation']['loss'].append(val_loss[0])
             log['validation']['accuracy'].append(val_loss[1])
             pickle.dump(log, open(log_path, "wb"))
@@ -353,12 +333,7 @@ class Train:
                 lowest_train_loss = train_loss[0]
 
             ETA = round(time.time() - start_time) * (1/((i + 1) / self.s.NR_BATCHES) - 1)
-<<<<<<< HEAD
 
-=======
-            # ETA = 0
-            print('t_get_patches == {:<20} | t_train == {:<20} | t_val == {:<20}'.format(t_get_patches, t_train, t_val))
->>>>>>> a33443d2663c8940e0fe431e247c46d61581da2d
             print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest validation loss:' +
                   ' {}, {}. Latest, lowest training loss: {}, {}.').format(
                 round(time.time() - start_time), ETA, i + 1, self.s.NR_BATCHES, (i + 1) /

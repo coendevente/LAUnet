@@ -292,9 +292,7 @@ class ScarApplier:
 
         bp_mean, bp_std = self.get_bp_info(no_scar, la_seg)
 
-        bp_std_factor_mean = random.uniform(self.s.BP_STD_FACTOR_MEAN_MIN, self.s.BP_STD_FACTOR_MEAN_MAX)
-
-        sf = groups * self.get_resampled_random_noise(bp_mean + bp_std_factor_mean * bp_std,
+        sf = groups * self.get_resampled_random_noise(bp_mean + self.s.BP_STD_FACTOR_MEAN * bp_std,
                                                       bp_std * self.s.BP_STD_FACTOR_STD, groups.shape,
                                                       self.h.mm_to_px(self.s.NOISE_RESAMPLE_FACTOR_MM))
 
@@ -305,11 +303,7 @@ class ScarApplier:
         return art_scar, ann
 
     def apply(self):
-<<<<<<< HEAD
         num_cores = min(100, multiprocessing.cpu_count())
-=======
-        num_cores = min(8, multiprocessing.cpu_count())
->>>>>>> a33443d2663c8940e0fe431e247c46d61581da2d
         print('num_cores == {}'.format(num_cores))
 
         input = [[self, art_nr] for art_nr in range(self.s.NR_ART)]
