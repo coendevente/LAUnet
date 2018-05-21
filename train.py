@@ -143,7 +143,7 @@ class Train:
 
     def getRandomPositiveSlicesOffline(self, set_idx):
         if random.random() < self.s.ART_FRACTION:
-            x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False)
+            x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False, set_idx)
 
             # print('x_pos_path == {}'.format(x_s_path))
             # print('y_pos_path == {}'.format(y_s_path))
@@ -268,7 +268,15 @@ class Train:
 
         print(model.summary())
 
-        log = {'training': {'loss': [], 'accuracy': []}, 'validation': {'loss': [], 'accuracy': []}}
+        log = {'training': {}, 'validation': {}}
+
+        for m in model.metrics_names:
+            log['training'][m] = []
+            log['validation'][m] = []
+
+        # print(model.metrics_names)
+
+        # log = {'training': {'loss': [], 'accuracy': []}, 'validation': {'loss': [], 'accuracy': []}}
 
         start_time = time.time()
         lowest_val_loss = float("inf")
@@ -312,12 +320,13 @@ class Train:
             print('y_aux.shape == {}'.format(y_train_aux.shape))
 
             train_loss = model.train_on_batch(x_train, {'main_output': y_train, 'aux_output': y_train_aux})
-            log['training']['loss'].append(train_loss[0])
-            log['training']['accuracy'].append(train_loss[1])
 
             val_loss = model.test_on_batch(x_val, {'main_output': y_val, 'aux_output': y_val_aux})
-            log['validation']['loss'].append(val_loss[0])
-            log['validation']['accuracy'].append(val_loss[1])
+
+            for m in range(len(model.metrics_names)):
+                log['training'][model.metrics_names[m]].append(train_loss[m])
+                log['validation'][model.metrics_names[m]].append(val_loss[m])
+
             pickle.dump(log, open(log_path, "wb"))
 
             if lowest_val_loss > val_loss[0]:

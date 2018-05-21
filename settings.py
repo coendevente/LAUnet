@@ -44,7 +44,7 @@ class Settings:
     DROPOUT = 0.5
     FEATURE_MAP_INC_RATE = 2.
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
-    ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = True
 
     # Offline augmentation

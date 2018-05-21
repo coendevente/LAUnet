@@ -25,6 +25,9 @@ class ArtificialPaths:
         if img_nr not in self.paths:
             self.paths[img_nr] = glob.glob('{}de_{}_*.nii.gz'.format(x_folder, img_nr))
 
+            for i in range(len(self.paths[img_nr])):
+                self.paths[img_nr][i] = self.paths[img_nr][i].replace('\\', '/')
+
         return self.paths[img_nr]
 
 
