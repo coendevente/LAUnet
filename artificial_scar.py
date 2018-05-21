@@ -27,9 +27,9 @@ def do_one_iteration(i):
 
     print(no_scar_paths)
 
-    self.s.DEMO = True
+    self.s.DEMO = False
 
-    for i in [24]:  # range(len(la_seg_list)):
+    for i in range(len(la_seg_list)):
         self.h.set_image_spacing_xy(image_spacing[i])
 
         no_scar_full = no_scar_list[i]
@@ -39,7 +39,7 @@ def do_one_iteration(i):
         art_scar_full = np.zeros(no_scar_full.shape)
         ann_full = np.zeros(no_scar_full.shape)
 
-        for j in [27]:  # range(no_scar_full.shape[0]):
+        for j in range(no_scar_full.shape[0]):
 
             print('i, art_nr, j = {}, {}, {}'.format(i, art_nr, j))
             no_scar = no_scar_full[j]
