@@ -6,7 +6,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'test'
+    MODEL_NAME = 'aux_test'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -31,7 +31,7 @@ class Settings:
 
     # Training hyperparameters
     UNET_DEPTH = 3
-    LEARNING_RATE = 0.001  # math.pow(10, -5)
+    LEARNING_RATE = 0.00005  # math.pow(10, -5)
     BATCH_SIZE = 1
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 7
@@ -44,7 +44,7 @@ class Settings:
     DROPOUT = 0.5
     FEATURE_MAP_INC_RATE = 2.
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
-    ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = True
 
     # Offline augmentation
