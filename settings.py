@@ -6,7 +6,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'artificial_scar_0'
+    MODEL_NAME = 'test'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -30,9 +30,9 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
-    UNET_DEPTH = 5
+    UNET_DEPTH = 3
     LEARNING_RATE = 0.001  # math.pow(10, -5)
-    BATCH_SIZE = 8
+    BATCH_SIZE = 1
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 7
     POS_NEG_PATCH_PROP = 1  # with 1, all is positive, with 0 all is negative, in between values give a mix
@@ -45,6 +45,7 @@ class Settings:
     FEATURE_MAP_INC_RATE = 2.
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
     ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    USE_ANY_SCAR_AUX = True
 
     # Offline augmentation
     AUGMENT_ONLINE = False

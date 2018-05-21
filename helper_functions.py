@@ -238,7 +238,7 @@ class Helper():
         return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
     def dice_coef_loss(self, y_true, y_pred):
-        return -self.dice_coef(y_true, y_pred)
+        return 1-self.dice_coef(y_true, y_pred)
 
     def weighted_binary_cross_entropy(self, y_true, y_pred):
         y_pred_bw = K.round(y_pred)

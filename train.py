@@ -46,9 +46,16 @@ class Train:
         if self.s.NR_DIM == 2:
             ps = ps[1:]
         model = UNet(ps + (1, ), self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
-                     doeverylevel=self.s.DROPOUT_AT_EVERY_LEVEL, inc_rate=self.s.FEATURE_MAP_INC_RATE)
+                     doeverylevel=self.s.DROPOUT_AT_EVERY_LEVEL, inc_rate=self.s.FEATURE_MAP_INC_RATE,
+                     aux_loss=self.s.USE_ANY_SCAR_AUX)
 
-        model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss=self.h.custom_loss, metrics=['binary_accuracy'])
+        if self.s.USE_ANY_SCAR_AUX:
+            model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss={'main_output': self.h.custom_loss,
+                                                                         'aux_output': 'mean_squared_error'},
+                          metrics=['binary_accuracy'], loss_weights={'main_output': 0.5, 'aux_output': 0.5})
+        else:
+            model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss=self.h.custom_loss,
+                          metrics=['binary_accuracy'])
 
         return model
 
@@ -216,6 +223,12 @@ class Train:
                 self.sliceInformation[set_idx[i]].append(pos)
             self.sliceInformation[set_idx[i]] = np.array(self.sliceInformation[set_idx[i]])
 
+    def get_aux(self, y):
+        y_aux = np.array([int(np.sum(y[j]) > 0) for j in range(y.shape[0])])
+        y_aux = np.reshape(y_aux, (y_aux.shape[0], 1))
+
+        return y_aux
+
     def train(self):
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
 
@@ -253,6 +266,8 @@ class Train:
 
         model = self.buildUNet()
 
+        print(model.summary())
+
         log = {'training': {'loss': [], 'accuracy': []}, 'validation': {'loss': [], 'accuracy': []}}
 
         start_time = time.time()
@@ -287,11 +302,20 @@ class Train:
                                                  self.s.VALIDATION_SET)
             print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
-            train_loss = model.train_on_batch(x_train, y_train)
+            randomize_train_idx = np.random.permutation(range(y_train.shape[0]))
+            x_train = x_train[randomize_train_idx]
+            y_train = y_train[randomize_train_idx]
+
+            y_train_aux = self.get_aux(y_train)
+            y_val_aux = self.get_aux(y_val)
+
+            print('y_aux.shape == {}'.format(y_train_aux.shape))
+
+            train_loss = model.train_on_batch(x_train, {'main_output': y_train, 'aux_output': y_train_aux})
             log['training']['loss'].append(train_loss[0])
             log['training']['accuracy'].append(train_loss[1])
 
-            val_loss = model.test_on_batch(x_val, y_val)
+            val_loss = model.test_on_batch(x_val, {'main_output': y_val, 'aux_output': y_val_aux})
             log['validation']['loss'].append(val_loss[0])
             log['validation']['accuracy'].append(val_loss[1])
             pickle.dump(log, open(log_path, "wb"))
@@ -309,7 +333,7 @@ class Train:
                 lowest_train_loss = train_loss[0]
 
             ETA = round(time.time() - start_time) * (1/((i + 1) / self.s.NR_BATCHES) - 1)
-            # ETA = 0
+
             print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest validation loss:' +
                   ' {}, {}. Latest, lowest training loss: {}, {}.').format(
                 round(time.time() - start_time), ETA, i + 1, self.s.NR_BATCHES, (i + 1) /

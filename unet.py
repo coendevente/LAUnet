@@ -2,7 +2,7 @@
 
 from keras.models import Input, Model
 from keras.layers import Conv3D, Conv2D, Concatenate, MaxPooling3D, MaxPooling2D, UpSampling3D, UpSampling2D, Dropout, \
-    BatchNormalization
+    BatchNormalization, GlobalMaxPooling2D, GlobalMaxPooling3D, Dense
 from settings import *
 
 '''
@@ -40,19 +40,30 @@ def conv_block(m, dim, acti, bn, res, ndim, do=0):
     return Concatenate()([m, n]) if res else n
 
 
-def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeverylevel):
+def aux_loss_block(m, ndim):
+    if ndim == 2:
+        o_aux = GlobalMaxPooling2D()(m)
+    else:
+        raise Exception('No global max pooling in 3D')
+    o_aux = Dense(1, activation='sigmoid', name='aux_output')(o_aux)
+
+    return o_aux
+
+
+def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al):
     """
     Builds one block in UNet. The function is recursive. The depth decreases with 1 every time.
     :param: Similar to paramaters in UNet(...)
     :return: A UNet of the depth specified in the input
     """
-    # print('depth == {}'.format(depth))
+    o_aux = -1
+
     if depth > 0:
         n = conv_block(m, dim, acti, bn, res, ndim, do) if doeverylevel else \
             conv_block(m, dim, acti, bn, res, ndim)
         m = (MaxPooling3D((1, 2, 2))(n) if mp else Conv3D(dim, 3, strides=2, padding='same')(n)) if ndim == 3 else \
             (MaxPooling2D((2, 2))(n) if mp else Conv2D(dim, 3, strides=2, padding='same')(n))
-        m = level_block(m, int(inc * dim), depth - 1, inc, acti, do, bn, mp, up, res, ndim, doeverylevel)
+        m, o_aux = level_block(m, int(inc * dim), depth - 1, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al)
         if up:
             m = UpSampling3D((1, 2, 2))(m) if ndim == 3 else \
                 UpSampling2D((2, 2))(m)
@@ -65,11 +76,13 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
             conv_block(n, dim, acti, bn, res, ndim)
     else:
         m = conv_block(m, dim, acti, bn, res, ndim, do)
-    return m
+        if al:
+            o_aux = aux_loss_block(m, ndim)
+    return m, o_aux
 
 
 def UNet(img_shape, ndim, out_ch=1, start_ch=64, depth=4, inc_rate=2., activation='relu',
-         dropout=0.5, batchnorm=False, maxpool=True, upconv=True, residual=False, doeverylevel=False):
+         dropout=0.5, batchnorm=False, maxpool=True, upconv=True, residual=False, doeverylevel=False, aux_loss=True):
     """
     Makes UNet model.
 
@@ -89,8 +102,9 @@ def UNet(img_shape, ndim, out_ch=1, start_ch=64, depth=4, inc_rate=2., activatio
     :return: UNet as Keras object
     """
     i = Input(shape=img_shape)
-    o = level_block(i, start_ch, depth, inc_rate, activation, dropout, batchnorm, maxpool, upconv, residual, ndim,
-                    doeverylevel)
-    o = Conv3D(out_ch, 1, activation='sigmoid')(o) if ndim == 3 else \
-        Conv2D(out_ch, 1, activation='sigmoid')(o)
-    return Model(inputs=i, outputs=o)
+    o_main, o_aux = level_block(i, start_ch, depth, inc_rate, activation, dropout, batchnorm, maxpool, upconv, residual,
+                                ndim, doeverylevel, aux_loss)
+    o_main = Conv3D(out_ch, 1, activation='sigmoid', name='main_output')(o_main) if ndim == 3 else \
+             Conv2D(out_ch, 1, activation='sigmoid', name='main_output')(o_main)
+    return Model(inputs=i, outputs=[o_main, o_aux]) if aux_loss else \
+           Model(inputs=i, outputs=o_main)
