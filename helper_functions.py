@@ -11,10 +11,29 @@ import glob
 import random
 
 
+class ArtificialPaths:
+    paths = {}
+
+    def __init__(self, s, h):
+        self.s = s
+        self.h = h
+
+    def get_image_slices(self, img_nr):
+        aug_path = self.h.getArtPath()
+        x_folder = '{}input/'.format(aug_path)
+
+        if img_nr not in self.paths:
+            self.paths[img_nr] = glob.glob('{}de_{}_*.nii.gz'.format(x_folder, img_nr))
+
+        return self.paths[img_nr]
+
+
 class Helper():
     def __init__(self, s):
         self.s = s
         self.image_spacing_xy = -1
+
+        self.artificial_paths = ArtificialPaths(s, self)
 
     def mm_to_px(self, mm):
         if self.image_spacing_xy == -1:
@@ -149,16 +168,26 @@ class Helper():
         elif self.s.GROUND_TRUTH == 'scar_fibrosis':
             return x_path, y_path
 
-    def getRandomArtificialPositiveImagePath(self, get_all):
+    def getRandomArtificialPositiveImagePath(self, get_all, set_idx):
         aug_path = self.getArtPath()
 
         x_folder = '{}input/'.format(aug_path)
         y_folder = '{}annotations/'.format(aug_path)
         la_folder = '{}input/'.format(aug_path)
 
-        x_path = random.choice(
-            glob.glob('{}de_*.nii.gz'.format(x_folder))
-        ).replace('\\', '/')
+        img_nrs = list(np.array(self.s.NO_SCAR_NRS) - 1) + list(np.array(set_idx) + len(self.s.NO_SCAR_NRS) - 1)
+        # print(img_nrs)
+
+        img_nr = random.choice(img_nrs)
+        # art_nr = random.randint(0, self.s.NR_ART - 1)
+
+        # t0 = time.time()
+        # x_path = random.choice(
+        #     glob.glob('{}de_{}_*_{}.nii.gz'.format(x_folder, img_nr, art_nr))
+        # ).replace('\\', '/')
+        # print('loading took {}'.format(time.time() - t0))
+
+        x_path = random.choice(self.artificial_paths.get_image_slices(img_nr))
 
         y_path = x_path.replace(x_folder, y_folder)
         y_path = y_path.replace('de_', 'staple_')

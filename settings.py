@@ -6,7 +6,11 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
+<<<<<<< HEAD
     MODEL_NAME = 'test'
+=======
+    MODEL_NAME = 'h200500/1'
+>>>>>>> a33443d2663c8940e0fe431e247c46d61581da2d
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -18,7 +22,7 @@ class Settings:
     # Division of datasets
     ALL_NATURAL_SET = range(1, 31)
     TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 26, 5]  # 18 left out because of orientation
-    VALIDATION_SET = [25, 24, 16, 2, 14, 28, 21]
+    VALIDATION_SET = [25, 24, 16, 2, 14, 28, 21]  # [480, 640, 576, 576, 512, 512, 512]
     TESTING_SET = [20, 29, 11, 15, 27, 9, 3, 12]
 
     # Patchsize
@@ -30,22 +34,32 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
+<<<<<<< HEAD
     UNET_DEPTH = 3
     LEARNING_RATE = 0.001  # math.pow(10, -5)
     BATCH_SIZE = 1
+=======
+    UNET_DEPTH = 4
+    LEARNING_RATE = math.pow(10, -4)
+    BATCH_SIZE = 4
+>>>>>>> a33443d2663c8940e0fe431e247c46d61581da2d
     NR_BATCHES = 15000
-    NR_VAL_PATCH_PER_ITER = 7
-    POS_NEG_PATCH_PROP = 1  # with 1, all is positive, with 0 all is negative, in between values give a mix
+    NR_VAL_PATCH_PER_ITER = 8
+    POS_NEG_PATCH_PROP = .5  # when 1, all is positive, when 0 all is negative, in between values give a mix
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
-    AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+    AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
     PATIENTCE_ES = 2000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
     DROPOUT = 0.5
     FEATURE_MAP_INC_RATE = 2.
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
+<<<<<<< HEAD
     ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = True
+=======
+    ART_FRACTION = 1  # when 1, all is artificial, when 0 all is natural, in between values give a mix
+>>>>>>> a33443d2663c8940e0fe431e247c46d61581da2d
 
     # Offline augmentation
     AUGMENT_ONLINE = False
@@ -60,7 +74,7 @@ class Settings:
     BIN_THRESH = .5  # Threshold to binarize the probability images
     METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 
-    CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and
+    CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and
     # results will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur
     # if these images do not exist on the disk.
 
@@ -100,7 +114,8 @@ class Settings:
     ANGLE_MIN = 10
     ANGLE_MAX = 60
     assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001
-    BP_STD_FACTOR_MEAN = 4
+    BP_STD_FACTOR_MEAN_MIN = 1.5
+    BP_STD_FACTOR_MEAN_MAX = 5
     BP_STD_FACTOR_STD = 1
     MAX_SCALE_EDGE_MM = .75  # mm
     SF_REMOVE_DILATION_MM = 1.3  # mm

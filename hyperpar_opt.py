@@ -38,19 +38,19 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'h150500/'
+MAIN_FOLDER = 'h200500/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
 bo = -1
 
 
-def target(learning_rate_power, dropout, art_non_art_fraction):
+def target(learning_rate_power, dropout, art_fraction):
     global bo
     if bo != -1:
         pickle.dump(bo, open(bo_path, "wb"))
 
-    # return (1 - (learning_rate_power - .6) ** 2) * (1 - (dropout - .2) ** 2) * (1 - (art_non_art_fraction - .2) ** 2)
+    # return (1 - (learning_rate_power - .6) ** 2) * (1 - (dropout - .2) ** 2) * (1 - (art_fraction - .2) ** 2)
 
     domains = {
         # 'unet_depth': (2, 4),
@@ -133,7 +133,7 @@ def visBoResValues(r):
 
 def hyperpar_opt():
     resume_previous = False
-    only_inspect_bo = True
+    only_inspect_bo = False
 
     global bo
 
@@ -163,7 +163,7 @@ def hyperpar_opt():
             'learning_rate_power': (0, 1),
             # 'patch_size_factor': (0, 1),
             'dropout': (0, 1),
-            'art_non_art_fraction': (0, 1),
+            'art_fraction': (0, 1),
             # 'feature_map_inc_rate': (0, 1),
             # 'loss_function': (0, 1)
         })
