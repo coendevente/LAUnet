@@ -94,12 +94,12 @@ class ScarApplier:
             int(round(self.h.mm_to_px(self.s.WALL_THICKNESS_MAX_MM))) + 1
         )
 
-        return bw - sitk.GetArrayFromImage(
+        return sitk.GetArrayFromImage(
             sitk.BinaryErode(
                 sitk.GetImageFromArray(bw),
                 w
             )
-        )
+        ) - bw
 
     def get_centroid(self, bw):
         coords = np.argwhere(bw == 1)

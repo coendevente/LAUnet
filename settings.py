@@ -7,7 +7,7 @@ class Settings:
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
     # MODEL_NAME = 'aux_all_art'
-    MODEL_NAME = 'no_staple'
+    MODEL_NAME = 'union_annotations'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -34,7 +34,7 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
-    UNET_DEPTH = 4
+    UNET_DEPTH = 5
     LEARNING_RATE = math.pow(10, -3)
     BATCH_SIZE = 4
     NR_BATCHES = 15000
@@ -51,7 +51,7 @@ class Settings:
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
     ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
-    USE_ANY_SCAR_AUX = True
+    USE_ANY_SCAR_AUX = False
 
     # Offline augmentation
     AUGMENT_ONLINE = False
@@ -66,7 +66,7 @@ class Settings:
     BIN_THRESH = .5  # Threshold to binarize the probability images
     METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 
-    CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and
+    CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and
     # results will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur
     # if these images do not exist on the disk.
 

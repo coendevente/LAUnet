@@ -62,7 +62,10 @@ class Test:
                 ps = ps[1:]
 
             p_reshaped = np.reshape(p, (1, ) + ps + (1, ))
-            prob_p = model.predict(p_reshaped)[0]
+            prob_p = model.predict(p_reshaped)
+
+            if self.s.USE_ANY_SCAR_AUX:
+                prob_p = prob_p[0]
 
             prop_p_s = prob_p.shape[1:4]
             if self.s.NR_DIM == 2:

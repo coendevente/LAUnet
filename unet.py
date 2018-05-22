@@ -40,14 +40,16 @@ def conv_block(m, dim, acti, bn, res, ndim, do=0):
     return Concatenate()([m, n]) if res else n
 
 
-def aux_loss_block(m, ndim):
+def aux_loss_block(m, ndim, inc, dim, acti):
     if ndim == 2:
-        o_aux = GlobalMaxPooling2D()(m)
+        o = MaxPooling2D((2, 2))(m)
+        o = Conv2D(int(dim / (inc ** 2)), 3, activation=acti, padding='same')(o)
+        o = Conv2D(int(dim / (inc ** 4)), 3, activation=acti, padding='same')(o)
+        o = GlobalMaxPooling2D()(o)
+        o = Dense(1, activation='sigmoid', name='aux_output')(o)
     else:
         raise Exception('No global max pooling in 3D')
-    o_aux = Dense(1, activation='sigmoid', name='aux_output')(o_aux)
-
-    return o_aux
+    return o
 
 
 def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al):
@@ -77,7 +79,7 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
     else:
         m = conv_block(m, dim, acti, bn, res, ndim, do)
         if al:
-            o_aux = aux_loss_block(m, ndim)
+            o_aux = aux_loss_block(m, ndim, inc, dim, acti)
     return m, o_aux
 
 

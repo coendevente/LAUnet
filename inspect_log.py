@@ -49,7 +49,7 @@ class LogInspector:
             except:
                 print('s.{:>25} = absent in this log file'.format(name))
 
-        w = 300
+        w = 50
         orig_lw = 1
         smooth_lw = 2
 
