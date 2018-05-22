@@ -6,7 +6,8 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'aux_test2'
+    # MODEL_NAME = 'aux_all_art'
+    MODEL_NAME = 'aux_test3'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -31,14 +32,14 @@ class Settings:
 
     # Training hyperparameters
     UNET_DEPTH = 4
-    LEARNING_RATE = math.pow(10, -5)
+    LEARNING_RATE = math.pow(10, -3)
     BATCH_SIZE = 8
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 8
     POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
     AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
-    EARLY_STOPPING = False
+    EARLY_STOPPING = True
     PATIENTCE_ES = 2000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
     DROPOUT = 0.5
@@ -46,7 +47,7 @@ class Settings:
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
-    ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = True
 
     # Offline augmentation

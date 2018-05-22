@@ -265,7 +265,8 @@ class Helper():
     def imshow_demo(self, im):
         if self.s.DEMO:
             plt.figure()
-            plt.imshow(im[241:361, 146:342], cmap='Greys_r')
+            # plt.imshow(im[241:361, 146:342], cmap='Greys_r')
+            plt.imshow(im, cmap='Greys_r')
             plt.show()
 
     # Thanks to https://github.com/keras-team/keras/issues/3611

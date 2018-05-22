@@ -311,9 +311,15 @@ class Train:
                                                  self.s.VALIDATION_SET)
             print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
-            randomize_train_idx = np.random.permutation(range(y_train.shape[0]))
-            x_train = x_train[randomize_train_idx]
-            y_train = y_train[randomize_train_idx]
+            self.s.DEMO = False
+
+            for j in range(self.s.BATCH_SIZE):
+                self.h.imshow_demo(np.concatenate(
+                    (
+                        np.reshape(x_train[j], x_train[j].shape[:-1]),
+                        np.reshape(y_train[j], y_train[j].shape[:-1]) * np.max(x_train[j])
+                    ), axis=1
+                ))
 
             y_train_aux = self.get_aux(y_train)
             y_val_aux = self.get_aux(y_val)

@@ -28,27 +28,28 @@ class LogInspector:
         logs_to_output = ['stopped_early', 'lowest_val_loss', 'lowest_val_loss_i']
         for log_name in logs_to_output:
             if log_name in log:
-                print('{:>22} = {}'.format(log_name, log[log_name]))
+                print('{:>27} = {}'.format(log_name, log[log_name]))
             else:
-                print('{:>22} = absent in this log file'.format(log_name))
+                print('{:>27} = absent in this log file'.format(log_name))
 
         lowest_training_loss = min(log['training']['loss']) if len(log['training']['loss']) > 0 else 'absent'
 
-        print('{:>22} = {}'.format('lowest training loss', lowest_training_loss))
+        print('{:>27} = {}'.format('lowest training loss', lowest_training_loss))
 
         lowest_training_loss_i = np.argmin(log['training']['loss']) if len(log['training']['loss']) > 0 else 'absent'
-        print('{:>22} = {}'.format('lowest training loss i', lowest_training_loss_i))
+        print('{:>27} = {}'.format('lowest training loss i', lowest_training_loss_i))
 
         settings_to_output = ['MODEL_NAME', 'FN_CLASS_WEIGHT', 'UNET_DEPTH', 'LEARNING_RATE', 'PATCH_SIZE', 'DROPOUT',
                               'FEATURE_MAP_INC_RATE', 'LOSS_FUNCTION', 'BATCH_SIZE', 'NR_AUG', 'NR_DIM', 'ART_FRACTION',
-                              'POS_NEG_PATCH_PROP', 'PATIENTCE_ES']
+                              'POS_NEG_PATCH_PROP', 'PATIENTCE_ES', 'USE_ANY_SCAR_AUX', 'MAIN_OUTPUT_LOSS_WEIGHT',
+                              'AUX_OUTPUT_LOSS_WEIGHT']
         for name in settings_to_output:
             try:
-                print('s.{:>20} = {}'.format(name, eval("log['settings'].{}".format(name))))
+                print('s.{:>25} = {}'.format(name, eval("log['settings'].{}".format(name))))
             except:
-                print('s.{:>20} = absent in this log file'.format(name))
+                print('s.{:>25} = absent in this log file'.format(name))
 
-        w = 50
+        w = 300
         orig_lw = 1
         smooth_lw = 2
 
@@ -60,12 +61,12 @@ class LogInspector:
             plt.subplot(2, m, cnt)
             plt.plot(log['training'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.smooth(log['training'][i], w), lw=smooth_lw)
-            plt.title(i)
+            plt.title(i, fontsize=8)
 
             plt.subplot(2, m, m + cnt)
             plt.plot(log['validation'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.smooth(log['validation'][i], w), lw=smooth_lw)
-            plt.title(i)
+            plt.title(i, fontsize=8)
 
             cnt += 1
         plt.show()
