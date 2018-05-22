@@ -7,7 +7,7 @@ class Settings:
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
     # MODEL_NAME = 'aux_all_art'
-    MODEL_NAME = 'aux_test3'
+    MODEL_NAME = 'no_staple'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -15,6 +15,9 @@ class Settings:
     PATH_TO_MODELS = '../results/models/'
     PATH_TO_AUG = '../data/augmentations/'
     PATH_TO_ART = '../data/augmentations/artificial/'
+
+    # Show demo images
+    DEMO = True
 
     # Division of datasets
     ALL_NATURAL_SET = range(1, 31)
@@ -33,7 +36,7 @@ class Settings:
     # Training hyperparameters
     UNET_DEPTH = 4
     LEARNING_RATE = math.pow(10, -3)
-    BATCH_SIZE = 8
+    BATCH_SIZE = 4
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 8
     POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
@@ -47,7 +50,7 @@ class Settings:
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
-    ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = True
 
     # Offline augmentation
@@ -97,13 +100,13 @@ class Settings:
     NO_SCAR_NRS = range(1, 31)  # 18, 16, 2
     NR_ART = 24
     PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
-    WALL_THICKNESS_MIN_MM = 3  # mm
-    WALL_THICKNESS_MAX_MM = 3  # mm
+    WALL_THICKNESS_MIN_MM = 1.5  # mm
+    WALL_THICKNESS_MAX_MM = 1.5  # mm
     NB_GROUPS_ODDS = [0, 0, 1, 0]
     ANGLE_MIN = 10
-    ANGLE_MAX = 60
+    ANGLE_MAX = 30
     assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001
-    BP_STD_FACTOR_MEAN = 5
+    BP_STD_FACTOR_MEAN = 4
     BP_STD_FACTOR_STD = 1
     MAX_SCALE_EDGE_MM = .75  # mm
     SF_REMOVE_DILATION_MM = 1.3  # mm

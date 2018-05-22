@@ -62,7 +62,7 @@ class Helper():
             x_all_path.append('{0}input/{1}/p{2}/de_{3}_{2}.nrrd'.format(self.s.PATH_TO_DATA, self.s.PRE_OR_POST_NAME,
                                                                          i, self.s.PRE_OR_POST_XX))
 
-            y_all_path.append('{0}annotations/staple_{2}_{1}.gipl'.format(self.s.PATH_TO_DATA, i,
+            y_all_path.append('{0}annotations/ann_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
                                                                           self.s.PRE_OR_POST_XX))
 
             la_all_path.append('{0}input/{3}/p{1}/la_seg_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
@@ -161,7 +161,7 @@ class Helper():
             os.makedirs(la_folder)
 
         x_path = '{}de_{}_{}_{}_{}.nii.gz'.format(x_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
-        y_path = '{}staple_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
+        y_path = '{}ann_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
         la_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(la_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
 
         if get_all:
@@ -193,7 +193,7 @@ class Helper():
         x_path = random.choice(self.artificial_paths.get_image_slices(img_nr))
 
         y_path = x_path.replace(x_folder, y_folder)
-        y_path = y_path.replace('de_', 'staple_')
+        y_path = y_path.replace('de_', 'ann_')
         la_path = x_path.replace(x_folder, la_folder)
         la_path = la_path.replace('de_', 'la_seg_')
 
@@ -219,7 +219,7 @@ class Helper():
             os.makedirs(la_folder)
 
         x_path = '{}de_{}_{}_{}.nii.gz'.format(x_folder, img_nr, z, art_nr)
-        y_path = '{}staple_{}_{}_{}.nii.gz'.format(y_folder, img_nr, z, art_nr)
+        y_path = '{}ann_{}_{}_{}.nii.gz'.format(y_folder, img_nr, z, art_nr)
         la_path = '{}la_seg_{}_{}_{}.nii.gz'.format(la_folder, img_nr, z, art_nr)
 
         if get_all:
@@ -245,13 +245,13 @@ class Helper():
         no_scar_paths = []
         la_seg_paths = []
         sf_seg_paths = []
-        for i in nrs:
-            p_folder = self.s.PATH_TO_NO_SCAR_PRE + 'p{}/'.format(i)
-            sf_folder = '{}annotations/'.format(self.s.PATH_TO_DATA)
-
-            no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
-            la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
-            sf_seg_paths.append(sf_folder + 'staple_a_{}.gipl'.format(i))
+        # for i in nrs:
+        #     p_folder = self.s.PATH_TO_NO_SCAR_PRE + 'p{}/'.format(i)
+        #     sf_folder = '{}annotations/'.format(self.s.PATH_TO_DATA)
+        #
+        #     no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
+        #     la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
+        #     sf_seg_paths.append(sf_folder + 'ann_a_{}.nrrd'.format(i))
 
         for i in nrs:
             p_folder = self.s.PATH_TO_NO_SCAR_POST + 'p{}/'.format(i)
@@ -259,7 +259,7 @@ class Helper():
 
             no_scar_paths.append(p_folder + 'de_b_{}.nrrd'.format(i))
             la_seg_paths.append(p_folder + 'la_seg_b_{}.nrrd'.format(i))
-            sf_seg_paths.append(sf_folder + 'staple_b_{}.gipl'.format(i))
+            sf_seg_paths.append(sf_folder + 'ann_b_{}.nrrd'.format(i))
         return no_scar_paths, la_seg_paths, sf_seg_paths
 
     def imshow_demo(self, im):

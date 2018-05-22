@@ -11,6 +11,7 @@ from online_augment import OnlineAugmenter
 from scipy import signal
 from joblib import Parallel, delayed
 import multiprocessing
+import cv2
 
 
 def do_one_iteration(i):
@@ -46,42 +47,31 @@ def do_one_iteration(i):
             la_seg = la_seg_full[j]
             sf_seg = sf_seg_full[j]
 
-            self.h.imshow_demo(no_scar)
-            self.h.imshow_demo(la_seg)
-
             la_seg = self.pre_process_seg(la_seg)
-
-            self.h.imshow_demo(la_seg)
 
             scar_removed, sf_seg_dilated = self.remove_scar(no_scar, sf_seg, la_seg)
             scar_removed = self.post_process_art_scar(scar_removed, sf_seg_dilated)
 
-            self.h.imshow_demo(scar_removed)
-
             art_scar_full[j] = scar_removed
             art_scar_full[j], ann_full[j] = self.add_scar(scar_removed, la_seg)
 
-            self.h.imshow_demo(art_scar_full[j])
-
             art_scar_full[j] = self.post_process_art_scar(art_scar_full[j], ann_full[j])
-
-            self.h.imshow_demo(art_scar_full[j])
 
         art_scar_aug, ann_aug, la_seg_aug = OnlineAugmenter(self.s, self.h).augment(
             art_scar_full, ann_full, False, la_seg_full)
 
-        # imshow3D(
-        #     np.concatenate(
-        #         (np.concatenate(
-        #             (no_scar_full, sf_seg_full * np.max(art_scar_aug)
-        #              ), axis=2
-        #         ),
-        #         np.concatenate(
-        #             (art_scar_aug, ann_aug * np.max(art_scar_aug)
-        #              ), axis=2
-        #         )), axis=1
-        #     )
-        # )
+        imshow3D(
+            np.concatenate(
+                (np.concatenate(
+                    (no_scar_full, sf_seg_full * np.max(art_scar_aug)
+                     ), axis=2
+                ),
+                np.concatenate(
+                    (art_scar_aug, ann_aug * np.max(art_scar_aug)
+                     ), axis=2
+                )), axis=1
+            )
+        )
 
         for j in range(no_scar_full.shape[0]):
             if np.sum(ann_aug[j]) == 0:
@@ -186,8 +176,6 @@ class ScarApplier:
         scale[scale < scale_cut_off] = 0
         mri_old = copy.copy(mri)
 
-        self.h.imshow_demo(scale)
-
         for c in np.argwhere(scale > 0):
             sc = scale[c[0], c[1]]
             mri[c[0], c[1]] = self.get_gaussian(mri_old, c, sc)
@@ -201,7 +189,24 @@ class ScarApplier:
         # plt.imshow(scale, cmap='Greys_r')
         # plt.show()
 
-        return mri
+    def blend_in(self, mri, ann):
+        dist = sitk.GetArrayFromImage(
+            sitk.SignedDanielssonDistanceMap(
+                sitk.GetImageFromArray(
+                    ann.astype(int)
+                )
+            )
+        )
+
+        impaint_locs = np.ones(dist.shape)
+        impaint_locs[dist < 0] = 0
+        impaint_locs[dist >= 2] = 0
+
+        self.h.imshow_demo(impaint_locs)
+
+        blended_in = cv2.inpaint(mri.astype(np.uint16), impaint_locs.astype(np.uint8), 2, cv2.INPAINT_TELEA)
+
+        return blended_in
 
     def sharpen(self, image):
         return sitk.GetArrayFromImage(
@@ -238,6 +243,12 @@ class ScarApplier:
 
         r = r[:sh[0], :sh[1]]
 
+        r = sitk.GetArrayFromImage(
+            sitk.DiscreteGaussian(
+                sitk.GetImageFromArray(r, 1)
+            )
+        )
+
         # plt.figure()
         # plt.imshow(r)
         # plt.show()
@@ -257,14 +268,10 @@ class ScarApplier:
         # print('bp_std == {}'.format(bp_std))
         # print('sf_seg.shape == {}'.format(sf_seg.shape))
 
-        self.h.imshow_demo(sf_seg)
-
         sf_seg_dilated = self.dilate(sf_seg, int(round(self.h.mm_to_px(self.s.SF_REMOVE_DILATION_MM))))
 
-        self.h.imshow_demo(sf_seg_dilated)
-
-        noise = self.get_resampled_random_noise(bp_mean, bp_std * self.s.BP_STD_FACTOR_STD, sf_seg.shape,
-                                                self.h.mm_to_px(self.s.NOISE_RESAMPLE_FACTOR_MM))
+        noise = self.get_resampled_random_noise(bp_mean, bp_std * self.s.BP_STD_FACTOR_STD, sf_seg.shape, 2)
+        # self.h.mm_to_px(self.s.NOISE_RESAMPLE_FACTOR_MM)
 
         # print('self.h.mm_to_px(self.s.NOISE_RESAMPLE_FACTOR_MM) == {}'.format(
         # self.h.mm_to_px(self.s.NOISE_RESAMPLE_FACTOR_MM)))
@@ -273,14 +280,12 @@ class ScarApplier:
 
         sf = sf_seg_dilated * noise
 
-        self.h.imshow_demo(sf)
-
         scar_removed[np.nonzero(sf)] = sf[np.nonzero(sf)]
 
         return scar_removed, sf_seg_dilated
 
     def post_process_art_scar(self, art_scar, ann):
-        art_scar = self.blur_local(art_scar, ann)
+        art_scar = self.blend_in(art_scar, ann)
         return art_scar
 
     def add_scar(self, no_scar, la_seg):
@@ -291,8 +296,6 @@ class ScarApplier:
             return art_scar, ann
 
         wall = self.get_wall(la_seg)
-
-        self.h.imshow_demo(wall)
 
         centroid = self.get_centroid(la_seg)
 
@@ -311,13 +314,10 @@ class ScarApplier:
 
         groups = (groups > 0).astype(int)
 
-        self.h.imshow_demo(groups)
-
         bp_mean, bp_std = self.get_bp_info(no_scar, la_seg)
 
         sf = groups * self.get_resampled_random_noise(bp_mean + self.s.BP_STD_FACTOR_MEAN * bp_std,
-                                                      bp_std * self.s.BP_STD_FACTOR_STD, groups.shape,
-                                                      self.h.mm_to_px(self.s.NOISE_RESAMPLE_FACTOR_MM))
+                                                      bp_std * self.s.BP_STD_FACTOR_STD, groups.shape, 2)
 
         art_scar[np.nonzero(sf)] = sf[np.nonzero(sf)]
 
@@ -326,7 +326,7 @@ class ScarApplier:
         return art_scar, ann
 
     def apply(self):
-        num_cores = min(1, multiprocessing.cpu_count())
+        num_cores = min(10, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
 
         input = [[self, art_nr] for art_nr in range(self.s.NR_ART)]
