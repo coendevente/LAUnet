@@ -57,40 +57,33 @@ for nr in range(1, 31):
 
     union = ((utah + kcl + yale) > 0).astype(np.uint8)
 
-    imshow3D(
-        np.concatenate(
-            (
-                np.concatenate(
-                    (mri, staple * np.max(mri), kcl * np.max(mri)), axis=2
-                ),
-                np.concatenate(
-                    (yale * np.max(mri), utah * np.max(mri), union * np.max(mri)), axis=2
-                )
-            ), axis=1
-        )
-    )
-
     ann_path = 'C:/Users/cdv18/Documents/LAUnet/data/annotations/'
     out_path = '{}ann{}.nrrd'.format(ann_path, postfix)
 
     if nr in kcl_nrs:
         print('KCL')
-        sitk.WriteImage(
-            sitk.GetImageFromArray(
-                kcl
-            ), out_path
-        )
     if nr in utah_nrs:
         print('UTAH')
-        sitk.WriteImage(
-            sitk.GetImageFromArray(
-                utah
-            ), out_path
-        )
     if nr in yale_nrs:
         print('YALE')
-        sitk.WriteImage(
-            sitk.GetImageFromArray(
-                yale
-            ), out_path
-        )
+
+    # imshow3D(union)
+
+    sitk.WriteImage(
+        sitk.GetImageFromArray(
+            union
+        ), out_path
+    )
+
+    # imshow3D(
+    #     np.concatenate(
+    #         (
+    #             np.concatenate(
+    #                 (mri, staple * np.max(mri), kcl * np.max(mri)), axis=2
+    #             ),
+    #             np.concatenate(
+    #                 (yale * np.max(mri), utah * np.max(mri), union * np.max(mri)), axis=2
+    #             )
+    #         ), axis=1
+    #     )
+    # )
