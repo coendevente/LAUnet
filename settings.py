@@ -6,8 +6,8 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    # MODEL_NAME = 'union_annotations_with_aux'
-    MODEL_NAME = 'union_annotations_no_aux'
+    MODEL_NAME = 'union_annotations_with_aux'
+    # MODEL_NAME = 'union_annotations_no_aux'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -45,19 +45,21 @@ class Settings:
     EARLY_STOPPING = True
     PATIENTCE_ES = 4000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
-    DROPOUT = 0.5
+    DROPOUT = 0
     FEATURE_MAP_INC_RATE = 2.
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
     ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = True
+    USE_NORMALIZATION = True
 
     # Offline augmentation
     AUGMENT_ONLINE = False
     NR_AUG = 100
 
     # Testing and validation procedure
+    SAVE_METRICS = True
     VALTEST_SET = VALIDATION_SET  # OR TESTING_SET
     VALTEST_MODEL_NAMES = [MODEL_NAME]
     VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET

@@ -279,6 +279,16 @@ class Helper():
     def dice_coef_loss(self, y_true, y_pred):
         return 1-self.dice_coef(y_true, y_pred)
 
+    def normalize(self, im):
+        return (im - np.mean(im)) / np.std(im)
+
+    def normalize_list(self, ls_in):
+        ls_out = []
+        for im in ls_in:
+            ls_out.append(self.h.normalize(im))
+
+        return ls_out
+
     def weighted_binary_cross_entropy(self, y_true, y_pred):
         y_pred_bw = K.round(y_pred)
         m = y_true - (y_true == y_pred_bw)

@@ -62,6 +62,10 @@ class Test:
                 ps = ps[1:]
 
             p_reshaped = np.reshape(p, (1, ) + ps + (1, ))
+
+            if self.s.USE_NORMALIZATION:
+                p_reshaped = self.h.normalize(p_reshaped)
+
             prob_p = model.predict(p_reshaped)
 
             if self.s.USE_ANY_SCAR_AUX:

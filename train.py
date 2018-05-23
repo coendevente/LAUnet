@@ -331,6 +331,9 @@ class Train:
                 y_train_all['aux_output'] = y_train_aux
                 y_val_all['aux_output'] = y_val_aux
 
+            if self.s.USE_NORMALIZATION:
+                x_train = self.h.normalize_list(x_train)
+                x_val = self.h.normalize_list(x_val)
 
             train_loss = model.train_on_batch(x_train, y_train_all)
 
