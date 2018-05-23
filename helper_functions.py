@@ -282,10 +282,10 @@ class Helper():
     def normalize(self, im):
         return (im - np.mean(im)) / np.std(im)
 
-    def normalize_list(self, ls_in):
-        ls_out = []
-        for im in ls_in:
-            ls_out.append(self.h.normalize(im))
+    def normalize_multiple(self, ls_in):
+        ls_out = np.zeros(ls_in.shape)
+        for i in range(ls_in.shape[0]):
+            ls_out[i] = self.normalize(ls_in[i])
 
         return ls_out
 

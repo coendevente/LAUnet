@@ -6,7 +6,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'union_annotations_with_aux'
+    MODEL_NAME = 'with_norm'
     # MODEL_NAME = 'union_annotations_no_aux'
 
     # Path to folders
@@ -34,7 +34,7 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
-    UNET_DEPTH = 5
+    UNET_DEPTH = 4
     LEARNING_RATE = math.pow(10, -4)
     BATCH_SIZE = 4
     NR_BATCHES = 15000
