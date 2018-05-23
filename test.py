@@ -6,6 +6,7 @@ from online_augment import OnlineAugmenter
 import SimpleITK as sitk
 from imshow_3D import imshow3D
 import matplotlib.pyplot as plt
+import tensorflow as tf
 
 
 class Test:
@@ -89,7 +90,19 @@ class Test:
         count_image = np.zeros(sh)
         for i in range(len(patch_corners)):
             p = prob_patches[i]
-            c = patch_corners[i]
+            c = list(patch_corners[i])
+
+            for j in range(len(c)):
+                if c[j] < 0:
+                    c[j] = 0
+
+            # print('c == {}'.format(c))
+
+            if prob_image.shape[1] < p.shape[1]:
+                p = self.h.rescaleImage(p, prob_image.shape[1:])
+
+            # print(prob_image.shape)
+            # print(p.shape)
 
             prob_image[c[0]:c[0] + self.s.PATCH_SIZE[0],
                        c[1]:c[1] + self.s.PATCH_SIZE[1],
@@ -146,6 +159,9 @@ class Test:
         return metrics
 
     def test(self):
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
+        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
         x_all_path, y_all_path = self.h.getImagePaths(self.s.VALTEST_SET, False)
 
         x_full_all = self.h.loadImages(x_all_path)

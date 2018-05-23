@@ -30,7 +30,7 @@ def do_one_iteration(i):
 
     self.s.DEMO = False
 
-    for i in [1]:  # range(len(la_seg_list)):
+    for i in [3]:  # range(len(la_seg_list)):
         self.h.set_image_spacing_xy(image_spacing[i])
 
         no_scar_full = no_scar_list[i]
@@ -94,12 +94,12 @@ class ScarApplier:
             int(round(self.h.mm_to_px(self.s.WALL_THICKNESS_MAX_MM))) + 1
         )
 
-        return bw - sitk.GetArrayFromImage(
-            sitk.BinaryErode(
+        return sitk.GetArrayFromImage(
+            sitk.BinaryDilate(
                 sitk.GetImageFromArray(bw),
                 w
             )
-        )
+        ) - bw
 
     def get_centroid(self, bw):
         coords = np.argwhere(bw == 1)
@@ -200,11 +200,12 @@ class ScarApplier:
 
         impaint_locs = np.ones(dist.shape)
         impaint_locs[dist <= 0] = 0
-        impaint_locs[dist >= 2] = 0
+        impaint_locs[dist >= self.h.mm_to_px(self.s.IMPAINT_DISTANCE_MM)] = 0
 
         self.h.imshow_demo(impaint_locs)
 
-        blended_in = cv2.inpaint(mri.astype(np.uint16), impaint_locs.astype(np.uint8), 2, cv2.INPAINT_TELEA)
+        blended_in = cv2.inpaint(mri.astype(np.uint16), impaint_locs.astype(np.uint8), 0, cv2.INPAINT_TELEA)
+        # blended_in = mri
 
         return blended_in
 

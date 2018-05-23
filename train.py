@@ -11,10 +11,10 @@ from unet import UNet
 import os
 os.environ["PATH"] += os.pathsep + 'C:/Anaconda3/Library/bin/graphviz/'
 
-import tensorflow as tf
 from tensorflow.python.client import device_lib
 from keras.optimizers import *
 from keras.utils import plot_model
+import tensorflow as tf
 
 from online_augment import OnlineAugmenter
 from offline_augment import OfflineAugmenter
@@ -154,8 +154,8 @@ class Train:
                     self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
             ).astype(int)
 
-        imshow3D(y_patch)
-        imshow3D(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]])
+        # imshow3D(y_patch)
+        # imshow3D(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]])
 
         return x_patch, y_patch, True
 
@@ -249,13 +249,13 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
+        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100
         # model = self.buildUNet()
         # plot_model(model, to_file='model.png')
 
-        # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         self.h.s = self.s
 

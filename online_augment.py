@@ -70,19 +70,19 @@ class OnlineAugmenter():
         I_aug = np.zeros(I.shape).astype(np.uint16)
         J_aug = np.zeros(J.shape).astype(np.uint16)
 
-        if K:
+        if isinstance(K, np.ndarray):
             K_aug = np.zeros(J.shape).astype(np.uint16)
         for i in range(I.shape[0]):
             I_slice = sitk.GetImageFromArray(I[i])
             J_slice = sitk.GetImageFromArray(J[i])
 
-            if K:
+            if isinstance(K, np.ndarray):
                 K_slice = sitk.GetImageFromArray(K[i])
 
             I_aug_slice = self.resample(I_slice, affine)
             J_aug_slice = self.resample(J_slice, affine)
 
-            if K:
+            if isinstance(K, np.ndarray):
                 K_aug_slice = self.resample(K_slice, affine)
 
             I_aug_slice = sitk.AdditiveGaussianNoise(I_aug_slice, noise_mean, noise_std)
@@ -90,12 +90,12 @@ class OnlineAugmenter():
             I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
             J_aug[i] = sitk.GetArrayFromImage(J_aug_slice)
 
-            if K:
+            if isinstance(K, np.ndarray):
                 K_aug[i] = sitk.GetArrayFromImage(K_aug_slice)
 
         # I_aug, J_aug = (I, J)
 
-        if K is not None:
+        if isinstance(K, np.ndarray):
             return I_aug, J_aug, K_aug
         else:
             return I_aug, J_aug
