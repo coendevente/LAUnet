@@ -9,6 +9,8 @@ import time
 import matplotlib.pyplot as plt
 import glob
 import random
+from skimage import io
+from skimage.transform import resize
 
 
 class ArtificialPaths:
@@ -96,14 +98,23 @@ class Helper():
 
         return spacing
 
+    def rescaleImage(self, I, dims):
+        I_out = np.zeros(tuple([I.shape[0]]) + dims)
+        for i in range(I.shape[0]):
+            I_out[i] = resize(I[i], dims)
+
+        return I_out
+
     def cropImage(self, I, corner, dims):
         c = copy.copy(corner)
+
         for i in range(3):
             if c[i] < 0:
                 pad_elem = [(0, 0), (0, 0), (0, 0)]
                 pad_elem[i] = (-c[i], dims[i] + c[i] - I.shape[i])
                 pad_elem = tuple(pad_elem)
                 I = np.pad(I, pad_elem, 'constant', constant_values=0)
+
                 c[i] = 0
 
         d, h, w = dims

@@ -6,8 +6,9 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'with_norm'
+    # MODEL_NAME = 'ps_864'
     # MODEL_NAME = 'union_annotations_no_aux'
+    MODEL_NAME = 'union_annotations_with_aux'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -27,8 +28,9 @@ class Settings:
 
     # Patchsize
     # PATCH_SIZE = (3, 64, 64)
-    # PATCH_SIZE = (1, 864, 864)
-    PATCH_SIZE = (1, 384, 384)
+    PATCH_SIZE = (1, 864, 864)
+    # PATCH_SIZE = (1, 384, 384)
+    # PATCH_SIZE = (1, 512, 512)
     # PATCH_SIZE = (3, 128, 128)
     # PATCH_SIZE = (1, 400, 400)
     NR_DIM = 2  # Only 2D and 3D are supported
@@ -36,7 +38,7 @@ class Settings:
     # Training hyperparameters
     UNET_DEPTH = 4
     LEARNING_RATE = math.pow(10, -4)
-    BATCH_SIZE = 4
+    BATCH_SIZE = 1
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 8
     POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
@@ -51,7 +53,7 @@ class Settings:
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
     ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
-    USE_ANY_SCAR_AUX = True
+    USE_ANY_SCAR_AUX = False
     USE_NORMALIZATION = True
 
     # Offline augmentation

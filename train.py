@@ -28,6 +28,8 @@ from imshow_3D import imshow3D
 
 from shutil import copyfile
 
+from skimage import img_as_bool
+
 
 class Train:
     def __init__(self, s, h):
@@ -82,14 +84,20 @@ class Train:
 
         if self.s.AUGMENT_ONLINE:
             x, y = self.online_augmenter.augment(x[corner[0]:corner[0] + self.s.PATCH_SIZE[0]], y[corner[0]:corner[0]
-                                                 + self.s.PATCH_SIZE[0]], False)
+                                                 + self.s.PATCH_SIZE[0]], False, None)
             corner[0] = 0
 
         # print("x.shape == {}".format(x.shape))
         # print("y.shape == {}".format(y.shape))
 
-        x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
-        y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
+        if self.s.PATCH_SIZE[1] <= x.shape[1]:
+            x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
+            y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
+        elif self.s.PATCH_SIZE[1] > x.shape[1]:
+            x_patch = self.h.rescaleImage(x[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
+            y_patch = (
+                    self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
+            ).astype(int)
 
         return x_patch, y_patch
 
@@ -137,8 +145,17 @@ class Train:
             else:
                 corner[i] = nz_yx[i - 1] + random.randint(ranges[i - 1][0], ranges[i - 1][1])
 
-        x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
-        y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
+        if self.s.PATCH_SIZE[1] <= x.shape[1]:
+            x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
+            y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
+        elif self.s.PATCH_SIZE[1] > x.shape[1]:
+            x_patch = self.h.rescaleImage(x[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
+            y_patch = (
+                    self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
+            ).astype(int)
+
+        imshow3D(y_patch)
+        imshow3D(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]])
 
         return x_patch, y_patch, True
 
@@ -170,7 +187,7 @@ class Train:
         if self.s.AUGMENT_ONLINE:
             x_i, y_i = self.getRandomPositiveImage(x_full, y_full, set_idx)
             x_s, y_s = self.getRandomPositiveSlices(x_i, y_i)
-            x_s, y_s = self.online_augmenter.augment(x_s, y_s, False)
+            x_s, y_s = self.online_augmenter.augment(x_s, y_s, False, None)
         else:
             x_s, y_s = self.getRandomPositiveSlicesOffline(set_idx)
 
@@ -201,6 +218,7 @@ class Train:
             # print("positive_patch == {}".format(positive_patch))
             # print("x_j.shape == {}".format(x_j.shape))
             # print("y_j.shape == {}".format(y_j.shape))
+            # print("np.sum(y_j) == {}".format(np.sum(y_j)))
             # imshow3D(np.concatenate((x_j / np.max(x_j), y_j), axis=2))
 
             x.append(x_j)

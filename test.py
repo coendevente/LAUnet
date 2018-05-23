@@ -44,7 +44,10 @@ class Test:
     def patchesFromCorners(self, I, patch_corners):
         patches = []
         for c in patch_corners:
-            p = self.h.cropImage(I, c, self.s.PATCH_SIZE)
+            if self.s.PATCH_SIZE[1] <= I.shape[1]:
+                p = self.h.cropImage(I, c, self.s.PATCH_SIZE)
+            elif self.s.PATCH_SIZE[1] > I.shape[1]:
+                p = self.h.rescaleImage(I[c[0]:c[0] + self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
             patches.append(p)
         return patches
 
