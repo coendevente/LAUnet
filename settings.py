@@ -43,13 +43,13 @@ class Settings:
     NR_VAL_PATCH_PER_ITER = 8
     POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
-    AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
+    AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
     PATIENTCE_ES = 4000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
     DROPOUT = 0
     FEATURE_MAP_INC_RATE = 2.
-    LOSS_FUNCTION = 'weighted_binary_cross_entropy'  # 'weighted_binary_cross_entropy' OR 'dice'
+    LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
     ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
