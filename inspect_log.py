@@ -49,7 +49,7 @@ class LogInspector:
             except:
                 print('s.{:>25} = absent in this log file'.format(name))
 
-        w = 50
+        w = 300
         orig_lw = 1
         smooth_lw = 2
 
@@ -61,12 +61,12 @@ class LogInspector:
             plt.subplot(2, m, cnt)
             plt.plot(log['training'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.smooth(log['training'][i], w), lw=smooth_lw)
-            plt.title(i, fontsize=8)
+            plt.title('train: ' + i, fontsize=8)
 
             plt.subplot(2, m, m + cnt)
             plt.plot(log['validation'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.smooth(log['validation'][i], w), lw=smooth_lw)
-            plt.title(i, fontsize=8)
+            plt.title('val: ' + i, fontsize=8)
 
             cnt += 1
         plt.show()

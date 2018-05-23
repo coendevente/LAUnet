@@ -6,8 +6,8 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    # MODEL_NAME = 'aux_all_art'
-    MODEL_NAME = 'union_annotations'
+    # MODEL_NAME = 'union_annotations_with_aux'
+    MODEL_NAME = 'union_annotations_no_aux'
 
     # Path to folders
     PATH_TO_DATA = '../data/'
@@ -35,7 +35,7 @@ class Settings:
 
     # Training hyperparameters
     UNET_DEPTH = 5
-    LEARNING_RATE = math.pow(10, -3)
+    LEARNING_RATE = math.pow(10, -4)
     BATCH_SIZE = 4
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 8
@@ -43,7 +43,7 @@ class Settings:
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
     AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
-    PATIENTCE_ES = 2000  # Patience of early stopping
+    PATIENTCE_ES = 4000  # Patience of early stopping
     DROPOUT_AT_EVERY_LEVEL = False
     DROPOUT = 0.5
     FEATURE_MAP_INC_RATE = 2.
@@ -51,7 +51,7 @@ class Settings:
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
     ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
-    USE_ANY_SCAR_AUX = False
+    USE_ANY_SCAR_AUX = True
 
     # Offline augmentation
     AUGMENT_ONLINE = False

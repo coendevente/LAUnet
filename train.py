@@ -321,15 +321,20 @@ class Train:
                     ), axis=1
                 ))
 
-            y_train_aux = self.get_aux(y_train)
-            y_val_aux = self.get_aux(y_val)
+            y_train_all = {'main_output': y_train}
+            y_val_all = {'main_output': y_val}
 
-            # print('y_train_aux == {}'.format(y_train_aux))
-            # print('y_train_aux.shape == {}'.format(y_train_aux.shape))
+            if self.s.USE_ANY_SCAR_AUX:
+                y_train_aux = self.get_aux(y_train)
+                y_val_aux = self.get_aux(y_val)
 
-            train_loss = model.train_on_batch(x_train, {'main_output': y_train, 'aux_output': y_train_aux})
+                y_train_all['aux_output'] = y_train_aux
+                y_val_all['aux_output'] = y_val_aux
 
-            val_loss = model.test_on_batch(x_val, {'main_output': y_val, 'aux_output': y_val_aux})
+
+            train_loss = model.train_on_batch(x_train, y_train_all)
+
+            val_loss = model.test_on_batch(x_val, y_val_all)
 
             for m in range(len(model.metrics_names)):
                 log['training'][model.metrics_names[m]].append(train_loss[m])
