@@ -160,7 +160,7 @@ class Train:
         return x_patch, y_patch, True
 
     def getRandomPositiveSlicesOffline(self, set_idx):
-        if random.random() < self.s.ART_FRACTION:
+        if random.random() < self.s.ART_FRACTION and set(set_idx) != set(self.s.VALIDATION_SET):
             x_s_path, y_s_path = self.h.getRandomArtificialPositiveImagePath(False, set_idx)
 
             # print('x_pos_path == {}'.format(x_s_path))

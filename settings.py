@@ -28,7 +28,7 @@ class Settings:
 
     # Patchsize
     # PATCH_SIZE = (3, 64, 64)
-    PATCH_SIZE = (1, 512, 512)
+    PATCH_SIZE = (1, 480, 480)
     # PATCH_SIZE = (1, 384, 384)
     # PATCH_SIZE = (1, 512, 512)
     # PATCH_SIZE = (3, 128, 128)

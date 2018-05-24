@@ -27,7 +27,7 @@ class ArtificialPaths:
         if img_nr not in self.paths[xx]:
             self.paths[xx][img_nr] = glob.glob('{}de_{}_{}_*.nii.gz'.format(x_folder, xx, img_nr))
 
-            for i in range(len(self.paths[img_nr])):
+            for i in range(len(self.paths[xx][img_nr])):
                 self.paths[xx][img_nr][i] = self.paths[xx][img_nr][i].replace('\\', '/')
 
         return self.paths[xx][img_nr]
@@ -189,17 +189,27 @@ class Helper():
         y_folder = '{}annotations/'.format(aug_path)
         la_folder = '{}input/'.format(aug_path)
 
-        img_nrs = list(self.s.NO_SCAR_NRS_PRE) + set_idx
-        xxs = ['a'] * len(self.s.NO_SCAR_NRS_PRE) + ['b'] * set_idx
+        img_nrs_pre = list(self.s.NO_SCAR_NRS_PRE)
+        img_nrs_post = list(set(set_idx).intersection(self.s.NO_SCAR_NRS_POST))
 
-        random_i = random.randint(0, len(img_nrs))
+        img_nrs = img_nrs_pre + img_nrs_post
+        xxs = ['a'] * len(img_nrs_pre) + ['b'] * len(img_nrs_post)
+
+        random_i = random.randint(0, len(img_nrs) - 1)
         # art_nr = random.randint(0, self.s.NR_ART - 1)
+
+        # print('img_nrs == {}'.format(img_nrs))
+        # print('xxs == {}'.format(xxs))
 
         # t0 = time.time()
         # x_path = random.choice(
         #     glob.glob('{}de_{}_*_{}.nii.gz'.format(x_folder, img_nr, art_nr))
         # ).replace('\\', '/')
         # print('loading took {}'.format(time.time() - t0))
+
+        # print('random_i == {}'.format(random_i))
+        # print('xxs[random_i] == {}'.format(xxs[random_i]))
+        # print('img_nrs[random_i] == {}'.format(img_nrs[random_i]))
 
         x_path = random.choice(self.artificial_paths.get_image_slices(xxs[random_i], img_nrs[random_i]))
 

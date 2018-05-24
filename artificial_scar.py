@@ -19,7 +19,7 @@ def do_one_iteration(i):
     art_nr = i[1]
 
     nrs = list(self.s.NO_SCAR_NRS_PRE) + list(self.s.NO_SCAR_NRS_POST)
-    xx = ['a'] * len(self.s.NO_SCAR_NRS_POST) + ['b'] * len(self.s.NO_SCAR_NRS_POST)
+    xx = ['a'] * len(self.s.NO_SCAR_NRS_PRE) + ['b'] * len(self.s.NO_SCAR_NRS_POST)
 
     no_scar_paths, la_seg_paths, sf_seg_paths = self.h.getNoScarPaths(self.s.NO_SCAR_NRS_PRE, self.s.NO_SCAR_NRS_POST)
     no_scar_list = self.h.loadImages(no_scar_paths)
