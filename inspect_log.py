@@ -61,11 +61,17 @@ class LogInspector:
             plt.subplot(2, m, cnt)
             plt.plot(log['training'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.smooth(log['training'][i], w), lw=smooth_lw)
+
+            # plt.plot(np.log10(log['training'][i]), lw=orig_lw, alpha=.3)
+            # plt.plot(np.log10(self.smooth(log['training'][i], w)), lw=smooth_lw)
             plt.title('train: ' + i, fontsize=8)
 
             plt.subplot(2, m, m + cnt)
             plt.plot(log['validation'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.smooth(log['validation'][i], w), lw=smooth_lw)
+
+            # plt.plot(np.log10(log['validation'][i]), lw=orig_lw, alpha=.3)
+            # plt.plot(np.log10(self.smooth(log['validation'][i], w)), lw=smooth_lw)
             plt.title('val: ' + i, fontsize=8)
 
             cnt += 1
