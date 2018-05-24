@@ -14,23 +14,23 @@ from skimage.transform import resize
 
 
 class ArtificialPaths:
-    paths = {}
+    paths = {'a': {}, 'b': {}}
 
     def __init__(self, s, h):
         self.s = s
         self.h = h
 
-    def get_image_slices(self, img_nr):
+    def get_image_slices(self, xx, img_nr):
         aug_path = self.h.getArtPath()
         x_folder = '{}input/'.format(aug_path)
 
-        if img_nr not in self.paths:
-            self.paths[img_nr] = glob.glob('{}de_{}_*.nii.gz'.format(x_folder, img_nr))
+        if img_nr not in self.paths[xx]:
+            self.paths[xx][img_nr] = glob.glob('{}de_{}_{}_*.nii.gz'.format(x_folder, xx, img_nr))
 
             for i in range(len(self.paths[img_nr])):
-                self.paths[img_nr][i] = self.paths[img_nr][i].replace('\\', '/')
+                self.paths[xx][img_nr][i] = self.paths[xx][img_nr][i].replace('\\', '/')
 
-        return self.paths[img_nr]
+        return self.paths[xx][img_nr]
 
 
 class Helper():
@@ -189,10 +189,10 @@ class Helper():
         y_folder = '{}annotations/'.format(aug_path)
         la_folder = '{}input/'.format(aug_path)
 
-        img_nrs = list(np.array(self.s.NO_SCAR_NRS) - 1) + list(np.array(set_idx) + len(self.s.NO_SCAR_NRS) - 1)
-        # print(img_nrs)
+        img_nrs = list(self.s.NO_SCAR_NRS_PRE) + set_idx
+        xxs = ['a'] * len(self.s.NO_SCAR_NRS_PRE) + ['b'] * set_idx
 
-        img_nr = random.choice(img_nrs)
+        random_i = random.randint(0, len(img_nrs))
         # art_nr = random.randint(0, self.s.NR_ART - 1)
 
         # t0 = time.time()
@@ -201,7 +201,7 @@ class Helper():
         # ).replace('\\', '/')
         # print('loading took {}'.format(time.time() - t0))
 
-        x_path = random.choice(self.artificial_paths.get_image_slices(img_nr))
+        x_path = random.choice(self.artificial_paths.get_image_slices(xxs[random_i], img_nrs[random_i]))
 
         y_path = x_path.replace(x_folder, y_folder)
         y_path = y_path.replace('de_', 'ann_')
@@ -215,7 +215,7 @@ class Helper():
         elif self.s.GROUND_TRUTH == 'scar_fibrosis':
             return x_path, y_path
 
-    def getArtImagesPath(self, img_nr, art_nr, z, get_all):
+    def getArtImagesPath(self, xx, img_nr, art_nr, z, get_all):
         aug_path = self.getArtPath()
 
         x_folder = '{}input/'.format(aug_path)
@@ -229,9 +229,9 @@ class Helper():
         if not os.path.exists(la_folder):
             os.makedirs(la_folder)
 
-        x_path = '{}de_{}_{}_{}.nii.gz'.format(x_folder, img_nr, z, art_nr)
-        y_path = '{}ann_{}_{}_{}.nii.gz'.format(y_folder, img_nr, z, art_nr)
-        la_path = '{}la_seg_{}_{}_{}.nii.gz'.format(la_folder, img_nr, z, art_nr)
+        x_path = '{}de_{}_{}_{}_{}.nii.gz'.format(x_folder, xx, img_nr, z, art_nr)
+        y_path = '{}ann_{}_{}_{}_{}.nii.gz'.format(y_folder, xx, img_nr, z, art_nr)
+        la_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(la_folder, xx, img_nr, z, art_nr)
 
         if get_all:
             return x_path, y_path, la_path
@@ -252,19 +252,19 @@ class Helper():
 
         return n_neg / n_pos
 
-    def getNoScarPaths(self, nrs):
+    def getNoScarPaths(self, nrs_pre, nrs_post):
         no_scar_paths = []
         la_seg_paths = []
         sf_seg_paths = []
-        # for i in nrs:
-        #     p_folder = self.s.PATH_TO_NO_SCAR_PRE + 'p{}/'.format(i)
-        #     sf_folder = '{}annotations/'.format(self.s.PATH_TO_DATA)
-        #
-        #     no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
-        #     la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
-        #     sf_seg_paths.append(sf_folder + 'ann_a_{}.nrrd'.format(i))
+        for i in nrs_pre:
+            p_folder = self.s.PATH_TO_NO_SCAR_PRE + 'p{}/'.format(i)
+            sf_folder = '{}annotations/'.format(self.s.PATH_TO_DATA)
 
-        for i in nrs:
+            no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
+            la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
+            sf_seg_paths.append(sf_folder + 'staple_a_{}.gipl'.format(i))
+
+        for i in nrs_post:
             p_folder = self.s.PATH_TO_NO_SCAR_POST + 'p{}/'.format(i)
             sf_folder = '{}annotations/'.format(self.s.PATH_TO_DATA)
 
@@ -291,7 +291,8 @@ class Helper():
         return 1-self.dice_coef(y_true, y_pred)
 
     def normalize(self, im):
-        return (im - np.mean(im)) / np.std(im)
+        # return (im - np.mean(im)) / np.std(im)
+        return (im - np.min(im)) / (np.max(im) - np.min(im))
 
     def normalize_multiple(self, ls_in):
         ls_out = np.zeros(ls_in.shape)

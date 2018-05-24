@@ -97,7 +97,7 @@ class OfflineAugmenter:
             for j in range(self.s.NR_AUG):
                 inputs.append([i, j, x_full_all[i], y_full_all[i], la_full_all[i], t0, len(x_full_all)])
 
-        num_cores = min(6, multiprocessing.cpu_count())
+        num_cores = min(8, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
         Parallel(n_jobs=num_cores)(delayed(self.doOneAug)(i) for i in inputs)
         # for i in inputs:

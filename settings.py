@@ -6,7 +6,7 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'ps_512'
+    MODEL_NAME = 'art_scar_with_blur'
     # MODEL_NAME = 'union_annotations_no_aux'
     # MODEL_NAME = 'union_annotations_with_aux'
 
@@ -36,12 +36,12 @@ class Settings:
     NR_DIM = 2  # Only 2D and 3D are supported
 
     # Training hyperparameters
-    UNET_DEPTH = 4
-    LEARNING_RATE = math.pow(10, -3)
+    UNET_DEPTH = 5
+    LEARNING_RATE = math.pow(10, -4)
     BATCH_SIZE = 4
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 8
-    POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
+    POS_NEG_PATCH_PROP = .75  # with 1, all is positive, with 0 all is negative, in between values give a mix
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
     AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True
@@ -52,7 +52,7 @@ class Settings:
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
-    ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    ART_FRACTION = .75  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = False
     USE_NORMALIZATION = True
 
@@ -101,19 +101,25 @@ class Settings:
     # Scar applier
     PATH_TO_NO_SCAR_POST = '../data/input/post/'
     PATH_TO_NO_SCAR_PRE = '../data/input/pre/'
-    NO_SCAR_NRS = range(1, 31)  # 18, 16, 2
-    NR_ART = 24
+    NO_SCAR_NRS_PRE = range(1, 31)
+    NO_SCAR_NRS_PRE = [x for x in NO_SCAR_NRS_PRE if x not in [3, 5, 7, 9, 11, 12, 19, 20, 23, 25, 26, 28]]
+    NO_SCAR_NRS_POST = range(1, 31)  # 18, 16, 2
+    NO_SCAR_NRS_POST = [x for x in NO_SCAR_NRS_POST if x not in [7, 17, 23, 26, 21, 3, 12, 14, 28, 5, 18]]
+
+    NR_ART = 100
     PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
     WALL_THICKNESS_MIN_MM = 1  # mm
-    WALL_THICKNESS_MAX_MM = 1  # mm
-    NB_GROUPS_ODDS = [0, 0, 1, 0]
+    WALL_THICKNESS_MAX_MM = 2  # mm
+    NB_GROUPS_ODDS = [0, .2, .6, .2]
     ANGLE_MIN = 10
-    ANGLE_MAX = 30
+    ANGLE_MAX = 40
     assert abs(np.sum(NB_GROUPS_ODDS) - 1) < 0.00001
-    BP_STD_FACTOR_MEAN = 4
+    BP_STD_FACTOR_MEAN_MIN = 2
+    BP_STD_FACTOR_MEAN_MAX = 4
     BP_STD_FACTOR_STD = 1
     MAX_SCALE_EDGE_MM = .75  # mm
-    SF_REMOVE_DILATION_MM = 2  # mm
+    SF_REMOVE_DILATION_MM = 1  # mm
     NOISE_RESAMPLE_FACTOR_MM = 1.3  # mm
-    IMPAINT_DISTANCE_MM = .5
-
+    INPAINT_DISTANCE_MM = 2
+    INPAINT_NEIGHBOURHOOD = .5
+    BLUR_SCALE_MM = .8  # mm

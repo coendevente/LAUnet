@@ -88,6 +88,7 @@ class Test:
     def fullImageFromPatches(self, sh, prob_patches, patch_corners):
         prob_image = np.zeros(sh)
         count_image = np.zeros(sh)
+
         for i in range(len(patch_corners)):
             p = prob_patches[i]
             c = list(patch_corners[i])
@@ -158,6 +159,8 @@ class Test:
 
         return metrics
 
+    # def save_metrics(self, metric_means, metric_sds, all_dice):
+
     def test(self):
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
@@ -180,6 +183,13 @@ class Test:
                     for j in [-1] + list(range(self.s.VALTEST_AUG_NR)):
                         input = x_full_all[i]
                         anno = y_full_all[i]
+
+                        if input.shape[1] < self.s.PATCH_SIZE[1]:
+                            input = self.h.rescaleImage(input, self.s.PATCH_SIZE[1:])
+                            anno = (self.h.rescaleImage(anno, self.s.PATCH_SIZE[1:]) > 0).astype(np.uint8)
+
+                        # sitk.WriteImage(sitk.GetImageFromArray(input), 'input.nrrd')
+                        # sitk.WriteImage(sitk.GetImageFromArray(anno), 'anno.nrrd')
 
                         if j != -1:  # No augmentation
                             input, anno = OnlineAugmenter(self.s, self.h).augment(input, anno, False)
@@ -236,11 +246,11 @@ class Test:
             print('Means of metrics: {}'.format(metric_means[model_name]))
             print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
 
-        allDice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
-        print('All Dice values: {}'.format(allDice))
+        all_dice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
+        print('All Dice values: {}'.format(all_dice))
 
         # plt.figure()
-        # plt.hist(allDice)
+        # plt.hist(all_dice)
         # plt.show()
 
         return metric_means, metric_sds

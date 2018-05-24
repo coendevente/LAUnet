@@ -18,7 +18,10 @@ def do_one_iteration(i):
     self = i[0]
     art_nr = i[1]
 
-    no_scar_paths, la_seg_paths, sf_seg_paths = self.h.getNoScarPaths(self.s.NO_SCAR_NRS)
+    nrs = list(self.s.NO_SCAR_NRS_PRE) + list(self.s.NO_SCAR_NRS_POST)
+    xx = ['a'] * len(self.s.NO_SCAR_NRS_POST) + ['b'] * len(self.s.NO_SCAR_NRS_POST)
+
+    no_scar_paths, la_seg_paths, sf_seg_paths = self.h.getNoScarPaths(self.s.NO_SCAR_NRS_PRE, self.s.NO_SCAR_NRS_POST)
     no_scar_list = self.h.loadImages(no_scar_paths)
     la_seg_list = self.h.loadImages(la_seg_paths)
     sf_seg_list = self.h.loadImages(sf_seg_paths)
@@ -28,60 +31,77 @@ def do_one_iteration(i):
 
     print(no_scar_paths)
 
-    self.s.DEMO = False
+    self.s.DEMO = True
 
-    for i in [3]:  # range(len(la_seg_list)):
+    for i in range(len(la_seg_list)):
         self.h.set_image_spacing_xy(image_spacing[i])
 
         no_scar_full = no_scar_list[i]
         la_seg_full = la_seg_list[i]
         sf_seg_full = sf_seg_list[i]
 
-        art_scar_full = np.zeros(no_scar_full.shape)
+        art_scar_full = copy.copy(no_scar_full)
         ann_full = np.zeros(no_scar_full.shape)
 
         for j in range(no_scar_full.shape[0]):
 
             print('i, art_nr, j = {}, {}, {}'.format(i, art_nr, j))
+            print('nrs[i] == {}'.format(nrs[i]))
             no_scar = no_scar_full[j]
             la_seg = la_seg_full[j]
             sf_seg = sf_seg_full[j]
 
+            if np.sum(la_seg) == 0:
+                continue
+            bp_mean, bp_std = self.get_bp_info(no_scar, la_seg)
+
+            la_seg = (la_seg + self.dilate(sf_seg, int(round(self.h.mm_to_px(self.s.SF_REMOVE_DILATION_MM))))
+                      > 0).astype(np.uint8)
             la_seg = self.pre_process_seg(la_seg)
 
-            scar_removed, sf_seg_dilated = self.remove_scar(no_scar, sf_seg, la_seg)
-            scar_removed = self.post_process_art_scar(scar_removed, sf_seg_dilated)
+            scar_removed, la_seg_dilated = self.remove_scar(no_scar, la_seg, la_seg, bp_mean, bp_std)
+            scar_removed = self.post_process_art_scar(scar_removed, la_seg_dilated)
+            art_scar_full[j], ann_full[j] = self.add_scar(scar_removed, la_seg_dilated, bp_mean, bp_std)
 
-            art_scar_full[j] = scar_removed
-            art_scar_full[j], ann_full[j] = self.add_scar(scar_removed, la_seg)
+            # scar_removed, sf_seg_dilated = self.remove_scar(no_scar, sf_seg, la_seg, bp_mean, bp_std)
+            # scar_removed = self.post_process_art_scar(scar_removed, sf_seg_dilated)
+            # art_scar_full[j], ann_full[j] = self.add_scar(scar_removed, sf_seg_dilated)
 
             art_scar_full[j] = self.post_process_art_scar(art_scar_full[j], ann_full[j])
+
+        for j in range(no_scar_full.shape[0]):
+            art_scar_full[j] = sitk.GetArrayFromImage(
+                sitk.DiscreteGaussian(
+                    sitk.GetImageFromArray(art_scar_full[j]), self.h.mm_to_px(self.s.BLUR_SCALE_MM)
+                )
+            )
 
         art_scar_aug, ann_aug, la_seg_aug = OnlineAugmenter(self.s, self.h).augment(
             art_scar_full, ann_full, False, la_seg_full)
 
-        imshow3D(
-            np.concatenate(
-                (np.concatenate(
-                    (no_scar_full, sf_seg_full * np.max(art_scar_aug)
-                     ), axis=2
-                ),
-                np.concatenate(
-                    (art_scar_aug, ann_aug * np.max(art_scar_aug)
-                     ), axis=2
-                )), axis=1
-            )
-        )
+        # imshow3D(
+        #     np.concatenate(
+        #         (np.concatenate(
+        #             (no_scar_full, sf_seg_full * np.max(art_scar_aug)
+        #              ), axis=2
+        #         ),
+        #         np.concatenate(
+        #             (art_scar_aug, ann_aug * np.max(art_scar_aug)
+        #              ), axis=2
+        #         )), axis=1
+        #     )
+        # )
 
         for j in range(no_scar_full.shape[0]):
             if np.sum(ann_aug[j]) == 0:
                 continue
 
-            art_scar_path, ann_path, la_path = self.h.getArtImagesPath(i, art_nr, j, True)
+            art_scar_path, ann_path, la_path = self.h.getArtImagesPath(xx[i], nrs[i], art_nr, j, True)
 
             sitk.WriteImage(sitk.GetImageFromArray(art_scar_aug[j]), art_scar_path)
             sitk.WriteImage(sitk.GetImageFromArray(ann_aug[j]), ann_path)
             sitk.WriteImage(sitk.GetImageFromArray(la_seg_aug[j]), la_path)
+
 
 class ScarApplier:
     def __init__(self, s, h):
@@ -94,12 +114,12 @@ class ScarApplier:
             int(round(self.h.mm_to_px(self.s.WALL_THICKNESS_MAX_MM))) + 1
         )
 
-        return sitk.GetArrayFromImage(
-            sitk.BinaryDilate(
+        return bw - sitk.GetArrayFromImage(
+            sitk.BinaryErode(
                 sitk.GetImageFromArray(bw),
                 w
             )
-        ) - bw
+        )
 
     def get_centroid(self, bw):
         coords = np.argwhere(bw == 1)
@@ -124,11 +144,13 @@ class ScarApplier:
         return group
 
     def pre_process_seg(self, bw):
+        strel_size = 5
+
         bw = sitk.GetArrayFromImage(
             sitk.BinaryMorphologicalClosing(
                 sitk.BinaryMorphologicalOpening(
-                    sitk.GetImageFromArray(bw), 2
-                ), 2
+                    sitk.GetImageFromArray(bw),
+                ), strel_size
             )
         )
         return bw
@@ -200,11 +222,17 @@ class ScarApplier:
 
         impaint_locs = np.ones(dist.shape)
         impaint_locs[dist <= 0] = 0
-        impaint_locs[dist >= self.h.mm_to_px(self.s.IMPAINT_DISTANCE_MM)] = 0
+        impaint_locs[dist >= self.h.mm_to_px(self.s.INPAINT_DISTANCE_MM)] = 0
 
-        self.h.imshow_demo(impaint_locs)
+        if np.sum(impaint_locs) > 0:
+            self.h.imshow_demo(impaint_locs)
 
-        blended_in = cv2.inpaint(mri.astype(np.uint16), impaint_locs.astype(np.uint8), 0, cv2.INPAINT_TELEA)
+        blended_in = cv2.inpaint(
+            mri.astype(np.uint16),
+            impaint_locs.astype(np.uint8),
+            self.h.mm_to_px(self.s.INPAINT_NEIGHBOURHOOD),
+            cv2.INPAINT_TELEA
+        )
         # blended_in = mri
 
         return blended_in
@@ -257,13 +285,11 @@ class ScarApplier:
         return r
 
     # Remove the scar that could be in no_scar
-    def remove_scar(self, no_scar, sf_seg, la_seg):
+    def remove_scar(self, no_scar, sf_seg, la_seg, bp_mean, bp_std):
         if np.sum(la_seg) == 0:
             return no_scar, sf_seg
 
         scar_removed = copy.copy(no_scar)
-
-        bp_mean, bp_std = self.get_bp_info(scar_removed, la_seg)
 
         # print('bp_mean == {}'.format(bp_mean))
         # print('bp_std == {}'.format(bp_std))
@@ -286,10 +312,10 @@ class ScarApplier:
         return scar_removed, sf_seg_dilated
 
     def post_process_art_scar(self, art_scar, ann):
-        art_scar = self.blend_in(art_scar, ann)
+        # art_scar = self.blend_in(art_scar, ann)
         return art_scar
 
-    def add_scar(self, no_scar, la_seg):
+    def add_scar(self, no_scar, la_seg, bp_mean, bp_std):
         art_scar = no_scar
         ann = np.zeros(no_scar.shape)
 
@@ -297,6 +323,8 @@ class ScarApplier:
             return art_scar, ann
 
         wall = self.get_wall(la_seg)
+
+        # self.h.imshow_demo(wall)
 
         centroid = self.get_centroid(la_seg)
 
@@ -315,9 +343,9 @@ class ScarApplier:
 
         groups = (groups > 0).astype(int)
 
-        bp_mean, bp_std = self.get_bp_info(no_scar, la_seg)
+        bp_std_factor_mean = random.uniform(self.s.BP_STD_FACTOR_MEAN_MIN, self.s.BP_STD_FACTOR_MEAN_MAX)
 
-        sf = groups * self.get_resampled_random_noise(bp_mean + self.s.BP_STD_FACTOR_MEAN * bp_std,
+        sf = groups * self.get_resampled_random_noise(bp_mean + bp_std_factor_mean * bp_std,
                                                       bp_std * self.s.BP_STD_FACTOR_STD, groups.shape, 2)
 
         art_scar[np.nonzero(sf)] = sf[np.nonzero(sf)]
@@ -327,12 +355,12 @@ class ScarApplier:
         return art_scar, ann
 
     def apply(self):
-        num_cores = min(10, multiprocessing.cpu_count())
+        num_cores = min(8, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
 
         input = [[self, art_nr] for art_nr in range(self.s.NR_ART)]
-        do_one_iteration(input[0])
-        # Parallel(n_jobs=num_cores)(delayed(do_one_iteration)(i) for i in input)
+        # do_one_iteration(input[0])
+        Parallel(n_jobs=num_cores)(delayed(do_one_iteration)(i) for i in input)
 
 
 if __name__ == '__main__':

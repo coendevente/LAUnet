@@ -14,7 +14,8 @@ class DataExploration:
         nrOfOnes = {'a': [[], []], 'b': [[], []]}
         total_pixels = {'a': 0, 'b': 0}
 
-        for xx_name in [['a', 'pre'], ['b', 'post']]:
+        # for xx_name in [['a', 'pre'], ['b', 'post']]:
+        for xx_name in [['b', 'post']]:
             # Get image sizes
             allShapes = {}
             allYXDim = {}
@@ -24,7 +25,7 @@ class DataExploration:
                     continue
                     # Sizes annotation and input of i == 20 are not equal
 
-                path_ann = '{0}annotations/staple_{1}_{2}.gipl'.format(self.s.PATH_TO_DATA, xx_name[0], i)
+                path_ann = '{0}annotations/ann_{1}_{2}.nrrd'.format(self.s.PATH_TO_DATA, xx_name[0], i)
                 path_input = '{0}input/{2}/p{1}/de_{3}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i, xx_name[1], xx_name[0])
 
                 I_ann = sitk.GetArrayFromImage(sitk.ReadImage(path_ann))
@@ -37,7 +38,8 @@ class DataExploration:
                 sh_input = I_input.shape
 
                 if sh_ann != sh_input:
-                    raise Exception('size of {} != size of {}, ({} != {})'.format(path_ann, path_input, sh_ann, sh_input))
+                    raise Exception('size of {} != size of {}, ({} != {})'.format(path_ann, path_input, sh_ann,
+                                                                                  sh_input))
 
                 if sh_ann in allShapes:
                     allShapes[sh_ann][0] += 1
@@ -69,14 +71,14 @@ class DataExploration:
                 # I_out = sitk.GetImageFromArray(np.array(np.concatenate(toShow, axis=1) * 255, dtype=np.uint8))
                 # sitk.WriteImage(I_out, "{0}data_exploration/{1}_shape={2}.png".format(PATH_TO_RESULTS, xx_name[1], yx))
 
-        print("Pre: Minimum nr of positive voxels: {} has {}".format(np.argmin(nrOfOnes['a'])+1, np.min(nrOfOnes['a'])))
-        print("Pre: Maximum nr of positive voxels: {} has {}".format(np.argmax(nrOfOnes['a'])+1, np.max(nrOfOnes['a'])))
+        # print("Pre: Minimum nr of positive voxels: {} has {}".format(np.argmin(nrOfOnes['a'])+1, np.min(nrOfOnes['a'])))
+        # print("Pre: Maximum nr of positive voxels: {} has {}".format(np.argmax(nrOfOnes['a'])+1, np.max(nrOfOnes['a'])))
 
         print("Post: Minimum nr of positive voxels: {} has {}".format(np.argmin(nrOfOnes['b'])+1, np.min(nrOfOnes['b'])))
         print("Post: Maximum nr of positive voxels: {} has {}".format(np.argmax(nrOfOnes['b'])+1, np.max(nrOfOnes['b'])))
 
-        print("Pre: Total number of foreground pixels: {}".format(np.sum(nrOfOnes['a'])))
-        print("Pre: Total number of pixels: {}".format(total_pixels['a']))
+        # print("Pre: Total number of foreground pixels: {}".format(np.sum(nrOfOnes['a'])))
+        # print("Pre: Total number of pixels: {}".format(total_pixels['a']))
 
         print("Post: Total number of foreground pixels: {}".format(np.sum(nrOfOnes['b'])))
         print("Post: Total number of pixels: {}".format(total_pixels['b']))

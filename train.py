@@ -256,7 +256,6 @@ class Train:
         # model = self.buildUNet()
         # plot_model(model, to_file='model.png')
 
-
         self.h.s = self.s
 
         print(device_lib.list_local_devices())
