@@ -280,6 +280,9 @@ class Train:
         x_full_all = self.h.loadImages(x_all_path)
         y_full_all = self.h.loadImages(y_all_path)
 
+        self.x_full_all = x_full_all
+        self.y_full_all = y_full_all
+
         # Divide full images in training and validation
         x_full_train = [x_full_all[i - 1] for i in self.s.TRAINING_SET]
         y_full_train = [y_full_all[i - 1] for i in self.s.TRAINING_SET]

@@ -61,7 +61,7 @@ class Settings:
 
     # Offline augmentation
     AUGMENT_ONLINE = False
-    NR_AUG = 100
+    NR_AUG = 1
 
     # Testing and validation procedure
     SAVE_METRICS = True

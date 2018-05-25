@@ -305,6 +305,7 @@ class Helper():
 
     def normalize(self, im):
         # return (im - np.mean(im)) / np.std(im)
+        print(im.shape)
         return (im - np.min(im)) / (np.max(im) - np.min(im))
 
     def normalize_multiple(self, ls_in):
