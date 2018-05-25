@@ -30,6 +30,9 @@ from shutil import copyfile
 
 from skimage import img_as_bool
 
+import multiprocessing
+from joblib import Parallel, delayed
+
 
 class Train:
     def __init__(self, s, h):
@@ -62,7 +65,7 @@ class Train:
 
         return model
 
-    def getRandomPatch(self, x_full, y_full, set_idx):
+    def getRandomNegativePatch(self, x_full, y_full, set_idx):
         i = random.randint(0, len(x_full) - 1)
 
         if self.s.AUGMENT_ONLINE:
@@ -70,7 +73,11 @@ class Train:
             y = y_full[i]
         else:
             zl = self.sliceInformation[set_idx[i]].shape[0]
-            s_nr = random.randint(0, zl - 1 - self.s.PATCH_SIZE[0])
+
+            first = True
+            while first or self.sliceInformation[set_idx[i]][s_nr]:
+                first = False
+                s_nr = random.randint(0, zl - 1 - self.s.PATCH_SIZE[0])
 
             x, y = self.offline_augmenter.offline_augment(set_idx[i], range(s_nr, s_nr + self.s.PATCH_SIZE[0]), False)
 
@@ -98,6 +105,10 @@ class Train:
             y_patch = (
                     self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
             ).astype(int)
+
+        if np.sum(y_patch) > 0:
+            print('RETRY NEGATIVE PATCH')
+            x_patch, y_patch = self.getRandomNegativePatch(x_full, y_full, set_idx)
 
         return x_patch, y_patch
 
@@ -207,13 +218,16 @@ class Train:
     def getRandomPatches(self, x_full, y_full, nr, set_idx):
         x = []
         y = []
+
         for j in range(nr):
             positive_patch = random.random() < self.s.POS_NEG_PATCH_PROP  # Whether batch should be positive
 
             if not positive_patch:
-                x_j, y_j = self.getRandomPatch(x_full, y_full, set_idx)
+                x_j, y_j = self.getRandomNegativePatch(x_full, y_full, set_idx)
             else:
                 x_j, y_j = self.getRandomPositivePatch(x_full, y_full, set_idx)
+
+            x_j = self.h.pre_process(x_j)
 
             # print("positive_patch == {}".format(positive_patch))
             # print("x_j.shape == {}".format(x_j.shape))
@@ -249,7 +263,7 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.75)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100
@@ -327,16 +341,6 @@ class Train:
             x_val, y_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
                                                  self.s.VALIDATION_SET)
             print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
-
-            self.s.DEMO = False
-
-            for j in range(self.s.BATCH_SIZE):
-                self.h.imshow_demo(np.concatenate(
-                    (
-                        np.reshape(x_train[j], x_train[j].shape[:-1]),
-                        np.reshape(y_train[j], y_train[j].shape[:-1]) * np.max(x_train[j])
-                    ), axis=1
-                ))
 
             if self.s.USE_NORMALIZATION:
                 x_train = self.h.normalize_multiple(x_train)

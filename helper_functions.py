@@ -84,7 +84,10 @@ class Helper():
     def loadImages(self, pathNames):
         im_out = []
         for p in pathNames:
-            im = sitk.GetArrayFromImage(sitk.ReadImage(p))
+            im_sitk = sitk.ReadImage(p)
+            im = sitk.GetArrayFromImage(im_sitk)
+
+            self.set_image_spacing_xy(self.loadImageSpacing([p])[0])
             im_out.append(im)
 
         return im_out
@@ -310,6 +313,18 @@ class Helper():
             ls_out[i] = self.normalize(ls_in[i])
 
         return ls_out
+
+    def pre_process(self, x):
+        if not self.s.USE_PRE_PROCESSING:
+            return x
+
+        x_pre_processed = sitk.GetArrayFromImage(
+            sitk.RecursiveGaussian(
+                sitk.GetImageFromArray(x), self.mm_to_px(self.s.BLUR_SCALE_MM)
+            )
+        )
+
+        return x_pre_processed
 
     def weighted_binary_cross_entropy(self, y_true, y_pred):
         y_pred_bw = K.round(y_pred)

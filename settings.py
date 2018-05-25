@@ -7,7 +7,7 @@ class Settings:
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
     # MODEL_NAME = 'art_scar_with_blur'
-    MODEL_NAME = 'art_scar_with_blur_frac_1'
+    MODEL_NAME = 'art_frac_1_blur_everything'
     # MODEL_NAME = 'union_annotations_no_aux'
     # MODEL_NAME = 'union_annotations_with_aux'
 
@@ -36,13 +36,15 @@ class Settings:
     # PATCH_SIZE = (1, 400, 400)
     NR_DIM = 2  # Only 2D and 3D are supported
 
+    USE_PRE_PROCESSING = True
+
     # Training hyperparameters
     UNET_DEPTH = 5
     LEARNING_RATE = math.pow(10, -4)
     BATCH_SIZE = 4
     NR_BATCHES = 15000
     NR_VAL_PATCH_PER_ITER = 8
-    POS_NEG_PATCH_PROP = .75  # with 1, all is positive, with 0 all is negative, in between values give a mix
+    POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
     FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
     AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to 'auto'
     EARLY_STOPPING = True

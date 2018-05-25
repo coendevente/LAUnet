@@ -49,6 +49,8 @@ class Test:
                 p = self.h.cropImage(I, c, self.s.PATCH_SIZE)
             elif self.s.PATCH_SIZE[1] > I.shape[1]:
                 p = self.h.rescaleImage(I[c[0]:c[0] + self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
+
+            p = self.h.pre_process(p)
             patches.append(p)
         return patches
 
