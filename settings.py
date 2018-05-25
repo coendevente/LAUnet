@@ -6,7 +6,8 @@ class Settings:
     GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
     PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
     PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-    MODEL_NAME = 'art_scar_with_blur'
+    # MODEL_NAME = 'art_scar_with_blur'
+    MODEL_NAME = 'art_scar_with_blur_frac_1'
     # MODEL_NAME = 'union_annotations_no_aux'
     # MODEL_NAME = 'union_annotations_with_aux'
 
@@ -52,7 +53,7 @@ class Settings:
     LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
     MAIN_OUTPUT_LOSS_WEIGHT = .8
     AUX_OUTPUT_LOSS_WEIGHT = .2
-    ART_FRACTION = .75  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+    ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
     USE_ANY_SCAR_AUX = False
     USE_NORMALIZATION = True
 
@@ -70,7 +71,7 @@ class Settings:
     BIN_THRESH = .5  # Threshold to binarize the probability images
     METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN', 'volume_diff']
 
-    CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras and
+    CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras and
     # results will be saved to the disk. If False, the probability images will be loaded from disk. An error will occur
     # if these images do not exist on the disk.
 
