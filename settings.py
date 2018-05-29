@@ -10,7 +10,7 @@ class Settings:
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
         # self.MODEL_NAME = 'art_scar_with_blur'
         # self.MODEL_NAME = 'art_frac_1_blur_everything'
-        self.MODEL_NAME = 'gs_art_fraction/5'
+        self.MODEL_NAME = 'aug_with_contrast'
         # self.MODEL_NAME = 'ps_512_lr_1e4'
         # MODEL_NAME = 'union_annotations_no_aux'
         # MODEL_NAME = 'union_annotations_with_aux'
@@ -60,13 +60,13 @@ class Settings:
         self.LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
         self.MAIN_OUTPUT_LOSS_WEIGHT = .8
         self.AUX_OUTPUT_LOSS_WEIGHT = .2
-        self.ART_FRACTION = 1  # with 1, all is artificial, with 0 all is natural, in between values give a mix
+        self.ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
         self.USE_ANY_SCAR_AUX = False
         self.USE_NORMALIZATION = True
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
-        self.NR_AUG = 1
+        self.NR_AUG = 100
 
         # Testing and validation procedure
         self.SAVE_METRICS = True
@@ -85,7 +85,7 @@ class Settings:
 
         # Data augmentation
 
-        self.FLIP_PROB = .5
+        self.FLIP_PROB = 0.5
 
         self.ROT_MAX = 20
         self.ROT_MIN = -self.ROT_MAX
@@ -107,6 +107,9 @@ class Settings:
         self.NOISE_STD_MIN = 1
         self.NOISE_STD_MAX = 15
 
+        self.CONTRAST_POWER_MIN = 0.75
+        self.CONTRAST_POWER_MAX = 2
+
         # Scar applier
         self.PATH_TO_NO_SCAR_POST = '../data/input/post/'
         self.PATH_TO_NO_SCAR_PRE = '../data/input/pre/'
@@ -116,7 +119,7 @@ class Settings:
         self.NO_SCAR_NRS_POST = range(1, 31)  # 18, 16, 2
         self.NO_SCAR_NRS_POST = [x for x in self.NO_SCAR_NRS_POST if x not in [7, 17, 23, 26, 21, 3, 12, 14, 28, 5, 18]]
 
-        self.NR_ART = 1
+        self.NR_ART = 100
         self.PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
         self.WALL_THICKNESS_MIN_MM = 1  # mm
         self.WALL_THICKNESS_MAX_MM = 2  # mm

@@ -305,7 +305,7 @@ class Helper():
 
     def normalize(self, im):
         # return (im - np.mean(im)) / np.std(im)
-        print(im.shape)
+        # print(im.shape)
         return (im - np.min(im)) / (np.max(im) - np.min(im))
 
     def normalize_multiple(self, ls_in):
@@ -355,3 +355,12 @@ class Helper():
         plt.figure()
         plt.imshow(img, cmap='Greys_r')
         plt.show()
+
+    def smooth(self, x, w):
+        pre = math.floor(w / 2)
+        post = w - pre
+        for i in range(len(x)):  # range(pre, len(x) - post):
+            s = max(0, i - pre)
+            e = min(len(x), i + post)
+            x[i] = np.mean(x[s:e])
+        return x

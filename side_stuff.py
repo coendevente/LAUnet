@@ -1,5 +1,6 @@
 import numpy as np
 import SimpleITK as sitk
+from imshow_3D import imshow3D
 
 
 def calcMetrics(A, B):  # A is predicted, B is ground truth
@@ -16,25 +17,32 @@ def calcMetrics(A, B):  # A is predicted, B is ground truth
 
     return metrics
 
-Ap = '/Users/coendevente/Desktop/Master/jaar_1/Stage/LAUnet/data/annotations_improved/kcl_b_1.nrrd'
 
 all_dice = []
 
 # for i in list(range(1, 20)) + list(range(21, 31)):
-for i in range(1, 31):
-    Ap = '/Users/coendevente/Downloads/utah_zipped/utah_b_{}.nrrd'.format(i)
-    Bp = '/Users/coendevente/Downloads/kcl_zipped 2/kcl_b_{}.nrrd'.format(i)
-    Cp = '/Users/coendevente/Downloads/yale_zipped/yale_b_{}.nrrd'.format(i)
+# for i in range(1, 31):
+for i in [5]:
+    Ap = 'C:/Users/cdv18/Documents/LAUnet/data/annotations_improved/kcl_b_{}.nrrd'.format(i)
+    Bp = 'C:/Users/cdv18/Documents/LAUnet/data/annotations/ann_b_{}.nrrd'.format(i)
+    # Bp = 'C:/Users/cdv18/Downloads/kcl_zipped/kcl_b_{}.nrrd'.format(i)
+    # Bp = 'C:/Users/cdv18/Downloads/utah_zipped/utah_b_{}.nrrd'.format(i)
+    # Bp = 'C:/Users/cdv18/Downloads/yale_zipped/yale_b_{}.nrrd'.format(i)
 
     A = sitk.GetArrayFromImage(sitk.ReadImage(Ap))
     B = sitk.GetArrayFromImage(sitk.ReadImage(Bp))
-    try:
-        C = sitk.GetArrayFromImage(sitk.ReadImage(Cp))
-    except Exception:
-        a = 0
-
     m = calcMetrics(A, B)
     all_dice.append(m['Dice'])
 
-print(all_dice)
+    print(m['Dice'])
+
+    only_A = np.logical_and(B != A, A)
+    only_B = np.logical_and(B != A, B)
+
+    # imshow3D(only_B)
+
+    imshow3D(np.concatenate(
+        (A, B, only_A, only_B), axis=2
+    ))
+
 print(np.mean(all_dice))

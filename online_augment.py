@@ -33,6 +33,13 @@ class OnlineAugmenter():
         matrix = np.dot(matrix, scale_matrix)
         return matrix
 
+    def enhance_contrast(self, im, pw):
+        im = self.h.normalize(im)
+        # im = (im.astype(np.float) - np.mean(im)) / (sd_times * np.std(im)) + 1
+        im = np.power(im, pw)
+        return im
+
+
     # I is gray scale, J should be a binary mask
     def augment(self, I, J, mx, K):
         if I.shape != J.shape:
@@ -43,6 +50,7 @@ class OnlineAugmenter():
         zoom_y = random.uniform(self.s.ZOOM_Y_MIN, self.s.ZOOM_Y_MAX)
         shear_x = random.uniform(self.s.SHEAR_X_MIN, self.s.SHEAR_X_MAX)
         shear_y = random.uniform(self.s.SHEAR_Y_MIN, self.s.SHEAR_Y_MAX)
+        contrast_power = random.uniform(self.s.CONTRAST_POWER_MIN, self.s.CONTRAST_POWER_MAX)
         noise_mean = random.uniform(self.s.NOISE_MEAN_MIN, self.s.NOISE_MEAN_MAX)
         noise_std = random.uniform(self.s.NOISE_STD_MIN, self.s.NOISE_STD_MAX)
         flip = random.random() < self.s.FLIP_PROB
@@ -55,7 +63,8 @@ class OnlineAugmenter():
             shear_y = self.s.SHEAR_Y_MAX
             noise_mean = self.s.NOISE_MEAN_MAX
             noise_std = self.s.NOISE_STD_MAX
-            flip = True
+            contrast_power = self.s.CONTRAST_POWER_MIN
+            flip = False
 
         if flip:
             I = np.flip(I, axis=2)
@@ -67,8 +76,8 @@ class OnlineAugmenter():
         affine.SetMatrix(matrix.ravel())
         affine.SetCenter((round(I.shape[1] / 2), round(I.shape[2] / 2)))
 
-        I_aug = np.zeros(I.shape).astype(np.uint16)
-        J_aug = np.zeros(J.shape).astype(np.uint16)
+        I_aug = np.zeros(I.shape).astype(np.float32)
+        J_aug = np.zeros(J.shape).astype(np.float32)
 
         if isinstance(K, np.ndarray):
             K_aug = np.zeros(J.shape).astype(np.uint16)
@@ -86,8 +95,10 @@ class OnlineAugmenter():
                 K_aug_slice = self.resample(K_slice, affine)
 
             I_aug_slice = sitk.AdditiveGaussianNoise(I_aug_slice, noise_mean, noise_std)
+            I_aug_slice = self.enhance_contrast(sitk.GetArrayFromImage(I_aug_slice), contrast_power)
 
-            I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
+            I_aug[i] = I_aug_slice
+            # I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
             J_aug[i] = sitk.GetArrayFromImage(J_aug_slice)
 
             if isinstance(K, np.ndarray):
@@ -101,20 +112,29 @@ class OnlineAugmenter():
             return I_aug, J_aug
 
     def test_augment(self):
-        x_all_path, y_all_path = self.h.getImagePaths(range(1, 31))
+        x_all_path, y_all_path, la_all_path = self.h.getImagePaths(range(1, 31), True)
         x_full_all = self.h.loadImages(x_all_path)
         y_full_all = self.h.loadImages(y_all_path)
+        la_full_all = self.h.loadImages(la_all_path)
 
-        nr = 6
-        for i in range(5):
-            I, J = self.augment(x_full_all[nr], y_full_all[nr], True)
-            imshow3D(np.concatenate((x_full_all[nr], I), axis=2))
-        # imshow3D(
-        #     np.concatenate( (
-        #     np.concatenate((x_full_all[nr]/np.max(x_full_all[nr]), y_full_all[nr]), axis=2),
-        #         np.concatenate((I / np.max(I), J), axis=2)
-        #     ), axis=1)
-        # )
+        for nr in range(31):
+            for i in range(1):
+                I, J, K = self.augment(x_full_all[nr], y_full_all[nr], True, la_full_all[nr])
+                # imshow3D(np.concatenate((x_full_all[nr], I), axis=2))
+
+                imshow3D(
+                    np.concatenate(
+                        (
+                            np.concatenate(
+                                (self.h.normalize(x_full_all[nr]), y_full_all[nr]), axis=2
+                            ),
+                            np.concatenate(
+                                (self.h.normalize(I), J), axis=2
+                            )
+                        )
+                        , axis=1
+                    )
+                )
 
 
 if __name__ == "__main__":
