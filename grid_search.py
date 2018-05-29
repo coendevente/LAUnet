@@ -38,7 +38,7 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'gs_art_fraction/'
+MAIN_FOLDER = 'gs_art_fraction_2/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
@@ -54,7 +54,8 @@ def target(art_fraction):
     h = Helper(s)
 
     with suppress_stdout():
-        if model_nr != 1 and model_nr != 2 and model_nr != 3 and model_nr != 4:
+        not_model_nrs = []
+        if model_nr not in not_model_nrs:
             Train(s, h).train()
             metric_means, metric_sds = Test(s, h).test()
         else:
