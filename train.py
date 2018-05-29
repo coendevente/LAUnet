@@ -109,6 +109,7 @@ class Train:
         if np.sum(y_patch) > 0:
             print('RETRY NEGATIVE PATCH')
             x_patch, y_patch = self.getRandomNegativePatch(x_full, y_full, set_idx)
+        x_patch = self.h.pre_process(x_patch)
 
         return x_patch, y_patch
 
@@ -191,6 +192,7 @@ class Train:
                 s_nr = np.random.choice(w[0])
 
             x_s, y_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr + self.s.PATCH_SIZE[0]), False)
+            x_s = self.h.pre_process(x_s)
 
         return x_s, y_s
 
@@ -199,6 +201,7 @@ class Train:
             x_i, y_i = self.getRandomPositiveImage(x_full, y_full, set_idx)
             x_s, y_s = self.getRandomPositiveSlices(x_i, y_i)
             x_s, y_s = self.online_augmenter.augment(x_s, y_s, False, None)
+            x_s = self.h.pre_process(x_s)
         else:
             x_s, y_s = self.getRandomPositiveSlicesOffline(set_idx)
 
@@ -226,8 +229,6 @@ class Train:
                 x_j, y_j = self.getRandomNegativePatch(x_full, y_full, set_idx)
             else:
                 x_j, y_j = self.getRandomPositivePatch(x_full, y_full, set_idx)
-
-            x_j = self.h.pre_process(x_j)
 
             # print("positive_patch == {}".format(positive_patch))
             # print("x_j.shape == {}".format(x_j.shape))
@@ -292,7 +293,7 @@ class Train:
         self.updateSliceInformation(y_full_train, self.s.TRAINING_SET)
         self.updateSliceInformation(y_full_val, self.s.VALIDATION_SET)
 
-        if self.s.FN_CLASS_WEIGHT == 'auto':
+        if self.s.FN_CLASS_WEIGHT == 'auto' and self.s.LOSS_FUNCTION == 'weighted_binary_cross_entropy':
             _, y_patches = self.getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val,
                                                  self.s.AUTO_CLASS_WEIGHT_N, self.s.TRAINING_SET
                                                  + self.s.VALIDATION_SET)

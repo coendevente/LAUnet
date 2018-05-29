@@ -1,5 +1,5 @@
 from helper_functions import *
-from settings import *
+# from settings import *
 import pickle
 import matplotlib.pyplot as plt
 import math
@@ -45,11 +45,12 @@ class LogInspector:
                               'AUX_OUTPUT_LOSS_WEIGHT']
         for name in settings_to_output:
             try:
-                print('s.{:>25} = {}'.format(name, eval("log['settings'].{}".format(name))))
+                expr = "log['settings'].{}".format(name)
+                print('s.{:>25} = {}'.format(name, eval(expr)))
             except:
                 print('s.{:>25} = absent in this log file'.format(name))
 
-        w = 300
+        w = int(round(len(log['training']['loss'])/10))
         orig_lw = 1
         smooth_lw = 2
 

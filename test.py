@@ -194,7 +194,7 @@ class Test:
                         # sitk.WriteImage(sitk.GetImageFromArray(anno), 'anno.nrrd')
 
                         if j != -1:  # No augmentation
-                            input, anno = OnlineAugmenter(self.s, self.h).augment(input, anno, False)
+                            input, anno = OnlineAugmenter(self.s, self.h).augment(input, anno, False, None)
 
                         prob = self.probImage(input, model)
 

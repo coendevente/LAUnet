@@ -39,23 +39,37 @@ class ArtificialScarInspecter:
             sitk.BinaryDilate(
                 sitk.GetImageFromArray(
                     y
-                ), 4
+                ), 10
             )
         )
 
         cc = sitk.ConnectedComponent(sitk.GetImageFromArray(y))
         rand_label = int(np.random.choice(np.unique(sitk.GetArrayFromImage(cc))[1:]))
-        print(rand_label)
+        # print(rand_label)
 
         filt = sitk.LabelShapeStatisticsImageFilter()
         filt.Execute(cc)
-        c = np.round(filt.GetCentroid(rand_label)).astype(np.uint16)
+        c = list(reversed(list(np.round(filt.GetCentroid(rand_label)).astype(np.uint16))))
         print(c)
 
-        pad = 25
+        pad = 40
 
-        x_out = x[c[1]-pad:c[1]+pad, c[0]-pad:c[0]+pad]
-        y_out = y[c[1]-pad:c[1]+pad, c[0]-pad:c[0]+pad]
+        for i in range(2):
+            if c[i]-pad < 0:
+                strel = [[0, 0], [0, 0]]
+                strel[i] = [pad-c[i], 0]
+                x = np.pad(x, strel, mode='constant')
+                y = np.pad(y, strel, mode='constant')
+                c[i] = pad
+
+            if c[i]+pad > x.shape[i]:
+                strel = [[0, 0], [0, 0]]
+                strel[i] = [0, x.shape[i]-c[i]]
+                x = np.pad(x, strel, mode='constant')
+                y = np.pad(y, strel, mode='constant')
+
+        x_out = x[c[0]-pad:c[0]+pad, c[1]-pad:c[1]+pad]
+        y_out = y[c[0]-pad:c[0]+pad, c[1]-pad:c[1]+pad]
 
         return self.h.normalize(x_out), y_out
 
@@ -111,8 +125,10 @@ if __name__ == '__main__':
     s = Settings()
     h = Helper(s)
 
-    while True:
-        try:
-            ArtificialScarInspecter(s, h).inspect(5, 5)
-        except ValueError:
-            print('again')
+    ArtificialScarInspecter(s, h).inspect(4, 4)
+
+    # while True:
+    #     try:
+    #         ArtificialScarInspecter(s, h).inspect(5, 5)
+    #     except ValueError:
+    #         print('again')
