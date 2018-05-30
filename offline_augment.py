@@ -80,6 +80,8 @@ class OfflineAugmenter:
         ETA = round(t_passed * (steps_todo / steps_done - 1))
         print("{}s passed. ETA is {}. i, j = {}, {}".format(t_passed, ETA, i, j))
 
+        # imshow3D(x_aug)
+
     def augment_all(self):
         x_all_path, y_all_path, la_all_path = self.h.getImagePaths(self.s.ALL_NATURAL_SET, True)
 
@@ -99,9 +101,9 @@ class OfflineAugmenter:
 
         num_cores = min(8, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
-        Parallel(n_jobs=num_cores)(delayed(self.doOneAug)(i) for i in inputs)
-        # for i in inputs:
-        #     self.doOneAug(i)
+        # Parallel(n_jobs=num_cores)(delayed(self.doOneAug)(i) for i in inputs)
+        for i in inputs:
+            self.doOneAug(i)
 
 
 if __name__ == "__main__":

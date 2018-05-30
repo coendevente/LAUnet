@@ -205,11 +205,11 @@ class Train:
         else:
             x_s, y_s = self.getRandomPositiveSlicesOffline(set_idx)
 
-        # imshow3D(
-        #     np.concatenate(
-        #         (x_s, y_s * np.max(x_s)), axis=2
-        #     )
-        # )
+        imshow3D(
+            np.concatenate(
+                (x_s, y_s * np.max(x_s)), axis=2
+            )
+        )
 
         x_patch, y_patch, found = self.getRandomPositivePatchAllSlices(x_s, y_s)
 
