@@ -10,7 +10,8 @@ class Settings:
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
         # self.MODEL_NAME = 'art_scar_with_blur'
         # self.MODEL_NAME = 'art_frac_1_blur_everything'
-        self.MODEL_NAME = 'aug_no_contrast_enh'
+        # self.MODEL_NAME = 'aug_no_contrast_enh'
+        self.MODEL_NAME = 'removed_duplicate_sample'
         # self.MODEL_NAME = 'ps_512_lr_1e4'
         # MODEL_NAME = 'union_annotations_no_aux'
         # MODEL_NAME = 'union_annotations_with_aux'
@@ -27,9 +28,9 @@ class Settings:
 
         # Division of datasets
         self.ALL_NATURAL_SET = range(1, 31)
-        self.TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 26, 5]  # 18 left out because of orientation
-        self.VALIDATION_SET = [25, 24, 16, 2, 14, 28, 21]
-        self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3, 12]
+        self.TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 5, 26]  # 18 left out because of orientation,
+        self.VALIDATION_SET = [25, 24, 16, 2, 14, 28, 12]  # 21 left out, since duplicate of 26
+        self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3]
 
         # Patchsize
         # PATCH_SIZE = (3, 64, 64)
@@ -85,7 +86,7 @@ class Settings:
 
         # Data augmentation
 
-        self.FLIP_PROB = 0.5
+        self.FLIP_PROB = 0
 
         self.ROT_MAX = 20
         self.ROT_MIN = -self.ROT_MAX
@@ -107,7 +108,7 @@ class Settings:
         self.NOISE_STD_MIN = 1
         self.NOISE_STD_MAX = 15
 
-        self.CONTRAST_POWER_MIN = 0.9
+        self.CONTRAST_POWER_MIN = .9
         self.CONTRAST_POWER_MAX = 1.5
 
         # Scar applier

@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 """
 File with function imshow3D, which allows to view a 3D np array as an image.
+
+Source: https://matplotlib.org/examples/pylab_examples/image_slices_viewer.html
 """
 
 # Class that helps imshow3D

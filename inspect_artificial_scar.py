@@ -101,8 +101,8 @@ class ArtificialScarInspecter:
         return out1_x, out1_y
 
     def inspect(self, nr_x, nr_y):
-        natural_grid_x, natural_grid_y = self.get_grid(nr_x, nr_y, False)
-        artificial_grid_x, artificial_grid_y = self.get_grid(nr_x, nr_y, True)
+        natural_grid_x, natural_grid_y = self.h.get_grid(nr_x, nr_y, False)
+        artificial_grid_x, artificial_grid_y = self.h.get_grid(nr_x, nr_y, True)
 
         plt.figure()
         plt.subplot(1, 2, 1)

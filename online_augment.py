@@ -5,6 +5,7 @@ import SimpleITK as sitk
 import math
 from helper_functions import *
 from imshow_3D import imshow3D
+import skimage
 
 
 class OnlineAugmenter():
@@ -34,6 +35,12 @@ class OnlineAugmenter():
         return matrix
 
     def enhance_contrast(self, im, pw):
+        # amplitude_pre = np.max(im) - np.min(im)
+        # min_pre = np.min(im)
+        # im = self.h.normalize(im)
+        # im = np.power(im, pw)
+        # im = self.h.normalize(im) * amplitude_pre + min_pre
+
         im = self.h.normalize(im)
         # im = (im.astype(np.float) - np.mean(im)) / (sd_times * np.std(im)) + 1
         im = np.power(im, pw)
@@ -63,7 +70,7 @@ class OnlineAugmenter():
             shear_y = self.s.SHEAR_Y_MAX
             noise_mean = self.s.NOISE_MEAN_MAX
             noise_std = self.s.NOISE_STD_MAX
-            contrast_power = self.s.CONTRAST_POWER_MIN
+            contrast_power = self.s.CONTRAST_POWER_MAX
             flip = False
 
         if flip:
@@ -95,10 +102,10 @@ class OnlineAugmenter():
                 K_aug_slice = self.resample(K_slice, affine)
 
             I_aug_slice = sitk.AdditiveGaussianNoise(I_aug_slice, noise_mean, noise_std)
-            I_aug_slice = self.enhance_contrast(sitk.GetArrayFromImage(I_aug_slice), contrast_power)
+            # I_aug_slice = self.enhance_contrast(sitk.GetArrayFromImage(I_aug_slice), contrast_power)
 
-            I_aug[i] = I_aug_slice
-            # I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
+            # I_aug[i] = I_aug_slice
+            I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
             J_aug[i] = sitk.GetArrayFromImage(J_aug_slice)
 
             if isinstance(K, np.ndarray):
@@ -117,24 +124,53 @@ class OnlineAugmenter():
         y_full_all = self.h.loadImages(y_all_path)
         la_full_all = self.h.loadImages(la_all_path)
 
-        for nr in range(31):
+        imgs = [[], []]
+
+        for nr in range(30):
             for i in range(1):
-                I, J, K = self.augment(x_full_all[nr], y_full_all[nr], True, la_full_all[nr])
+                I, J, K = self.augment(x_full_all[nr][20:21], y_full_all[nr][20:21], True, la_full_all[nr][20:21])
                 # imshow3D(np.concatenate((x_full_all[nr], I), axis=2))
 
-                imshow3D(
-                    np.concatenate(
-                        (
-                            np.concatenate(
-                                (self.h.normalize(x_full_all[nr]), y_full_all[nr]), axis=2
-                            ),
-                            np.concatenate(
-                                (self.h.normalize(I), J), axis=2
-                            )
-                        )
-                        , axis=1
-                    )
-                )
+                im_in = [x_full_all[nr][20:21], I]
+
+                for j in range(2):
+                    I = np.reshape(im_in[j], im_in[j].shape[1:])
+                    I = self.h.normalize(I) * 1000
+
+                    print(np.min(I.astype(np.int16)))
+                    print(np.max(I.astype(np.int16)))
+
+                    im_rs = skimage.transform.resize(I.astype(np.int16), (400, 400))
+                    print(im_rs.shape)
+
+                    imgs[j].append(im_rs)
+
+                # imshow3D(
+                #     np.concatenate(
+                #         (
+                #             np.concatenate(
+                #                 (self.h.normalize(x_full_all[nr][sr]), y_full_all[nr][sr]), axis=2
+                #             ),
+                #             np.concatenate(
+                #                 (self.h.normalize(I), J), axis=2
+                #             )
+                #         )
+                #         , axis=1
+                #     )
+                # )
+
+        print(len(imgs[0]))
+        print(len(imgs[1]))
+
+        plt.figure()
+        plt.subplot(1, 2, 1)
+        g = self.h.get_grid(6, 5, imgs[0])
+        plt.imshow(g, cmap='Greys_r')
+
+        plt.subplot(1, 2, 2)
+        g = self.h.get_grid(6, 5, imgs[1])
+        plt.imshow(g, cmap='Greys_r')
+        plt.show()
 
 
 if __name__ == "__main__":

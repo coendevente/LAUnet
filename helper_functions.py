@@ -64,7 +64,7 @@ class Helper():
             x_all_path.append('{0}input/{1}/p{2}/de_{3}_{2}.nrrd'.format(self.s.PATH_TO_DATA, self.s.PRE_OR_POST_NAME,
                                                                          i, self.s.PRE_OR_POST_XX))
 
-            y_all_path.append('{0}annotations/ann_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
+            y_all_path.append('{0}annotations/kcl_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
                                                                           self.s.PRE_OR_POST_XX))
 
             la_all_path.append('{0}input/{3}/p{1}/la_seg_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
@@ -175,7 +175,7 @@ class Helper():
             os.makedirs(la_folder)
 
         x_path = '{}de_{}_{}_{}_{}.nii.gz'.format(x_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
-        y_path = '{}ann_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
+        y_path = '{}kcl_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
         la_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(la_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
 
         if get_all:
@@ -217,7 +217,7 @@ class Helper():
         x_path = random.choice(self.artificial_paths.get_image_slices(xxs[random_i], img_nrs[random_i]))
 
         y_path = x_path.replace(x_folder, y_folder)
-        y_path = y_path.replace('de_', 'ann_')
+        y_path = y_path.replace('de_', 'kcl_')
         la_path = x_path.replace(x_folder, la_folder)
         la_path = la_path.replace('de_', 'la_seg_')
 
@@ -243,7 +243,7 @@ class Helper():
             os.makedirs(la_folder)
 
         x_path = '{}de_{}_{}_{}_{}.nii.gz'.format(x_folder, xx, img_nr, z, art_nr)
-        y_path = '{}ann_{}_{}_{}_{}.nii.gz'.format(y_folder, xx, img_nr, z, art_nr)
+        y_path = '{}kcl_{}_{}_{}_{}.nii.gz'.format(y_folder, xx, img_nr, z, art_nr)
         la_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(la_folder, xx, img_nr, z, art_nr)
 
         if get_all:
@@ -275,7 +275,7 @@ class Helper():
 
             no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
             la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
-            sf_seg_paths.append(sf_folder + 'staple_a_{}.gipl'.format(i))
+            sf_seg_paths.append(sf_folder + 'kcl_a_{}.gipl'.format(i))
 
         for i in nrs_post:
             p_folder = self.s.PATH_TO_NO_SCAR_POST + 'p{}/'.format(i)
@@ -283,7 +283,7 @@ class Helper():
 
             no_scar_paths.append(p_folder + 'de_b_{}.nrrd'.format(i))
             la_seg_paths.append(p_folder + 'la_seg_b_{}.nrrd'.format(i))
-            sf_seg_paths.append(sf_folder + 'ann_b_{}.nrrd'.format(i))
+            sf_seg_paths.append(sf_folder + 'kcl_b_{}.nrrd'.format(i))
         return no_scar_paths, la_seg_paths, sf_seg_paths
 
     def imshow_demo(self, im):
@@ -364,3 +364,20 @@ class Helper():
             e = min(len(x), i + post)
             x[i] = np.mean(x[s:e])
         return x
+
+    def get_grid(self, nr_x, nr_y, imgs):
+        out1_x = np.array([])
+        for i in range(nr_x):
+            out2_x = np.array([])
+            for j in range(nr_y):
+                x = imgs[i * nr_y + j]
+
+                out2_x = np.concatenate(
+                    (out2_x, x), axis=0
+                ) if out2_x.size > 0 else x
+
+            out1_x = np.concatenate(
+                (out1_x, out2_x), axis=1
+            ) if out1_x.size > 0 else out2_x
+
+        return out1_x
