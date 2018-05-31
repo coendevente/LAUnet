@@ -11,7 +11,7 @@ class Settings:
         # self.MODEL_NAME = 'art_scar_with_blur'
         # self.MODEL_NAME = 'art_frac_1_blur_everything'
         # self.MODEL_NAME = 'aug_no_contrast_enh'
-        self.MODEL_NAME = 'removed_duplicate_sample'
+        self.MODEL_NAME = 'own_sf_seg'
         # self.MODEL_NAME = 'ps_512_lr_1e4'
         # MODEL_NAME = 'union_annotations_no_aux'
         # MODEL_NAME = 'union_annotations_with_aux'
