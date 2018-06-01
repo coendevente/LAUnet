@@ -5,16 +5,11 @@ import numpy as np
 class Settings:
     def __init__(self):
         # Model to train
-        self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
+        self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        # self.MODEL_NAME = 'art_scar_with_blur'
-        # self.MODEL_NAME = 'art_frac_1_blur_everything'
-        # self.MODEL_NAME = 'aug_no_contrast_enh'
-        self.MODEL_NAME = 'own_sf_seg'
-        # self.MODEL_NAME = 'ps_512_lr_1e4'
-        # MODEL_NAME = 'union_annotations_no_aux'
-        # MODEL_NAME = 'union_annotations_with_aux'
+        self.MODEL_NAME = 'la_seg_ps_480'
+        # self.MODEL_NAME = 'own_sf_seg'
 
         # Path to folders
         self.PATH_TO_DATA = '../data/'
@@ -31,6 +26,13 @@ class Settings:
         self.TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 5, 26]  # 18 left out because of orientation,
         self.VALIDATION_SET = [25, 24, 16, 2, 14, 28, 12]  # 21 left out, since duplicate of 26
         self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3]
+
+        self.YALE_NRS_POST = [7, 17, 23, 26, 21, 3, 12, 14, 28, 5, 18]
+
+        if self.GROUND_TRUTH == 'left_atrium':
+            self.TRAINING_SET = [x for x in self.TRAINING_SET if x not in self.YALE_NRS_POST]
+            self.VALIDATION_SET = [x for x in self.VALIDATION_SET if x not in self.YALE_NRS_POST]
+            self.TESTING_SET = [x for x in self.TESTING_SET if x not in self.YALE_NRS_POST]
 
         # Patchsize
         # PATCH_SIZE = (3, 64, 64)
@@ -118,7 +120,7 @@ class Settings:
         self.NO_SCAR_NRS_PRE = \
             [x for x in self.NO_SCAR_NRS_PRE if x not in [3, 5, 7, 9, 11, 12, 19, 20, 23, 25, 26, 28]]
         self.NO_SCAR_NRS_POST = range(1, 31)  # 18, 16, 2
-        self.NO_SCAR_NRS_POST = [x for x in self.NO_SCAR_NRS_POST if x not in [7, 17, 23, 26, 21, 3, 12, 14, 28, 5, 18]]
+        self.NO_SCAR_NRS_POST = [x for x in self.NO_SCAR_NRS_POST if x not in self.YALE_NRS_POST]
 
         self.NR_ART = 100
         self.PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'

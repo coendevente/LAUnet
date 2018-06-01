@@ -7,124 +7,13 @@ import SimpleITK as sitk
 from imshow_3D import imshow3D
 import matplotlib.pyplot as plt
 import tensorflow as tf
+from predict import Predict
 
 
 class Test:
     def __init__(self, s, h):
         self.s = s
         self.h = h
-
-    def patchCornersFullImage(self, sh):
-        step_size = np.subtract(self.s.PATCH_SIZE, self.s.VOXEL_OVERLAP)
-        nr_steps = np.divide(sh, step_size)
-
-        # Will be 1 at dimension where they are not rounded numbers, 0 otherwise
-        steps_are_not_round = np.array(np.not_equal(nr_steps, np.round(nr_steps) * 1.0), dtype=np.int)
-        nr_steps = (np.floor(nr_steps) - steps_are_not_round).astype(int)
-
-        corners_dim = []
-        for i in range(3):
-            corners_dim.append(np.array(range(nr_steps[i] + 1)) * step_size[i])
-            if steps_are_not_round[i]:
-                corners_dim[i] = np.append(corners_dim[i], sh[i] - self.s.PATCH_SIZE[i])
-
-            for j in reversed(range(corners_dim[i].shape[0])):
-                if corners_dim[i][j] + self.s.PATCH_SIZE[i] > sh[i]:
-                    print("i, j == {}, {}".format(i, j))
-                    corners_dim[i] = np.delete(corners_dim[i], j)
-
-        patch_corners = []
-        for z in corners_dim[0]:
-            for y in corners_dim[1]:
-                for x in corners_dim[2]:
-                    patch_corner = (z, y, x)  # np.multiply((z, y, x), PATCH_SIZE)
-                    patch_corners.append(patch_corner)
-
-        return patch_corners
-
-    def patchesFromCorners(self, I, patch_corners):
-        patches = []
-        for c in patch_corners:
-            if self.s.PATCH_SIZE[1] <= I.shape[1]:
-                p = self.h.cropImage(I, c, self.s.PATCH_SIZE)
-            elif self.s.PATCH_SIZE[1] > I.shape[1]:
-                p = self.h.rescaleImage(I[c[0]:c[0] + self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
-
-            p = self.h.pre_process(p)
-            patches.append(p)
-        return patches
-
-    def probPatches(self, patches, model):
-        prob_patches = []
-
-        print(len(patches))
-        cnt = 0
-        for p in patches:
-            if cnt % 1 == 0:
-                print(cnt)
-
-            ps = p.shape
-            if self.s.NR_DIM == 2:
-                ps = ps[1:]
-
-            p_reshaped = np.reshape(p, (1, ) + ps + (1, ))
-
-            if self.s.USE_NORMALIZATION:
-                p_reshaped = self.h.normalize(p_reshaped)
-
-            prob_p = model.predict(p_reshaped)
-
-            if self.s.USE_ANY_SCAR_AUX:
-                prob_p = prob_p[0]
-
-            prop_p_s = prob_p.shape[1:4]
-            if self.s.NR_DIM == 2:
-                prop_p_s = (1, ) + prob_p.shape[1:3]
-            prob_p_reshaped = np.reshape(prob_p, prop_p_s)
-            prob_patches.append(prob_p_reshaped)
-
-            cnt += 1
-
-        return prob_patches
-
-    def fullImageFromPatches(self, sh, prob_patches, patch_corners):
-        prob_image = np.zeros(sh)
-        count_image = np.zeros(sh)
-
-        for i in range(len(patch_corners)):
-            p = prob_patches[i]
-            c = list(patch_corners[i])
-
-            for j in range(len(c)):
-                if c[j] < 0:
-                    c[j] = 0
-
-            # print('c == {}'.format(c))
-
-            if prob_image.shape[1] < p.shape[1]:
-                p = self.h.rescaleImage(p, prob_image.shape[1:])
-
-            # print(prob_image.shape)
-            # print(p.shape)
-
-            prob_image[c[0]:c[0] + self.s.PATCH_SIZE[0],
-                       c[1]:c[1] + self.s.PATCH_SIZE[1],
-                       c[2]:c[2] + self.s.PATCH_SIZE[2]] += p
-
-            count_image[c[0]:c[0] + self.s.PATCH_SIZE[0],
-                        c[1]:c[1] + self.s.PATCH_SIZE[1],
-                        c[2]:c[2] + self.s.PATCH_SIZE[2]] += 1
-
-        # imshow3D(count_image)
-        prob_image /= count_image
-        return prob_image
-
-    def probImage(self, I, model):
-        patch_corners = self.patchCornersFullImage(I.shape)
-        patches = self.patchesFromCorners(I, patch_corners)
-        prob_patches = self.probPatches(patches, model)
-        prob_image = self.fullImageFromPatches(I.shape, prob_patches, patch_corners)
-        return prob_image
 
     def calcMetrics(self, A, B):  # A is predicted, B is ground truth
         metrics = {}
@@ -196,7 +85,7 @@ class Test:
                         if j != -1:  # No augmentation
                             input, anno = OnlineAugmenter(self.s, self.h).augment(input, anno, False, None)
 
-                        prob = self.probImage(input, model)
+                        prob = Predict(s, h).predict(input, model)
 
                         predict_path = self.h.getModelPredictPath(model_name)
                         sitk.WriteImage(sitk.GetImageFromArray(input),

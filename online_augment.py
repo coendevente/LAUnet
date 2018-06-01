@@ -102,10 +102,10 @@ class OnlineAugmenter():
                 K_aug_slice = self.resample(K_slice, affine)
 
             I_aug_slice = sitk.AdditiveGaussianNoise(I_aug_slice, noise_mean, noise_std)
-            # I_aug_slice = self.enhance_contrast(sitk.GetArrayFromImage(I_aug_slice), contrast_power)
+            I_aug_slice = self.enhance_contrast(sitk.GetArrayFromImage(I_aug_slice), contrast_power)
 
-            # I_aug[i] = I_aug_slice
-            I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
+            I_aug[i] = I_aug_slice
+            # I_aug[i] = sitk.GetArrayFromImage(I_aug_slice)
             J_aug[i] = sitk.GetArrayFromImage(J_aug_slice)
 
             if isinstance(K, np.ndarray):
