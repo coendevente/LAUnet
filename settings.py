@@ -5,12 +5,13 @@ import numpy as np
 class Settings:
     def __init__(self):
         # Model to train
-        self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
+        self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
         # self.MODEL_NAME = 'la_seg_ps_480'
-        self.MODEL_NAME = 'sf_less_contrast_enh'
-        self.MODEL_NAME = 'gs_art_fraction_2/4'
+        # self.MODEL_NAME = 'sf_less_contrast_enh'
+        # self.MODEL_NAME = 'gs_art_fraction_2/5'
+        self.MODEL_NAME = 'la_seg_new_data'
 
         # Path to folders
         self.PATH_TO_DATA = '../data/'
@@ -34,6 +35,12 @@ class Settings:
             self.TRAINING_SET = [x for x in self.TRAINING_SET if x not in self.YALE_NRS_POST]
             self.VALIDATION_SET = [x for x in self.VALIDATION_SET if x not in self.YALE_NRS_POST]
             self.TESTING_SET = [x for x in self.TESTING_SET if x not in self.YALE_NRS_POST]
+
+            self.ALL_NATURAL_SET = list(self.ALL_NATURAL_SET) + list(range(31, 44))
+
+            self.TRAINING_SET += [40, 39, 42, 34, 37, 32, 36]
+            self.VALIDATION_SET += [31, 38, 33]
+            self.TESTING_SET += [41, 43, 35]
 
         # Patchsize
         # PATCH_SIZE = (3, 64, 64)
@@ -69,7 +76,7 @@ class Settings:
         self.USE_NORMALIZATION = True
 
         # Offline augmentation
-        self.AUGMENT_ONLINE = False
+        self.AUGMENT_ONLINE = True
         self.NR_AUG = 100
 
         # Testing and validation procedure
@@ -88,7 +95,6 @@ class Settings:
         # will occur if these images do not exist on the disk.
 
         # Data augmentation
-
         self.FLIP_PROB = 0
 
         self.ROT_MAX = 20
@@ -140,3 +146,7 @@ class Settings:
         self.INPAINT_DISTANCE_MM = 2
         self.INPAINT_NEIGHBOURHOOD = .5
         self.BLUR_SCALE_MM = .8  # mm
+
+
+if __name__ == '__main__':
+    s = Settings()

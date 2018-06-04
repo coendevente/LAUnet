@@ -69,58 +69,6 @@ class LogInspector:
             cnt += 1
         plt.show()
 
-        # plt.subplot(2, 5, 1)
-        # plt.plot(log['training']['loss'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['training']['loss'], w), lw=smooth_lw)
-        # plt.title('Training net loss')
-        #
-        # plt.subplot(2, 5, 2)
-        # plt.plot(log['training']['main_output_loss'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['training']['main_output_loss'], w), lw=smooth_lw)
-        # plt.title('Training main loss')
-        #
-        # plt.subplot(2, 5, 3)
-        # plt.plot(log['training']['aux_output_loss'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['training']['aux_output_loss'], w), lw=smooth_lw)
-        # plt.title('Training aux loss')
-        #
-        # plt.subplot(2, 5, 4)
-        # plt.plot(log['training']['main_output_binary_accuracy'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['training']['main_output_binary_accuracy'], w), lw=smooth_lw)
-        # plt.title('Training main accuracy')
-        #
-        # plt.subplot(2, 5, 5)
-        # plt.plot(log['training']['aux_output_binary_accuracy'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['training']['aux_output_binary_accuracy'], w), lw=smooth_lw)
-        # plt.title('Training aux accuracy')
-        #
-        # plt.subplot(2, 5, 6)
-        # plt.plot(log['validation']['loss'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['validation']['loss'], w), lw=smooth_lw)
-        # plt.title('Validation net loss')
-        #
-        # plt.subplot(2, 5, 7)
-        # plt.plot(log['validation']['main_output_loss'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['validation']['main_output_loss'], w), lw=smooth_lw)
-        # plt.title('Validation main loss')
-        #
-        # plt.subplot(2, 5, 8)
-        # plt.plot(log['validation']['aux_output_loss'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['validation']['aux_output_loss'], w), lw=smooth_lw)
-        # plt.title('Validation aux loss')
-        #
-        # plt.subplot(2, 5, 9)
-        # plt.plot(log['validation']['main_output_binary_accuracy'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['validation']['main_output_binary_accuracy'], w), lw=smooth_lw)
-        # plt.title('Validation main accuracy')
-        #
-        # plt.subplot(2, 5, 10)
-        # plt.plot(log['validation']['aux_output_binary_accuracy'], lw=orig_lw, alpha=.3)
-        # plt.plot(self.h.smooth(log['validation']['aux_output_binary_accuracy'], w), lw=smooth_lw)
-        # plt.title('Validation aux accuracy')
-        #
-        # plt.show()
-
 
 if __name__ == "__main__":
     s = Settings()

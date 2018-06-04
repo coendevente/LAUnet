@@ -24,9 +24,9 @@ vol_diffs = []
 # for i in list(range(1, 20)) + list(range(21, 31)):
 # for i in range(1):
 for i in set(range(1, 31)) - set([18]):
-    Ap = 'C:/Users/cdv18/Documents/LAUnet/data/annotations_improved/kcl_b_{}.nrrd'.format(i)
-    Bp = 'C:/Users/cdv18/Documents/LAUnet/data/annotations/ann_b_{}.nrrd'.format(i)
-    # Bp = 'C:/Users/cdv18/Downloads/kcl_zipped/kcl_b_{}.nrrd'.format(i)
+    # Ap = 'C:/Users/cdv18/Documents/LAUnet/data/annotations_improved/kcl_b_{}.nrrd'.format(i)
+    Ap = 'C:/Users/cdv18/Documents/LAUnet/data/annotations/kcl_b_{}.nrrd'.format(i)
+    Bp = 'C:/Users/cdv18/Documents/LAUnet/data/annotations_old/ann_b_{}.nrrd'.format(i)
     # Bp = 'C:/Users/cdv18/Downloads/utah_zipped/utah_b_{}.nrrd'.format(i)
     # Bp = 'C:/Users/cdv18/Downloads/yale_zipped/yale_b_{}.nrrd'.format(i)
     # Ap = 'C:/Users/cdv18/Downloads/yale_zipped/yale_b_21.nrrd'.format(i)
@@ -57,7 +57,7 @@ for i in set(range(1, 31)) - set([18]):
 
 
 print('\n')
-print(np.mean(all_dice))
+print('{} +/- {}'.format(np.mean(all_dice), np.std(all_dice)))
 print(np.mean(vol_diffs))
-print(np.sum(np.array(vol_diffs) > 0))
-print(np.sum(np.array(vol_diffs) <= 0))
+# print(np.sum(np.array(vol_diffs) > 0))
+# print(np.sum(np.array(vol_diffs) <= 0))

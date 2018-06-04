@@ -111,3 +111,6 @@ if __name__ == "__main__":
     h = Helper(s)
     a = OfflineAugmenter(s, h)
     a.augment_all()
+
+    s.PRE_OR_POST_XX = 'a'
+    s.PRE_OR_POST_NAME = 'pre'

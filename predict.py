@@ -4,6 +4,7 @@ import SimpleITK as sitk
 import numpy as np
 import keras
 from keras.models import load_model
+import time
 
 
 class Predict:
@@ -129,7 +130,8 @@ if __name__ == '__main__':
     h = Helper(s)
     p = Predict(s, h)
 
-    for i in set(range(18, 26)) - set([11, 17, 23]):
+    for i in [1]:  # set(range(18, 26)) - set([11, 17, 23]):
+        t0 = time.time()
         keras.losses.custom_loss = h.custom_loss
         model_path = h.getModelPath(s.MODEL_NAME)
         model = load_model(model_path)
@@ -149,3 +151,5 @@ if __name__ == '__main__':
 
         sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(np.uint16)),
                         '{}prob_thresh.nii.gz'.format(folder))
+
+        print('Predicting took {}'.format(time.time() - t0))
