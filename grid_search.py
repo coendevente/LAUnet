@@ -54,7 +54,7 @@ def target(art_fraction):
     h = Helper(s)
 
     with suppress_stdout():
-        not_model_nrs = []
+        not_model_nrs = [1, 2, 3]
         if model_nr not in not_model_nrs:
             Train(s, h).train()
             metric_means, metric_sds = Test(s, h).test()

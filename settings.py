@@ -5,11 +5,12 @@ import numpy as np
 class Settings:
     def __init__(self):
         # Model to train
-        self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
+        self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        self.MODEL_NAME = 'la_seg_ps_480'
-        # self.MODEL_NAME = 'own_sf_seg'
+        # self.MODEL_NAME = 'la_seg_ps_480'
+        self.MODEL_NAME = 'sf_less_contrast_enh'
+        self.MODEL_NAME = 'gs_art_fraction_2/4'
 
         # Path to folders
         self.PATH_TO_DATA = '../data/'
@@ -53,8 +54,8 @@ class Settings:
         self.NR_VAL_PATCH_PER_ITER = 8
         self.POS_NEG_PATCH_PROP = .75  # with 1, all is positive, with 0 all is negative, in between values give a mix
         self.FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
-        self.AUTO_CLASS_WEIGHT_N = 0  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set to
-        # 'auto'
+        self.AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
+        # to 'auto'
         self.EARLY_STOPPING = True
         self.PATIENTCE_ES = 2000  # Patience of early stopping
         self.DROPOUT_AT_EVERY_LEVEL = False
@@ -73,7 +74,7 @@ class Settings:
 
         # Testing and validation procedure
         self.SAVE_METRICS = True
-        self.VALTEST_SET = self.VALIDATION_SET  # OR TESTING_SET
+        self.VALTEST_SET = self.VALIDATION_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
         # VOXEL_OVERLAP = (0, 200, 200)

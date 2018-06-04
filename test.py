@@ -85,7 +85,7 @@ class Test:
                         if j != -1:  # No augmentation
                             input, anno = OnlineAugmenter(self.s, self.h).augment(input, anno, False, None)
 
-                        prob = Predict(s, h).predict(input, model)
+                        prob = Predict(self.s, self.h).predict(input, model)
 
                         predict_path = self.h.getModelPredictPath(model_name)
                         sitk.WriteImage(sitk.GetImageFromArray(input),

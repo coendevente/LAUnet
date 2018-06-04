@@ -355,7 +355,7 @@ class ScarApplier:
         return art_scar, ann
 
     def apply(self):
-        num_cores = min(2, multiprocessing.cpu_count())
+        num_cores = min(8, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
 
         input = [[self, art_nr] for art_nr in range(self.s.NR_ART)]

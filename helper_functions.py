@@ -275,7 +275,7 @@ class Helper():
 
             no_scar_paths.append(p_folder + 'de_a_{}.nrrd'.format(i))
             la_seg_paths.append(p_folder + 'la_seg_a_{}.nrrd'.format(i))
-            sf_seg_paths.append(sf_folder + 'kcl_a_{}.gipl'.format(i))
+            sf_seg_paths.append(sf_folder + 'kcl_a_{}.nrrd'.format(i))
 
         for i in nrs_post:
             p_folder = self.s.PATH_TO_NO_SCAR_POST + 'p{}/'.format(i)
