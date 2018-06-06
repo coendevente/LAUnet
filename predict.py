@@ -118,10 +118,21 @@ class Predict:
         return prob_image
 
     def predict(self, im, model):
+        did_rescale = False
+        if im.shape[1] < self.s.PATCH_SIZE[1]:
+            did_rescale = True
+            old_input_shape = im.shape
+            im = self.h.rescaleImage(im, self.s.PATCH_SIZE[1:])
+
         patch_corners = self.patchCornersFullImage(im.shape)
         patches = self.patchesFromCorners(im, patch_corners)
         prob_patches = self.probPatches(patches, model)
         prob_image = self.fullImageFromPatches(im.shape, prob_patches, patch_corners)
+
+        if did_rescale:
+            print(old_input_shape)
+            prob_image = self.h.rescaleImage(prob_image, old_input_shape[1:])
+            print(prob_image.shape)
         return prob_image
 
 
@@ -147,9 +158,12 @@ if __name__ == '__main__':
         sitk.WriteImage(sitk.GetImageFromArray(prob),
                         '{}prob.nii.gz'.format(folder))
 
-        prob_thresh = prob > s.BIN_THRESH
+        prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
 
-        sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(np.uint16)),
+        if s.USE_POST_PROCESSING:
+            prob_thresh = h.post_process_la_seg(prob_thresh)
+
+        sitk.WriteImage(sitk.GetImageFromArray(prob_thresh),
                         '{}prob_thresh.nii.gz'.format(folder))
 
         print('Predicting took {}'.format(time.time() - t0))

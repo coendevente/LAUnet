@@ -55,7 +55,7 @@ class Helper():
 
         self.image_spacing_xy = spacing_3d[0]
 
-    def getImagePaths(self, nrs, get_all):
+    def get_image_paths_original(self, nrs, get_all):
         x_all_path = []
         y_all_path = []
         la_all_path = []
@@ -70,9 +70,6 @@ class Helper():
             la_all_path.append('{0}input/{3}/p{1}/la_seg_{2}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i,
                                                                              self.s.PRE_OR_POST_XX,
                                                                              self.s.PRE_OR_POST_NAME))
-            # x_all_path.append('../data/ctcf/lge_PLDP_rsmp.nii.gz')
-            # y_all_path.append('../data/ctcf/la_seg_PLDP.nii.gz')
-            # la_all_path.append('../data/ctcf/la_seg_PLDP.nii.gz')
 
         if get_all:
             return x_all_path, y_all_path, la_all_path
@@ -80,6 +77,30 @@ class Helper():
             return x_all_path, y_all_path
         elif self.s.GROUND_TRUTH == 'left_atrium':
             return x_all_path, la_all_path
+
+    def get_image_paths_challenge_2018(self, nrs, get_all):
+        if self.s.GROUND_TRUTH == 'scar_fibrosis':
+            raise Exception('No scar annotations in challenge 2018 data')
+
+        x_path = []
+        la_path = []
+
+        x_all_path = glob.glob('{}input/*/lgemri.nrrd'.format(self.s.PATH_TO_DATA))
+
+        for i in np.array(nrs) - 1:
+            x_path.append(x_all_path[i])
+            la_path.append(x_path[-1].replace('lgemri', 'laendo'))
+
+        if get_all:
+            return x_path, la_path, la_path
+        elif self.s.GROUND_TRUTH == 'left_atrium':
+            return x_path, la_path
+
+    def getImagePaths(self, nrs, get_all):
+        if self.s.DATA_SET == 'original':
+            return self.get_image_paths_original(nrs, get_all)
+        elif self.s.DATA_SET == 'challenge_2018':
+            return self.get_image_paths_challenge_2018(nrs, get_all)
 
     def loadImages(self, pathNames):
         im_out = []
@@ -102,6 +123,7 @@ class Helper():
         return spacing
 
     def rescaleImage(self, I, dims):
+        I = self.normalize(I)
         I_out = np.zeros(tuple([I.shape[0]]) + dims)
         for i in range(I.shape[0]):
             I_out[i] = resize(I[i], dims)
@@ -308,10 +330,17 @@ class Helper():
         # print(im.shape)
         return (im - np.min(im)) / (np.max(im) - np.min(im))
 
-    def normalize_multiple(self, ls_in):
+    def normalize_multiple_ndarray(self, ls_in):
         ls_out = np.zeros(ls_in.shape)
         for i in range(ls_in.shape[0]):
             ls_out[i] = self.normalize(ls_in[i])
+
+        return ls_out
+
+    def normalize_multiple_list(self, ls_in):
+        ls_out = []
+        for i in range(len(ls_in)):
+            ls_out.append(self.normalize(ls_in[i]))
 
         return ls_out
 
@@ -381,3 +410,30 @@ class Helper():
             ) if out1_x.size > 0 else out2_x
 
         return out1_x
+
+    def resize_to_unet_shape(self, im, two_power):
+        ys = im.shape[0]
+        xs = im.shape[1]
+        factor = 2 ** two_power
+        ys_new = int(math.ceil(ys / factor) * factor)
+        xs_new = int(math.ceil(xs / factor) * factor)
+
+        im = resize(im, (ys_new, xs_new))
+
+        return im
+
+    def post_process_la_seg(self, la):
+        sla = sitk.GetImageFromArray(la)
+        cc = sitk.GetArrayFromImage(sitk.ConnectedComponent(sla, True))
+
+        labels = list(np.unique(cc)[1:])
+
+        label_count = []
+        for l in labels:
+            label_count.append(np.sum(cc == l))
+
+        label_most = np.argmax(label_count) + 1
+
+        la_out = (cc == label_most).astype(np.uint8)
+
+        return la_out

@@ -48,6 +48,8 @@ class Train:
         :return: model from Unet
         """
         ps = self.s.PATCH_SIZE
+        if self.s.VARIABLE_PATCH_SIZE:
+            ps = (None, None, None)
         if self.s.NR_DIM == 2:
             ps = ps[1:]
         model = UNet(ps + (1, ), self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
@@ -97,18 +99,22 @@ class Train:
         # print("x.shape == {}".format(x.shape))
         # print("y.shape == {}".format(y.shape))
 
-        if self.s.PATCH_SIZE[1] <= x.shape[1]:
-            x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
-            y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
-        elif self.s.PATCH_SIZE[1] > x.shape[1]:
-            x_patch = self.h.rescaleImage(x[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
-            y_patch = (
-                    self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
-            ).astype(int)
+        if self.s.VARIABLE_PATCH_SIZE:
+            x_patch, y_patch = x, y
+        else:
+            if self.s.PATCH_SIZE[1] <= x.shape[1]:
+                x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
+                y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
+            elif self.s.PATCH_SIZE[1] > x.shape[1]:
+                x_patch = self.h.rescaleImage(x[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
+                y_patch = (
+                        self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
+                ).astype(int)
 
-        if np.sum(y_patch) > 0:
-            print('RETRY NEGATIVE PATCH')
-            x_patch, y_patch = self.getRandomNegativePatch(x_full, y_full, set_idx)
+            if np.sum(y_patch) > 0:
+                print('RETRY NEGATIVE PATCH')
+                x_patch, y_patch = self.getRandomNegativePatch(x_full, y_full, set_idx)
+
         x_patch = self.h.pre_process(x_patch)
 
         return x_patch, y_patch
@@ -137,34 +143,37 @@ class Train:
         if np.sum(y) == 0:
             return 0, 0, False
 
-        nz = np.nonzero(y)
+        if self.s.VARIABLE_PATCH_SIZE:
+            x_patch, y_patch = x, y
+        else:
+            nz = np.nonzero(y)
 
-        nz_i = random.randint(0, nz[0].shape[0] - 1)
-        nz_yx = (nz[1][nz_i], nz[2][nz_i])
-        ranges = ([-self.s.PATCH_SIZE[1] + 1, 0], [-self.s.PATCH_SIZE[2] + 1, 0])
+            nz_i = random.randint(0, nz[0].shape[0] - 1)
+            nz_yx = (nz[1][nz_i], nz[2][nz_i])
+            ranges = ([-self.s.PATCH_SIZE[1] + 1, 0], [-self.s.PATCH_SIZE[2] + 1, 0])
 
-        for i in range(2):
-            if nz_yx[i] - self.s.PATCH_SIZE[i + 1] < 0:
-                ranges[i][0] = -nz_yx[i]
-            if nz_yx[i] + self.s.PATCH_SIZE[i + 1] > x.shape[i + 1]:
-                ranges[i][1] = -(self.s.PATCH_SIZE[i + 1] - (x.shape[i + 1] - nz_yx[i]))
+            for i in range(2):
+                if nz_yx[i] - self.s.PATCH_SIZE[i + 1] < 0:
+                    ranges[i][0] = -nz_yx[i]
+                if nz_yx[i] + self.s.PATCH_SIZE[i + 1] > x.shape[i + 1]:
+                    ranges[i][1] = -(self.s.PATCH_SIZE[i + 1] - (x.shape[i + 1] - nz_yx[i]))
 
-        corner = [0, 0, 0]
+            corner = [0, 0, 0]
 
-        for i in range(1, 3):
-            if x.shape[i] < self.s.PATCH_SIZE[i]:
-                corner[i] = round((x.shape[i] - self.s.PATCH_SIZE[i]) / 2)
-            else:
-                corner[i] = nz_yx[i - 1] + random.randint(ranges[i - 1][0], ranges[i - 1][1])
+            for i in range(1, 3):
+                if x.shape[i] < self.s.PATCH_SIZE[i]:
+                    corner[i] = round((x.shape[i] - self.s.PATCH_SIZE[i]) / 2)
+                else:
+                    corner[i] = nz_yx[i - 1] + random.randint(ranges[i - 1][0], ranges[i - 1][1])
 
-        if self.s.PATCH_SIZE[1] <= x.shape[1]:
-            x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
-            y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
-        elif self.s.PATCH_SIZE[1] > x.shape[1]:
-            x_patch = self.h.rescaleImage(x[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
-            y_patch = (
-                    self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
-            ).astype(int)
+            if self.s.PATCH_SIZE[1] <= x.shape[1]:
+                x_patch = self.h.cropImage(x, corner, self.s.PATCH_SIZE)
+                y_patch = self.h.cropImage(y, corner, self.s.PATCH_SIZE)
+            elif self.s.PATCH_SIZE[1] > x.shape[1]:
+                x_patch = self.h.rescaleImage(x[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
+                y_patch = (
+                        self.h.rescaleImage(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:]) > 0
+                ).astype(int)
 
         # imshow3D(y_patch)
         # imshow3D(y[corner[0]:corner[0]+self.s.PATCH_SIZE[0]])
@@ -230,6 +239,10 @@ class Train:
             else:
                 x_j, y_j = self.getRandomPositivePatch(x_full, y_full, set_idx)
 
+            if self.s.VARIABLE_PATCH_SIZE:
+                x_j = self.h.resize_to_unet_shape(x_j, self.s.UNET_DEPTH)
+                y_j = self.h.resize_to_unet_shape(y_j, self.s.UNET_DEPTH)
+
             # print("positive_patch == {}".format(positive_patch))
             # print("x_j.shape == {}".format(x_j.shape))
             # print("y_j.shape == {}".format(y_j.shape))
@@ -238,15 +251,21 @@ class Train:
 
             x.append(x_j)
             y.append(y_j)
-        x = np.array(x)
-        y = np.array(y)
 
-        sh = x.shape
-        if self.s.NR_DIM == 2:
-            sh = sh[:1] + sh[2:]
+        if self.s.VARIABLE_PATCH_SIZE:
+            for i in range(len(x)):
+                x[i] = np.reshape(x[i], x[i].shape + (1,))
+                y[i] = np.reshape(y[i], y[i].shape + (1,))
+        else:
+            x = np.array(x)
+            y = np.array(y)
 
-        x = np.reshape(x, sh + (1, ))
-        y = np.reshape(y, sh + (1, ))
+            sh = x.shape
+            if self.s.NR_DIM == 2:
+                sh = sh[:1] + sh[2:]
+
+            x = np.reshape(x, sh + (1, ))
+            y = np.reshape(y, sh + (1, ))
         return x, y
 
     def updateSliceInformation(self, y_all, set_idx):
@@ -285,6 +304,8 @@ class Train:
         self.y_full_all = y_full_all
 
         # Divide full images in training and validation
+        # to_subtract = 1 if self.s.DATA_SET == 'original' else 0
+
         x_full_train = [x_full_all[i - 1] for i in self.s.TRAINING_SET]
         y_full_train = [y_full_all[i - 1] for i in self.s.TRAINING_SET]
         x_full_val = [x_full_all[i - 1] for i in self.s.VALIDATION_SET]
@@ -347,8 +368,10 @@ class Train:
             print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
             if self.s.USE_NORMALIZATION:
-                x_train = self.h.normalize_multiple(x_train)
-                x_val = self.h.normalize_multiple(x_val)
+                x_train = self.h.normalize_multiple_list(x_train) if self.s.VARIABLE_PATCH_SIZE else \
+                          self.h.normalize_multiple_ndarray(x_train)
+                x_val = self.h.normalize_multiple_list(x_val) if self.s.VARIABLE_PATCH_SIZE else \
+                        self.h.normalize_multiple_ndarray(x_val)
 
             y_train_all = {'main_output': y_train}
             y_val_all = {'main_output': y_val}
@@ -360,9 +383,16 @@ class Train:
                 y_train_all['aux_output'] = y_train_aux
                 y_val_all['aux_output'] = y_val_aux
 
-            train_loss = model.train_on_batch(x_train, y_train_all)
+            train_loss = model.train_on_batch(x_train, y_train_all) if not self.s.VARIABLE_PATCH_SIZE else \
+                model.train_on_batch(x_train[0], {'main_output': y_train_all['main_output'][0]})
 
-            val_loss = model.test_on_batch(x_val, y_val_all)
+            if self.s.VARIABLE_PATCH_SIZE:
+                val_losses = []
+                for j in range(len(y_val_all)):
+                     val_losses.append(model.test_on_batch(x_val[j], {'main_output': y_train_all['main_output'][j]}))
+                val_loss = np.mean(val_losses)
+            else:
+                val_loss = model.test_on_batch(x_val, y_val_all)
 
             for m in range(len(model.metrics_names)):
                 log['training'][model.metrics_names[m]].append(train_loss[m])

@@ -11,38 +11,54 @@ class Settings:
         # self.MODEL_NAME = 'la_seg_ps_480'
         # self.MODEL_NAME = 'sf_less_contrast_enh'
         # self.MODEL_NAME = 'gs_art_fraction_2/5'
-        self.MODEL_NAME = 'la_seg_new_data'
+        # self.MODEL_NAME = 'la_seg_new_data'
+        # self.MODEL_NAME = 'la_seg_dynamic_input_size'
+        self.MODEL_NAME = 'la_challenge_data'
+
+        self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
         # Path to folders
-        self.PATH_TO_DATA = '../data/'
+
+        # self.PATH_TO_DATA = '../data/'
+        self.PATH_TO_DATA = '../challenge_2018_data/' if self.DATA_SET == 'challenge_2018' else '../data/'
         self.PATH_TO_RESULTS = '../results/'
         self.PATH_TO_MODELS = '../results/models/'
-        self.PATH_TO_AUG = '../data/augmentations/'
-        self.PATH_TO_ART = '../data/augmentations/artificial/'
+        self.PATH_TO_AUG = self.PATH_TO_DATA + 'augmentations/'
+        self.PATH_TO_ART = self.PATH_TO_DATA + 'augmentations/artificial/'
 
         # Show demo images
         self.DEMO = True
 
-        # Division of datasets
-        self.ALL_NATURAL_SET = range(1, 31)
-        self.TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 5, 26]  # 18 left out because of orientation,
-        self.VALIDATION_SET = [25, 24, 16, 2, 14, 28, 12]  # 21 left out, since duplicate of 26
-        self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3]
-
         self.YALE_NRS_POST = [7, 17, 23, 26, 21, 3, 12, 14, 28, 5, 18]
 
-        if self.GROUND_TRUTH == 'left_atrium':
-            self.TRAINING_SET = [x for x in self.TRAINING_SET if x not in self.YALE_NRS_POST]
-            self.VALIDATION_SET = [x for x in self.VALIDATION_SET if x not in self.YALE_NRS_POST]
-            self.TESTING_SET = [x for x in self.TESTING_SET if x not in self.YALE_NRS_POST]
+        if self.DATA_SET == 'original':
+            # Division of datasets
+            self.ALL_NATURAL_SET = range(1, 31)
+            self.TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 5, 26]  # 18 left out because of orientation
+            self.VALIDATION_SET = [25, 24, 16, 2, 14, 28, 12]  # 21 left out, since duplicate of 26
+            self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3]
 
-            self.ALL_NATURAL_SET = list(self.ALL_NATURAL_SET) + list(range(31, 44))
+            if self.GROUND_TRUTH == 'left_atrium':
+                self.TRAINING_SET = [x for x in self.TRAINING_SET if x not in self.YALE_NRS_POST]
+                self.VALIDATION_SET = [x for x in self.VALIDATION_SET if x not in self.YALE_NRS_POST]
+                self.TESTING_SET = [x for x in self.TESTING_SET if x not in self.YALE_NRS_POST]
 
-            self.TRAINING_SET += [40, 39, 42, 34, 37, 32, 36]
-            self.VALIDATION_SET += [31, 38, 33]
-            self.TESTING_SET += [41, 43, 35]
+                self.ALL_NATURAL_SET = list(self.ALL_NATURAL_SET) + list(range(31, 44))
+
+                self.TRAINING_SET += [40, 39, 42, 34, 37, 32, 36]
+                self.VALIDATION_SET += [31, 38, 33]
+                self.TESTING_SET += [41, 43, 35]
+
+                print(self.VALIDATION_SET)
+        elif self.DATA_SET == 'challenge_2018':
+            self.ALL_NATURAL_SET = range(1, 101)
+            self.TRAINING_SET = range(1, 76)
+            self.VALIDATION_SET = range(76, 101)
+            self.TESTING_SET = []
 
         # Patchsize
+        self.VARIABLE_PATCH_SIZE = False
+
         # PATCH_SIZE = (3, 64, 64)
         self.PATCH_SIZE = (1, 480, 480)
         # PATCH_SIZE = (1, 384, 384)
@@ -51,10 +67,10 @@ class Settings:
         # PATCH_SIZE = (1, 400, 400)
         self.NR_DIM = 2  # Only 2D and 3D are supported
 
-        self.USE_PRE_PROCESSING = True
+        self.USE_PRE_PROCESSING = False
 
         # Training hyperparameters
-        self.UNET_DEPTH = 5
+        self.UNET_DEPTH = 4
         self.LEARNING_RATE = math.pow(10, -4)
         self.BATCH_SIZE = 4
         self.NR_BATCHES = 15000
@@ -76,10 +92,11 @@ class Settings:
         self.USE_NORMALIZATION = True
 
         # Offline augmentation
-        self.AUGMENT_ONLINE = True
-        self.NR_AUG = 100
+        self.AUGMENT_ONLINE = False
+        self.NR_AUG = 10
 
         # Testing and validation procedure
+        self.USE_POST_PROCESSING = True
         self.SAVE_METRICS = True
         self.VALTEST_SET = self.VALIDATION_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]

@@ -75,10 +75,6 @@ class Test:
                         input = x_full_all[i]
                         anno = y_full_all[i]
 
-                        if input.shape[1] < self.s.PATCH_SIZE[1]:
-                            input = self.h.rescaleImage(input, self.s.PATCH_SIZE[1:])
-                            anno = (self.h.rescaleImage(anno, self.s.PATCH_SIZE[1:]) > 0).astype(np.uint8)
-
                         # sitk.WriteImage(sitk.GetImageFromArray(input), 'input.nrrd')
                         # sitk.WriteImage(sitk.GetImageFromArray(anno), 'anno.nrrd')
 
@@ -116,10 +112,13 @@ class Test:
                     anno = sitk.GetArrayFromImage(anno)
 
                     # print(np.unique(prob))
-                    prob_thresh = prob > self.s.BIN_THRESH
+                    prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
+
+                    if self.s.USE_POST_PROCESSING:
+                        prob_thresh = h.post_process_la_seg(prob_thresh)
 
                     predict_path = self.h.getModelPredictPath(model_name)
-                    sitk.WriteImage(sitk.GetImageFromArray(prob_thresh.astype(np.uint16)),
+                    sitk.WriteImage(sitk.GetImageFromArray(prob_thresh),
                                     '{}prob_thresh_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
 
                     metrics = self.calcMetrics(prob_thresh, anno)
@@ -134,6 +133,7 @@ class Test:
                 metric_sds[model_name][metric[0]] = np.std(all)
 
             print('=========== Results of {} ==========='.format(model_name))
+            print('Image nrs: {}'.format(self.s.VALTEST_SET))
             print('Means of metrics: {}'.format(metric_means[model_name]))
             print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
 

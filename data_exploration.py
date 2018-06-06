@@ -20,12 +20,12 @@ class DataExploration:
             allShapes = {}
             allYXDim = {}
 
-            for i in range(1, 31):
+            for i in range(1, 44):
                 if i == 20 and xx_name[0] == 'a' or i == 18 and xx_name[0] == 'b':
                     continue
                     # Sizes annotation and input of i == 20 are not equal
 
-                path_ann = '{0}annotations/ann_{1}_{2}.nrrd'.format(self.s.PATH_TO_DATA, xx_name[0], i)
+                path_ann = '{0}annotations/kcl_{1}_{2}.nrrd'.format(self.s.PATH_TO_DATA, xx_name[0], i)
                 path_input = '{0}input/{2}/p{1}/de_{3}_{1}.nrrd'.format(self.s.PATH_TO_DATA, i, xx_name[1], xx_name[0])
 
                 I_ann = sitk.GetArrayFromImage(sitk.ReadImage(path_ann))
