@@ -12,7 +12,7 @@ class LossInspector:
 
     def inspect_loss(self):
         # model_names = ['gs_art_fraction_2/1', 'gs_art_fraction_2/2', 'gs_art_fraction_2/3', 'gs_art_fraction_2/4']
-        model_names = ['la_seg_new_data', 'la_challenge_data']
+        model_names = ['la_challenge_data', 'la_challenge_data_depth_5']
         colors = ['b', 'r', 'g', 'y']
         legend_parameter = 'ART_FRACTION'
         legend_parameter_name = 'Artificial data fraction'
@@ -24,7 +24,7 @@ class LossInspector:
         orig_lw = 1
         smooth_lw = 2
 
-        show_non_smooth = False
+        show_non_smooth = True
 
         for j in range(len(model_names)):
             model_name = model_names[j]
@@ -34,12 +34,12 @@ class LossInspector:
 
             legend.append('{} = {}'.format(legend_parameter_name, eval("log['settings'].{}".format(legend_parameter))))
 
-            # w = int(round(len(log['training']['loss'])/10))
-
             m = len(log['training'].keys())
 
             if show_non_smooth:
                 cnt = 1
+
+                # w = int(round(len(log['training']['loss'])/10))
 
                 for i in log['training']:
                     plt.subplot(2, m, cnt)

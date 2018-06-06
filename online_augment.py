@@ -48,7 +48,7 @@ class OnlineAugmenter():
 
 
     # I is gray scale, J should be a binary mask
-    def augment(self, I, J, mx, K):
+    def augment(self, I, J, mx, K, L):
         if I.shape != J.shape:
             raise Exception('Shape of I does not equal shape of J ({} != {})'.format(I.shape, J.shape))
 
@@ -88,18 +88,25 @@ class OnlineAugmenter():
 
         if isinstance(K, np.ndarray):
             K_aug = np.zeros(J.shape).astype(np.uint16)
+        if isinstance(L, np.ndarray):
+            L_aug = np.zeros(J.shape).astype(np.uint16)
+
         for i in range(I.shape[0]):
             I_slice = sitk.GetImageFromArray(I[i])
             J_slice = sitk.GetImageFromArray(J[i])
 
             if isinstance(K, np.ndarray):
                 K_slice = sitk.GetImageFromArray(K[i])
+            if isinstance(L, np.ndarray):
+                L_slice = sitk.GetImageFromArray(L[i])
 
             I_aug_slice = self.resample(I_slice, affine)
             J_aug_slice = self.resample(J_slice, affine)
 
             if isinstance(K, np.ndarray):
                 K_aug_slice = self.resample(K_slice, affine)
+            if isinstance(K, np.ndarray):
+                L_aug_slice = self.resample(L_slice, affine)
 
             I_aug_slice = sitk.AdditiveGaussianNoise(I_aug_slice, noise_mean, noise_std)
             I_aug_slice = self.enhance_contrast(sitk.GetArrayFromImage(I_aug_slice), contrast_power)
@@ -110,9 +117,15 @@ class OnlineAugmenter():
 
             if isinstance(K, np.ndarray):
                 K_aug[i] = sitk.GetArrayFromImage(K_aug_slice)
+            if isinstance(L, np.ndarray):
+                L_aug[i] = sitk.GetArrayFromImage(L_aug_slice)
 
         # I_aug, J_aug = (I, J)
 
+        if isinstance(L, np.ndarray) and isinstance(K, np.ndarray):
+            return I_aug, J_aug, K_aug, L_aug
+        if isinstance(L, np.ndarray):
+            return I_aug, J_aug, L_aug
         if isinstance(K, np.ndarray):
             return I_aug, J_aug, K_aug
         else:

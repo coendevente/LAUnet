@@ -6,6 +6,9 @@ from joblib import Parallel, delayed
 import multiprocessing
 import random
 import matplotlib.pyplot as plt
+from predict import Predict
+import keras
+from keras.models import load_model
 
 
 class OfflineAugmenter:
@@ -18,24 +21,28 @@ class OfflineAugmenter:
         x_aug_path = []
         y_aug_path = []
         la_aug_path = []
+        lap_aug_path = []
 
         for z in slices:
-            x_aug_path_z, y_aug_path_z, la_aug_path_z = \
+            x_aug_path_z, y_aug_path_z, la_aug_path_z, lap_aug_path_z = \
                 self.h.getAugImagesPath(img_nr, random.randint(0, self.s.NR_AUG - 1), z, True)
             x_aug_path.append(x_aug_path_z)
             y_aug_path.append(y_aug_path_z)
             la_aug_path.append(la_aug_path_z)
+            lap_aug_path.append(lap_aug_path_z)
 
         x_aug_path = np.array(x_aug_path)
         y_aug_path = np.array(y_aug_path)
         la_aug_path = np.array(la_aug_path)
+        lap_aug_path = np.array(lap_aug_path)
 
         x_aug = self.h.loadImages([x_aug_path])[0]
         y_aug = self.h.loadImages([y_aug_path])[0]
         la_aug = self.h.loadImages([la_aug_path])[0]
+        lap_aug = self.h.loadImages([lap_aug_path])[0]
 
         if get_all:
-            return x_aug, y_aug, la_aug
+            return x_aug, y_aug, la_aug, lap_aug
         elif self.s.GROUND_TRUTH == 'scar_fibrosis':
             return x_aug, y_aug
         elif self.s.GROUND_TRUTH == 'left_atrium':
@@ -47,13 +54,14 @@ class OfflineAugmenter:
         x = input[2]
         y = input[3]
         la = input[4]
-        t0 = input[5]
-        l = input[6]
+        lap = input[5]
+        t0 = input[6]
+        l = input[7]
 
-        x_aug, y_aug, la_aug = self.online_augmenter.augment(x, y, False, la)
+        x_aug, y_aug, la_aug, lap_aug = self.online_augmenter.augment(x, y, False, la, lap)
 
         for z in range(x_aug.shape[0]):
-            x_aug_path, y_aug_path, la_aug_path = self.h.getAugImagesPath(i + 1, j, z, True)
+            x_aug_path, y_aug_path, la_aug_path, lap_aug_path = self.h.getAugImagesPath(i + 1, j, z, True)
 
             # print(x_aug[z])
             # print(x_aug_path)
@@ -66,9 +74,11 @@ class OfflineAugmenter:
             # print('x_aug_path == {}'.format(x_aug_path))
             # print('y_aug_path == {}'.format(y_aug_path))
             # print('la_aug_path == {}'.format(la_aug_path))
+
             sitk.WriteImage(sitk.GetImageFromArray(x_aug[z]), x_aug_path)
             sitk.WriteImage(sitk.GetImageFromArray(y_aug[z]), y_aug_path)
             sitk.WriteImage(sitk.GetImageFromArray(la_aug[z]), la_aug_path)
+            sitk.WriteImage(sitk.GetImageFromArray(lap_aug[z]), lap_aug_path)
 
         # print(x_aug_path)
         # print(y_aug_path)
@@ -89,15 +99,31 @@ class OfflineAugmenter:
         print(y_all_path)
         print(la_all_path)
 
+        keras.losses.custom_loss = h.custom_loss
+
         x_full_all = self.h.loadImages(x_all_path)
         y_full_all = self.h.loadImages(y_all_path)
         la_full_all = self.h.loadImages(la_all_path)
+        lap_full_all = []
+
+        la_model = load_model(self.h.getModelPath(self.s.MODEL_NAME_FOR_LA_SEG))
+        for i in range(len(x_full_all)):
+            print('Predicting {}'.format(i))
+            x = x_full_all[i]
+            s_la_pred = copy.copy(self.s)
+            s_la_pred.PATCH_SIZE = self.s.MODEL_PS_FOR_LA_SEG
+            prob = Predict(s_la_pred, self.h).predict(x, la_model)
+            prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
+            lap = self.h.post_process_la_seg(prob_thresh)
+
+            lap_full_all.append(lap)
 
         t0 = time.time()
         inputs = []
         for i in range(len(x_full_all)):
             for j in range(self.s.NR_AUG):
-                inputs.append([i, j, x_full_all[i], y_full_all[i], la_full_all[i], t0, len(x_full_all)])
+                inputs.append([i, j, x_full_all[i], y_full_all[i], la_full_all[i], lap_full_all[i], t0,
+                               len(x_full_all)])
 
         num_cores = min(8, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
@@ -111,6 +137,5 @@ if __name__ == "__main__":
     h = Helper(s)
     a = OfflineAugmenter(s, h)
     a.augment_all()
-
     s.PRE_OR_POST_XX = 'a'
     s.PRE_OR_POST_NAME = 'pre'

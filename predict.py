@@ -5,6 +5,8 @@ import numpy as np
 import keras
 from keras.models import load_model
 import time
+from tkinter import Tk # askopenfilename, asksaveasfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 
 class Predict:
@@ -146,8 +148,15 @@ if __name__ == '__main__':
         keras.losses.custom_loss = h.custom_loss
         model_path = h.getModelPath(s.MODEL_NAME)
         model = load_model(model_path)
-        folder = '{}extra/Dataset_case{}/'.format(s.PATH_TO_DATA, i)
-        im_path = '{}lge.nii'.format(folder)
+
+        Tk().withdraw()
+        im_path = askopenfilename(title='Select LGE image')
+
+        Tk().withdraw()
+        output_file = asksaveasfilename(title='Select output folder')
+
+        # folder = '{}extra/Dataset_case{}/'.format(s.PATH_TO_DATA, i)
+        # im_path = '{}lge.nii'.format(folder)
 
         sim = sitk.ReadImage(im_path)
         im = sitk.GetArrayFromImage(sim)
@@ -155,15 +164,14 @@ if __name__ == '__main__':
         h.set_image_spacing_xy(sim.GetSpacing())
         prob = p.predict(im, model)
 
-        sitk.WriteImage(sitk.GetImageFromArray(prob),
-                        '{}prob.nii.gz'.format(folder))
+        # sitk.WriteImage(sitk.GetImageFromArray(prob),
+        #                 '{}prob.nii.gz'.format(folder))
 
         prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
 
         if s.USE_POST_PROCESSING:
             prob_thresh = h.post_process_la_seg(prob_thresh)
 
-        sitk.WriteImage(sitk.GetImageFromArray(prob_thresh),
-                        '{}prob_thresh.nii.gz'.format(folder))
+        sitk.WriteImage(sitk.GetImageFromArray(prob_thresh), output_file)
 
         print('Predicting took {}'.format(time.time() - t0))

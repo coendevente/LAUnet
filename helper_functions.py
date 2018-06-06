@@ -199,9 +199,10 @@ class Helper():
         x_path = '{}de_{}_{}_{}_{}.nii.gz'.format(x_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
         y_path = '{}kcl_{}_{}_{}_{}.nii.gz'.format(y_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
         la_path = '{}la_seg_{}_{}_{}_{}.nii.gz'.format(la_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
+        lap_path = '{}lap_seg_{}_{}_{}_{}.nii.gz'.format(la_folder, self.s.PRE_OR_POST_XX, img_nr, z, aug_nr)
 
         if get_all:
-            return x_path, y_path, la_path
+            return x_path, y_path, la_path, lap_path
         elif self.s.GROUND_TRUTH == 'left_atrium':
             return x_path, la_path
         elif self.s.GROUND_TRUTH == 'scar_fibrosis':

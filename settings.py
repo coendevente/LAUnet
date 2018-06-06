@@ -5,7 +5,7 @@ import numpy as np
 class Settings:
     def __init__(self):
         # Model to train
-        self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
+        self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
         # self.MODEL_NAME = 'la_seg_ps_480'
@@ -13,13 +13,13 @@ class Settings:
         # self.MODEL_NAME = 'gs_art_fraction_2/5'
         # self.MODEL_NAME = 'la_seg_new_data'
         # self.MODEL_NAME = 'la_seg_dynamic_input_size'
-        self.MODEL_NAME = 'la_challenge_data'
+        # self.MODEL_NAME = 'la_challenge_data'
+        self.MODEL_NAME = 'la_challenge_data_depth_5'
 
-        self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
+        self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
         # Path to folders
 
-        # self.PATH_TO_DATA = '../data/'
         self.PATH_TO_DATA = '../challenge_2018_data/' if self.DATA_SET == 'challenge_2018' else '../data/'
         self.PATH_TO_RESULTS = '../results/'
         self.PATH_TO_MODELS = '../results/models/'
@@ -59,8 +59,9 @@ class Settings:
         # Patchsize
         self.VARIABLE_PATCH_SIZE = False
 
-        # PATCH_SIZE = (3, 64, 64)
-        self.PATCH_SIZE = (1, 480, 480)
+        # self.PATCH_SIZE = (3, 64, 64)
+        # self.PATCH_SIZE = (1, 480, 480)
+        self.PATCH_SIZE = (1, 64, 64)
         # PATCH_SIZE = (1, 384, 384)
         # PATCH_SIZE = (1, 512, 512)
         # PATCH_SIZE = (3, 128, 128)
@@ -70,12 +71,12 @@ class Settings:
         self.USE_PRE_PROCESSING = False
 
         # Training hyperparameters
-        self.UNET_DEPTH = 4
+        self.UNET_DEPTH = 3
         self.LEARNING_RATE = math.pow(10, -4)
         self.BATCH_SIZE = 4
         self.NR_BATCHES = 15000
         self.NR_VAL_PATCH_PER_ITER = 8
-        self.POS_NEG_PATCH_PROP = .75  # with 1, all is positive, with 0 all is negative, in between values give a mix
+        self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
         self.FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
         self.AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
         # to 'auto'
@@ -90,10 +91,20 @@ class Settings:
         self.ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
         self.USE_ANY_SCAR_AUX = False
         self.USE_NORMALIZATION = True
+        self.USE_LA_INPUT = True
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
-        self.NR_AUG = 10
+        self.NR_AUG = 100
+
+        if self.USE_LA_INPUT and self.AUGMENT_ONLINE:
+            raise Exception('USE_LA_INPUT with AUGMENT_ONLINE is not yet implemented')
+
+        if self.USE_LA_INPUT and self.ART_FRACTION > 0:
+            raise Exception('USE_LA_INPUT with artificial data is not yet implemented')
+
+        if self.USE_LA_INPUT and self.GROUND_TRUTH == 'left_atrium':
+            raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
         self.USE_POST_PROCESSING = True
@@ -138,6 +149,9 @@ class Settings:
         self.CONTRAST_POWER_MAX = 1.5
 
         # Scar applier
+        self.MODEL_NAME_FOR_LA_SEG = 'la_challenge_data_depth_5'
+        self.MODEL_PS_FOR_LA_SEG = (1, 480, 480)
+
         self.PATH_TO_NO_SCAR_POST = '../data/input/post/'
         self.PATH_TO_NO_SCAR_PRE = '../data/input/pre/'
         self.NO_SCAR_NRS_PRE = range(1, 31)
