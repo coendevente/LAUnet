@@ -118,6 +118,16 @@ class OfflineAugmenter:
 
             lap_full_all.append(lap)
 
+            sitk.WriteImage(
+                sitk.GetImageFromArray(lap),
+                'predicted{}.nrrd'.format(i)
+            )
+
+            sitk.WriteImage(
+                sitk.GetImageFromArray(x),
+                'lge{}.nrrd'.format(i)
+            )
+
         t0 = time.time()
         inputs = []
         for i in range(len(x_full_all)):
