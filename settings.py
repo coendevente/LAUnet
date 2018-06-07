@@ -14,7 +14,8 @@ class Settings:
         # self.MODEL_NAME = 'la_seg_new_data'
         # self.MODEL_NAME = 'la_seg_dynamic_input_size'
         # self.MODEL_NAME = 'la_challenge_data'
-        self.MODEL_NAME = 'la_challenge_data_depth_5'
+        # self.MODEL_NAME = 'la_challenge_data_depth_5'
+        self.MODEL_NAME = 'sf_with_la_input'
 
         self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
@@ -73,9 +74,9 @@ class Settings:
         # Training hyperparameters
         self.UNET_DEPTH = 3
         self.LEARNING_RATE = math.pow(10, -4)
-        self.BATCH_SIZE = 4
+        self.BATCH_SIZE = 16
         self.NR_BATCHES = 15000
-        self.NR_VAL_PATCH_PER_ITER = 8
+        self.NR_VAL_PATCH_PER_ITER = 16
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
         self.FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
         self.AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
@@ -95,7 +96,7 @@ class Settings:
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
-        self.NR_AUG = 100
+        self.NR_AUG = 1
 
         if self.USE_LA_INPUT and self.AUGMENT_ONLINE:
             raise Exception('USE_LA_INPUT with AUGMENT_ONLINE is not yet implemented')

@@ -52,7 +52,11 @@ class Train:
             ps = (None, None, None)
         if self.s.NR_DIM == 2:
             ps = ps[1:]
-        model = UNet(ps + (1, ), self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
+        if self.s.USE_LA_INPUT:
+            ps += (2, )
+        else:
+            ps += (1, )
+        model = UNet(ps, self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
                      doeverylevel=self.s.DROPOUT_AT_EVERY_LEVEL, inc_rate=self.s.FEATURE_MAP_INC_RATE,
                      aux_loss=self.s.USE_ANY_SCAR_AUX)
 
@@ -83,8 +87,11 @@ class Train:
                 first = False
                 s_nr = random.randint(0, zl - 1 - self.s.PATCH_SIZE[0])
 
-            x, y, _, lap = self.offline_augmenter.offline_augment(set_idx[i], range(s_nr, s_nr + self.s.PATCH_SIZE[0]),
+            x, y, la, lap = self.offline_augmenter.offline_augment(set_idx[i], range(s_nr, s_nr + self.s.PATCH_SIZE[0]),
                                                                   True)
+
+            if self.s.GROUND_TRUTH == 'left_atrium':
+                y = la
 
         corner = [0, 0, 0]
 
@@ -213,9 +220,12 @@ class Train:
                 w = np.where(self.sliceInformation[img_nr])
                 s_nr = np.random.choice(w[0])
 
-            x_s, y_s, _, lap_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr + self.s.PATCH_SIZE[0])
-                                                                        , True)
+            x_s, y_s, la_s, lap_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr +
+                                                                                         self.s.PATCH_SIZE[0]), True)
             x_s = self.h.pre_process(x_s)
+
+            if self.s.GROUND_TRUTH == 'left_atrium':
+                y_s = la_s
 
         return x_s, lap_s, y_s
 
@@ -281,17 +291,27 @@ class Train:
             y = np.array(y)
             lap = np.array(lap)
 
-            if self.s.USE_LA_INPUT:
-                x = np.concatenate((x, lap), axis=self.s.NR_DIM)
-
             sh = x.shape
             if self.s.NR_DIM == 2:
                 sh = sh[:1] + sh[2:]
 
-            if not self.s.USE_LA_INPUT:
-                x = np.reshape(x, sh + (1, ))
+            x = np.reshape(x, sh + (1,))
+            lap = np.reshape(lap, sh + (1,))
             y = np.reshape(y, sh + (1, ))
-        return x, lap, y
+
+            if self.s.USE_NORMALIZATION:
+                x = self.h.normalize_multiple_list(x) if self.s.VARIABLE_PATCH_SIZE else \
+                          self.h.normalize_multiple_ndarray(x)
+
+            # print('np.sum(x) == {}'.format(np.sum(x)))
+            # print('np.sum(lap) == {}'.format(np.sum(lap)))
+            # print('np.sum(y) == {}'.format(np.sum(y)))
+
+            if self.s.USE_LA_INPUT:
+                x = np.concatenate((x, lap), axis=self.s.NR_DIM+1)
+
+            # print('x.shape == {}'.format(x.shape))
+        return x, y
 
     def updateSliceInformation(self, y_all, set_idx):
         for i in range(len(set_idx)):
@@ -340,7 +360,7 @@ class Train:
         self.updateSliceInformation(y_full_val, self.s.VALIDATION_SET)
 
         if self.s.FN_CLASS_WEIGHT == 'auto' and self.s.LOSS_FUNCTION == 'weighted_binary_cross_entropy':
-            _, _, y_patches = self.getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val,
+            _, y_patches = self.getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val,
                                                  self.s.AUTO_CLASS_WEIGHT_N, self.s.TRAINING_SET
                                                  + self.s.VALIDATION_SET)
             self.s.FN_CLASS_WEIGHT = self.h.getClassWeightAuto(y_patches)
@@ -387,17 +407,16 @@ class Train:
             es_j += 1
 
             print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
-            x_train, lap_train, y_train = self.getRandomPatches(x_full_train, y_full_train, self.s.BATCH_SIZE,
+            x_train, y_train = self.getRandomPatches(x_full_train, y_full_train, self.s.BATCH_SIZE,
                                                                 self.s.TRAINING_SET)
-            x_val, lap_val, y_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
+            x_val, y_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
                                                  self.s.VALIDATION_SET)
             print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
-            if self.s.USE_NORMALIZATION:
-                x_train = self.h.normalize_multiple_list(x_train) if self.s.VARIABLE_PATCH_SIZE else \
-                          self.h.normalize_multiple_ndarray(x_train)
-                x_val = self.h.normalize_multiple_list(x_val) if self.s.VARIABLE_PATCH_SIZE else \
-                        self.h.normalize_multiple_ndarray(x_val)
+            # r = random.randint(1, 100000)
+            # print(x_train[0].shape)
+            # sitk.WriteImage(sitk.GetImageFromArray(x_train[0]), 'trainx{}.nii.gz'.format(r))
+            # sitk.WriteImage(sitk.GetImageFromArray(y_train[0]), 'trainy{}.nii.gz'.format(r))
 
             y_train_all = {'main_output': y_train}
             y_val_all = {'main_output': y_val}
