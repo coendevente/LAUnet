@@ -15,7 +15,8 @@ class Settings:
         # self.MODEL_NAME = 'la_seg_dynamic_input_size'
         # self.MODEL_NAME = 'la_challenge_data'
         # self.MODEL_NAME = 'la_challenge_data_depth_5'
-        self.MODEL_NAME = 'sf_with_la_input'
+        # self.MODEL_NAME = 'sf_with_la_input_lr3'
+        self.MODEL_NAME = 'sf_without_la_input_lr4'
 
         self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
@@ -61,8 +62,8 @@ class Settings:
         self.VARIABLE_PATCH_SIZE = False
 
         # self.PATCH_SIZE = (3, 64, 64)
-        # self.PATCH_SIZE = (1, 480, 480)
-        self.PATCH_SIZE = (1, 64, 64)
+        self.PATCH_SIZE = (1, 480, 480)
+        # self.PATCH_SIZE = (1, 64, 64)
         # PATCH_SIZE = (1, 384, 384)
         # PATCH_SIZE = (1, 512, 512)
         # PATCH_SIZE = (3, 128, 128)
@@ -72,9 +73,9 @@ class Settings:
         self.USE_PRE_PROCESSING = False
 
         # Training hyperparameters
-        self.UNET_DEPTH = 3
+        self.UNET_DEPTH = 5
         self.LEARNING_RATE = math.pow(10, -4)
-        self.BATCH_SIZE = 16
+        self.BATCH_SIZE = 4
         self.NR_BATCHES = 15000
         self.NR_VAL_PATCH_PER_ITER = 16
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
@@ -82,7 +83,7 @@ class Settings:
         self.AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
         # to 'auto'
         self.EARLY_STOPPING = True
-        self.PATIENTCE_ES = 2000  # Patience of early stopping
+        self.PATIENTCE_ES = 4000  # Patience of early stopping
         self.DROPOUT_AT_EVERY_LEVEL = False
         self.DROPOUT = 0.3
         self.FEATURE_MAP_INC_RATE = 2.
@@ -92,11 +93,11 @@ class Settings:
         self.ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
         self.USE_ANY_SCAR_AUX = False
         self.USE_NORMALIZATION = True
-        self.USE_LA_INPUT = True
+        self.USE_LA_INPUT = False
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
-        self.NR_AUG = 1
+        self.NR_AUG = 100
 
         if self.USE_LA_INPUT and self.AUGMENT_ONLINE:
             raise Exception('USE_LA_INPUT with AUGMENT_ONLINE is not yet implemented')

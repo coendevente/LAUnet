@@ -310,6 +310,21 @@ class Train:
             if self.s.USE_LA_INPUT:
                 x = np.concatenate((x, lap), axis=self.s.NR_DIM+1)
 
+            # print(x.shape)
+            # # print(x[0, :, :, 0].shape)
+            # for i in range(x.shape[0]):
+            #     plt.figure()
+            #     plt.subplot(1, 3, 1)
+            #     plt.imshow(x[i, :, :, 0])
+            #
+            #     plt.subplot(1, 3, 2)
+            #     plt.imshow(x[i, :, :, 1])
+            #
+            #     plt.subplot(1, 3, 3)
+            #     plt.imshow(y[i, :, :, 0])
+            #
+            #     plt.show()
+
             # print('x.shape == {}'.format(x.shape))
         return x, y
 
@@ -334,6 +349,8 @@ class Train:
         # self.s.FN_CLASS_WEIGHT = 100
         # model = self.buildUNet()
         # plot_model(model, to_file='model.png')
+        # model = self.buildUNet()
+        # print(model.summary())
 
         self.h.s = self.s
 
@@ -367,7 +384,6 @@ class Train:
             self.h.s = self.s
 
         model = self.buildUNet()
-
         print(model.summary())
 
         log = {'training': {}, 'validation': {}}

@@ -12,7 +12,8 @@ class LossInspector:
 
     def inspect_loss(self):
         # model_names = ['gs_art_fraction_2/1', 'gs_art_fraction_2/2', 'gs_art_fraction_2/3', 'gs_art_fraction_2/4']
-        model_names = ['la_challenge_data', 'la_challenge_data_depth_5']
+        # model_names = ['la_challenge_data', 'la_challenge_data_depth_5']
+        model_names = ['sf_without_la_input_lr3', 'sf_without_la_input_lr4', 'sf_with_la_input_lr3']
         colors = ['b', 'r', 'g', 'y']
         legend_parameter = 'ART_FRACTION'
         legend_parameter_name = 'Artificial data fraction'

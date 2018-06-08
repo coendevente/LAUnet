@@ -7,6 +7,7 @@ from keras.models import load_model
 import time
 from tkinter import Tk # askopenfilename, asksaveasfilename
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+import copy
 
 
 class Predict:
@@ -51,7 +52,17 @@ class Predict:
                 p = self.h.rescaleImage(I[c[0]:c[0] + self.s.PATCH_SIZE[0]], self.s.PATCH_SIZE[1:])
 
             p = self.h.pre_process(p)
-            patches.append(p)
+
+            ps = p.shape
+            if self.s.NR_DIM == 2:
+                ps = ps[1:]
+
+            p_reshaped = np.reshape(p, (1,) + ps + (1,))
+
+            if self.s.USE_NORMALIZATION:
+                p_reshaped = self.h.normalize(p_reshaped)
+
+            patches.append(p_reshaped)
         return patches
 
     def probPatches(self, patches, model):
@@ -63,16 +74,17 @@ class Predict:
             if cnt % 1 == 0:
                 print(cnt)
 
-            ps = p.shape
-            if self.s.NR_DIM == 2:
-                ps = ps[1:]
+            # ps = p.shape
+            # if self.s.NR_DIM == 2:
+            #     ps = ps[1:]
+            #
+            # if
+            #     p_reshaped = np.reshape(p, (1, ) + ps + (1, ))
+            #
+            # if self.s.USE_NORMALIZATION:
+            #     p_reshaped = self.h.normalize(p_reshaped)
 
-            p_reshaped = np.reshape(p, (1, ) + ps + (1, ))
-
-            if self.s.USE_NORMALIZATION:
-                p_reshaped = self.h.normalize(p_reshaped)
-
-            prob_p = model.predict(p_reshaped)
+            prob_p = model.predict(p)
 
             if self.s.USE_ANY_SCAR_AUX:
                 prob_p = prob_p[0]
@@ -128,6 +140,23 @@ class Predict:
 
         patch_corners = self.patchCornersFullImage(im.shape)
         patches = self.patchesFromCorners(im, patch_corners)
+
+        if self.s.USE_LA_INPUT:
+            s_lap = copy.copy(self.s)
+            s_lap.USE_LA_INPUT = False
+            lap_model = load_model(self.h.getModelPath(self.s.MODEL_NAME_FOR_LA_SEG))
+            lap_prob = Predict(s_lap, self.h).predict(im, lap_model)
+
+            lap = (lap_prob > self.s.BIN_THRESH).astype(np.uint8)
+
+            if self.s.USE_POST_PROCESSING:
+                lap = self.h.post_process_la_seg(lap)
+
+            lap_patches = self.patchesFromCorners(lap, patch_corners)
+
+            for i in range(len(patches)):
+                patches[i] = np.concatenate((patches[i], lap_patches[i]), axis=self.s.NR_DIM+1)
+
         prob_patches = self.probPatches(patches, model)
         prob_image = self.fullImageFromPatches(im.shape, prob_patches, patch_corners)
 
