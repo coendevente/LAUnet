@@ -20,7 +20,7 @@ class Settings:
         # self.MODEL_NAME = 'sf_without_la_input_lr4'
         self.MODEL_NAME = 'la_2018_challenge_3_splits'
 
-        self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
+        self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
         # Path to folders
 
@@ -128,7 +128,7 @@ class Settings:
             raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
-        self.USE_POST_PROCESSING = False
+        self.USE_POST_PROCESSING = True
         self.SAVE_METRICS = True
         self.VALTEST_SET = self.VALIDATION_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
