@@ -81,9 +81,9 @@ class Settings:
         self.VARIABLE_PATCH_SIZE = False
 
         # self.PATCH_SIZE = (3, 64, 64)
-        self.PATCH_SIZE = (1, 480, 480)
+        # self.PATCH_SIZE = (1, 480, 480)
         # self.PATCH_SIZE = (1, 64, 64)
-        # PATCH_SIZE = (1, 384, 384)
+        self.PATCH_SIZE = (1, 384, 384)
         # PATCH_SIZE = (1, 512, 512)
         # PATCH_SIZE = (3, 128, 128)
         # PATCH_SIZE = (1, 400, 400)
@@ -92,9 +92,9 @@ class Settings:
         self.USE_PRE_PROCESSING = False
 
         # Training hyperparameters
-        self.UNET_DEPTH = 5
+        self.UNET_DEPTH = 4
         self.LEARNING_RATE = math.pow(10, -4)
-        self.BATCH_SIZE = 4
+        self.BATCH_SIZE = 1
         self.NR_BATCHES = 15000
         self.NR_VAL_PATCH_PER_ITER = 16
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
@@ -102,7 +102,7 @@ class Settings:
         self.AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
         # to 'auto'
         self.EARLY_STOPPING = True
-        self.PATIENTCE_ES = 4000  # Patience of early stopping
+        self.PATIENTCE_ES = 2000  # Patience of early stopping
         self.DROPOUT_AT_EVERY_LEVEL = False
         self.DROPOUT = 0.3
         self.FEATURE_MAP_INC_RATE = 2.

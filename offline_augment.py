@@ -112,25 +112,28 @@ class OfflineAugmenter:
 
         la_model = load_model(self.h.getModelPath(self.s.MODEL_NAME_FOR_LA_SEG))
         for i in range(len(x_full_all)):
-            print('Predicting {}'.format(i))
-            x = x_full_all[i]
-            s_la_pred = copy.copy(self.s)
-            s_la_pred.PATCH_SIZE = self.s.MODEL_PS_FOR_LA_SEG
-            prob = Predict(s_la_pred, self.h).predict(x, la_model)
-            prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
-            lap = self.h.post_process_la_seg(prob_thresh)
+            if self.s.USE_LA_INPUT:
+                print('Predicting {}'.format(i))
+                x = x_full_all[i]
+                s_la_pred = copy.copy(self.s)
+                s_la_pred.PATCH_SIZE = self.s.MODEL_PS_FOR_LA_SEG
+                prob = Predict(s_la_pred, self.h).predict(x, la_model)
+                prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
+                lap = self.h.post_process_la_seg(prob_thresh)
 
-            lap_full_all.append(lap)
+                lap_full_all.append(lap)
 
-            sitk.WriteImage(
-                sitk.GetImageFromArray(lap),
-                'predicted{}.nrrd'.format(i)
-            )
+                sitk.WriteImage(
+                    sitk.GetImageFromArray(lap),
+                    'predicted{}.nrrd'.format(i)
+                )
 
-            sitk.WriteImage(
-                sitk.GetImageFromArray(x),
-                'lge{}.nrrd'.format(i)
-            )
+                sitk.WriteImage(
+                    sitk.GetImageFromArray(x),
+                    'lge{}.nrrd'.format(i)
+                )
+            else:
+                lap_full_all.append(y_full_all[i])
 
         t0 = time.time()
         inputs = []

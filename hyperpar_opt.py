@@ -38,14 +38,14 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'h200500/'
+MAIN_FOLDER = 'hp_la_0/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
 bo = -1
 
 
-def target(learning_rate_power, dropout, art_fraction):
+def target(learning_rate_power, dropout, loss_function):
     global bo
     if bo != -1:
         pickle.dump(bo, open(bo_path, "wb"))
@@ -53,13 +53,13 @@ def target(learning_rate_power, dropout, art_fraction):
     # return (1 - (learning_rate_power - .6) ** 2) * (1 - (dropout - .2) ** 2) * (1 - (art_fraction - .2) ** 2)
 
     domains = {
-        # 'unet_depth': (2, 4),
+        # 'unet_depth': (3, 5),
         'learning_rate_power': (-6, -2),
         # 'patch_size_factor': (1, 6),
         'dropout': (0, 1),
-        'art_fraction': (0, 1),
+        # 'art_fraction': (0, 1),
         # 'feature_map_inc_rate': (1., 2.),
-        # 'loss_function': (0, 1)
+        'loss_function': (0, 1)
     }
 
     # print(domains.keys())
@@ -69,6 +69,9 @@ def target(learning_rate_power, dropout, art_fraction):
         mn = domains[k][0]
         new_value = mn + (mx - mn) * eval(k)
         hp[k] = new_value
+
+    print(' '.join(hp.keys()))
+    print(' '.join(hp.values()))
     # return hp['unet_depth'] * hp['learning_rate_power'] * hp['patch_size_factor'] * hp['dropout'] * \
     #        hp['feature_map_inc_rate'] * -1 * hp['loss_function']
 
@@ -88,12 +91,12 @@ def target(learning_rate_power, dropout, art_fraction):
 
     s.DROPOUT = hp['dropout']
     s.LEARNING_RATE = math.pow(10, hp['learning_rate_power'])
-    s.ART_FRACTION = hp['art_fraction']
+    # s.ART_FRACTION = hp['art_fraction']
 
     # s.UNET_DEPTH = hp['unet_depth']
     # s.PATCH_SIZE = (1, hp['patch_size_factor'] * 64, hp['patch_size_factor'] * 64)
     # s.FEATURE_MAP_INC_RATE = hp['feature_map_inc_rate']
-    # s.LOSS_FUNCTION = 'dice' if hp['loss_function'] < .5 else 'weighted_binary_cross_entropy'
+    s.LOSS_FUNCTION = 'dice' if hp['loss_function'] < .5 else 'weighted_binary_cross_entropy'
 
     # s.NR_DIM = int(round(hp['nr_dim']))
     # if s.NR_DIM == 3:
@@ -162,16 +165,16 @@ def hyperpar_opt():
             # 'unet_depth': (0, 1),
             'learning_rate_power': (0, 1),
             # 'patch_size_factor': (0, 1),
-            'dropout': (0, 1),
-            'art_fraction': (0, 1),
+            'dropout': (0, .8),
+            # 'art_fraction': (0, 1),
             # 'feature_map_inc_rate': (0, 1),
-            # 'loss_function': (0, 1)
+            'loss_function': (0, 1)
         })
 
         bo.maximize(init_points=10, n_iter=0)
 
-    bo.maximize(init_points=0, n_iter=30, acq='ei')
-    # bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)
+    # bo.maximize(init_points=0, n_iter=30, acq='ei')
+    bo.maximize(init_points=0, n_iter=100, acq='ucb', kappa=5)
 
     visBoResValues(bo.res)
     pickle.dump(bo, open(bo_path, "wb"))
