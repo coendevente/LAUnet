@@ -70,8 +70,8 @@ def target(learning_rate_power, dropout, loss_function):
         new_value = mn + (mx - mn) * eval(k)
         hp[k] = new_value
 
-    print(' '.join(hp.keys()))
-    print(' '.join(hp.values()))
+    print(' '.join(list(hp.keys())))
+    print(' '.join([str(i) for i in list(hp.values())]))
     # return hp['unet_depth'] * hp['learning_rate_power'] * hp['patch_size_factor'] * hp['dropout'] * \
     #        hp['feature_map_inc_rate'] * -1 * hp['loss_function']
 

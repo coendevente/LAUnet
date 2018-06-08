@@ -379,8 +379,8 @@ class Train:
 
         if self.s.FN_CLASS_WEIGHT == 'auto' and self.s.LOSS_FUNCTION == 'weighted_binary_cross_entropy':
             _, y_patches = self.getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val,
-                                                 self.s.AUTO_CLASS_WEIGHT_N, self.s.TRAINING_SET
-                                                 + self.s.VALIDATION_SET)
+                                                 self.s.AUTO_CLASS_WEIGHT_N, list(self.s.TRAINING_SET)
+                                                 + list(self.s.VALIDATION_SET))
             self.s.FN_CLASS_WEIGHT = self.h.getClassWeightAuto(y_patches)
             self.h.s = self.s
 
