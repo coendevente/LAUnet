@@ -13,7 +13,7 @@ class LossInspector:
     def inspect_loss(self):
         # model_names = ['gs_art_fraction_2/1', 'gs_art_fraction_2/2', 'gs_art_fraction_2/3', 'gs_art_fraction_2/4']
         # model_names = ['la_challenge_data', 'la_challenge_data_depth_5']
-        model_names = ['sf_without_la_input_lr3', 'sf_without_la_input_lr4', 'sf_with_la_input_lr3']
+        model_names = ['sf_with_la_input', 'sf_with_la_input_lr3']  # , 'sf_with_la_input_lr3']
         colors = ['b', 'r', 'g', 'y']
         legend_parameter = 'ART_FRACTION'
         legend_parameter_name = 'Artificial data fraction'
@@ -49,10 +49,11 @@ class LossInspector:
                     plt.title('train: ' + i, fontsize=8)
 
                     plt.subplot(2, m, m + cnt)
-                    plt.plot(log['validation'][i], lw=orig_lw, alpha=.3, color=color)
+                    plt.plot(log['validation'][i], lw=orig_lw, alpha=.3, color=color, label=log['settings'].MODEL_NAME)
                     plt.title('val: ' + i, fontsize=8)
 
                     cnt += 1
+                plt.legend()
 
             cnt = 1
             for i in log['training']:
@@ -66,7 +67,7 @@ class LossInspector:
                 plt.title('val: ' + i, fontsize=8)
 
                 cnt += 1
-        plt.legend(legend)
+        # plt.legend(legend)
         plt.show()
 
 

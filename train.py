@@ -88,7 +88,7 @@ class Train:
                 s_nr = random.randint(0, zl - 1 - self.s.PATCH_SIZE[0])
 
             x, y, la, lap = self.offline_augmenter.offline_augment(set_idx[i], range(s_nr, s_nr + self.s.PATCH_SIZE[0]),
-                                                                  True)
+                                                                  True, get_lap=self.s.USE_LA_INPUT)
 
             if self.s.GROUND_TRUTH == 'left_atrium':
                 y = la
@@ -221,7 +221,8 @@ class Train:
                 s_nr = np.random.choice(w[0])
 
             x_s, y_s, la_s, lap_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr +
-                                                                                         self.s.PATCH_SIZE[0]), True)
+                                                                                         self.s.PATCH_SIZE[0]), True,
+                                                                           get_lap=self.s.USE_LA_INPUT)
             x_s = self.h.pre_process(x_s)
 
             if self.s.GROUND_TRUTH == 'left_atrium':
@@ -343,7 +344,7 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.75)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100

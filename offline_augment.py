@@ -17,7 +17,7 @@ class OfflineAugmenter:
         self.h = h
         self.online_augmenter = OnlineAugmenter(s, h)
 
-    def offline_augment(self, img_nr, slices, get_all):
+    def offline_augment(self, img_nr, slices, get_all, get_lap=True):
         x_aug_path = []
         y_aug_path = []
         la_aug_path = []
@@ -39,7 +39,11 @@ class OfflineAugmenter:
         x_aug = self.h.loadImages([x_aug_path])[0]
         y_aug = self.h.loadImages([y_aug_path])[0]
         la_aug = self.h.loadImages([la_aug_path])[0]
-        lap_aug = self.h.loadImages([lap_aug_path])[0]
+
+        if get_lap:
+            lap_aug = self.h.loadImages([lap_aug_path])[0]
+        else:
+            lap_aug = self.h.loadImages([la_aug_path])[0]
 
         if get_all:
             return x_aug, y_aug, la_aug, lap_aug

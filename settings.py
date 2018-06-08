@@ -1,11 +1,11 @@
 import math
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 class Settings:
     def __init__(self):
         # Model to train
-        self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
+        self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
         # self.MODEL_NAME = 'la_seg_ps_480'
@@ -16,7 +16,9 @@ class Settings:
         # self.MODEL_NAME = 'la_challenge_data'
         # self.MODEL_NAME = 'la_challenge_data_depth_5'
         # self.MODEL_NAME = 'sf_with_la_input_lr3'
-        self.MODEL_NAME = 'sf_without_la_input_lr4'
+        # self.MODEL_NAME = 'test'
+        # self.MODEL_NAME = 'sf_without_la_input_lr4'
+        self.MODEL_NAME = 'la_2018_challenge_3_splits'
 
         self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
@@ -54,9 +56,26 @@ class Settings:
                 print(self.VALIDATION_SET)
         elif self.DATA_SET == 'challenge_2018':
             self.ALL_NATURAL_SET = range(1, 101)
-            self.TRAINING_SET = range(1, 76)
-            self.VALIDATION_SET = range(76, 101)
-            self.TESTING_SET = []
+            # self.TRAINING_SET = range(1, 51)
+            # self.VALIDATION_SET = range(51, 76)
+            # self.TESTING_SET = range(76, 101)
+
+            np.random.seed(0)
+            r_p = np.random.permutation(self.ALL_NATURAL_SET)
+            self.TRAINING_SET = r_p[range(0, 50)]
+            self.VALIDATION_SET = r_p[range(50, 75)]
+            self.TESTING_SET = r_p[range(75, 100)]
+
+            # print(self.TRAINING_SET)
+            # print(self.VALIDATION_SET)
+            # print(self.TESTING_SET)
+            #
+            # plt.figure()
+            # plt.scatter(self.TRAINING_SET, [0] * 50, label='train')
+            # plt.scatter(self.VALIDATION_SET, [0] * 25, label='validation')
+            # plt.scatter(self.TESTING_SET, [0] * 25, label='test')
+            # plt.legend()
+            # plt.show()
 
         # Patchsize
         self.VARIABLE_PATCH_SIZE = False
@@ -97,7 +116,7 @@ class Settings:
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
-        self.NR_AUG = 100
+        self.NR_AUG = 10
 
         if self.USE_LA_INPUT and self.AUGMENT_ONLINE:
             raise Exception('USE_LA_INPUT with AUGMENT_ONLINE is not yet implemented')
@@ -109,7 +128,7 @@ class Settings:
             raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
-        self.USE_POST_PROCESSING = True
+        self.USE_POST_PROCESSING = False
         self.SAVE_METRICS = True
         self.VALTEST_SET = self.VALIDATION_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
