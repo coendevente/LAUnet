@@ -112,10 +112,10 @@ class Test:
                     anno = sitk.GetArrayFromImage(anno)
 
                     # print(np.unique(prob))
-                    prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
+                    prob_thresh = (prob > self.s.BIN_THRESH).astype(np.uint8)
 
                     if self.s.USE_POST_PROCESSING:
-                        prob_thresh = h.post_process_la_seg(prob_thresh)
+                        prob_thresh = self.h.post_process_la_seg(prob_thresh)
 
                     predict_path = self.h.getModelPredictPath(model_name)
                     sitk.WriteImage(sitk.GetImageFromArray(prob_thresh),
