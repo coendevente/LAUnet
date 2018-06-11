@@ -1,6 +1,8 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import platform
+
 
 class Settings:
     def __init__(self):
@@ -12,7 +14,7 @@ class Settings:
         # self.MODEL_NAME = 'sf_less_contrast_enh'
         # self.MODEL_NAME = 'gs_art_fraction_2/5'
         # self.MODEL_NAME = 'la_seg_new_data'
-        # self.MODEL_NAME = 'la_seg_dynamic_input_size'
+        # self.MODEL_NAME = 'la_seg_dynamic_input_size'a
         # self.MODEL_NAME = 'la_challenge_data'
         # self.MODEL_NAME = 'la_challenge_data_depth_5'
         # self.MODEL_NAME = 'sf_with_la_input_lr3'
@@ -24,11 +26,14 @@ class Settings:
 
         # Path to folders
 
-        self.PATH_TO_DATA = '../challenge_2018_data/' if self.DATA_SET == 'challenge_2018' else '../data/'
+        self.DATA_PRE = '/data/cwdevente/LAUnet/' if platform.system() == 'Linux' else '../'
+        self.PATH_TO_DATA = '{}challenge_2018_data/'.format(self.DATA_PRE) \
+            if self.DATA_SET == 'challenge_2018' else '{}data/'.format(self.DATA_PRE)
         self.PATH_TO_RESULTS = '../results/'
         self.PATH_TO_MODELS = '../results/models/'
         self.PATH_TO_AUG = self.PATH_TO_DATA + 'augmentations/'
         self.PATH_TO_ART = self.PATH_TO_DATA + 'augmentations/artificial/'
+        print(self.DATA_PRE)
 
         # Show demo images
         self.DEMO = True

@@ -20,6 +20,8 @@ batchnorm: adds Batch Normalization if true
 maxpool: use strided conv instead of maxpooling if false
 upconv: use transposed conv instead of upsamping + conv if false
 residual: add residual connections around each conv block if true
+
+https://github.com/pietz/unet-keras/blob/master/unet.py
 '''
 
 

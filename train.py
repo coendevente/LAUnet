@@ -155,7 +155,7 @@ class Train:
 
     def getRandomPositivePatchAllSlices(self, x, lap, y):
         if np.sum(y) == 0:
-            return 0, 0, False
+            return 0, 0, 0, False
 
         if self.s.VARIABLE_PATCH_SIZE:
             x_patch, lap_patch, y_patch = x, lap, y
@@ -344,7 +344,7 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.25)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100
