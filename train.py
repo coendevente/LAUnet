@@ -344,7 +344,7 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.25)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.4)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100

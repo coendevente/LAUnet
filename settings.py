@@ -21,6 +21,7 @@ class Settings:
         # self.MODEL_NAME = 'test'
         # self.MODEL_NAME = 'sf_without_la_input_lr4'
         self.MODEL_NAME = 'la_2018_challenge_3_splits'
+        # self.MODEL_NAME = 'test'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
@@ -70,17 +71,6 @@ class Settings:
             self.TRAINING_SET = r_p[range(0, 50)]
             self.VALIDATION_SET = r_p[range(50, 75)]
             self.TESTING_SET = r_p[range(75, 100)]
-
-            # print(self.TRAINING_SET)
-            # print(self.VALIDATION_SET)
-            # print(self.TESTING_SET)
-            #
-            # plt.figure()
-            # plt.scatter(self.TRAINING_SET, [0] * 50, label='train')
-            # plt.scatter(self.VALIDATION_SET, [0] * 25, label='validation')
-            # plt.scatter(self.TESTING_SET, [0] * 25, label='test')
-            # plt.legend()
-            # plt.show()
 
         # Patchsize
         self.VARIABLE_PATCH_SIZE = False

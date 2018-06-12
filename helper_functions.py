@@ -85,7 +85,7 @@ class Helper():
         x_path = []
         la_path = []
 
-        x_all_path = glob.glob('{}input/*/lgemri.nrrd'.format(self.s.PATH_TO_DATA))
+        x_all_path = sorted(glob.glob('{}input/*/lgemri.nrrd'.format(self.s.PATH_TO_DATA)))
 
         for i in np.array(nrs) - 1:
             x_path.append(x_all_path[i])
@@ -93,7 +93,7 @@ class Helper():
 
         if get_all:
             return x_path, la_path, la_path
-        elif self.s.GROUND_TRUTH == 'left_atrium':
+        else:
             return x_path, la_path
 
     def getImagePaths(self, nrs, get_all):
