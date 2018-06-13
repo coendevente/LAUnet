@@ -38,7 +38,7 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'hp_la_0/'
+MAIN_FOLDER = 'hp_la_1/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
@@ -54,7 +54,7 @@ def target(learning_rate_power, dropout, loss_function):
 
     domains = {
         # 'unet_depth': (3, 5),
-        'learning_rate_power': (-6, -2),
+        'learning_rate_power': (-5, -3),
         # 'patch_size_factor': (1, 6),
         'dropout': (0, 1),
         # 'art_fraction': (0, 1),

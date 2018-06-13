@@ -26,6 +26,9 @@ import inspect
 
 from tabulate import tabulate
 
+import itertools
+
+
 
 @contextmanager
 def suppress_stdout():
@@ -38,23 +41,37 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'gs_art_fraction_2/'
+MAIN_FOLDER = 'la_2018_challenge_0/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
 
 
-def target(art_fraction):
+def target(param_names, param_values):
     model_nr = pickle.load(open(nr_steps_path, "rb")) + 1
 
     s = Settings()
-    s.MODEL_NAME = MAIN_FOLDER + str(model_nr)
-    s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
-    s.ART_FRACTION = art_fraction
+
+    param_values = list(param_values)
+
+    for i in range(len(param_names)):
+        eval('s.{}'.format(param_names[i]))
+        if isinstance(param_values[i], str):
+            param_values[i] = '\'' + param_values[i] + '\''
+        expr = 's.{} = {}'.format(param_names[i], param_values[i])
+        exec(expr)
+
+    # print('s.DROPOUT == {}'.format(s.DROPOUT))
+    # print('s.LEARNING_RATE == {}'.format(s.LEARNING_RATE))
+    # print('s.LOSS_FUNCTION == {}'.format(s.LOSS_FUNCTION))
+
+    # s.MODEL_NAME = MAIN_FOLDER + str(model_nr)
+    # s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
+    # s.ART_FRACTION = art_fraction
     h = Helper(s)
 
     with suppress_stdout():
-        not_model_nrs = [1, 2, 3, 4]
+        not_model_nrs = []
         if model_nr not in not_model_nrs:
             Train(s, h).train()
             metric_means, metric_sds = Test(s, h).test()
@@ -68,6 +85,15 @@ def target(art_fraction):
     return metric_means[s.MODEL_NAME]['Dice']
 
 
+def get_table_row(values):
+    out = ''
+    for v in values:
+        if out != '':
+            out += ' | '
+        out += '{:>15}'.format(v)
+    return out
+
+
 def hyperpar_opt():
     resume_previous = False
     only_inspect_bo = False
@@ -79,10 +105,22 @@ def hyperpar_opt():
 
         return
 
-    art_fractions = np.linspace(0, 1, 5)
+    params = {
+        'LEARNING_RATE': [1e-3, 1e-4, 1e-5],
+        'DROPOUT': [0, .3, .6],
+        'LOSS_FUNCTION': ['dice', 'weighted_binary_cross_entropy']
+    }
 
-    print('{:>20} | {:>20}'.format('art_fraction', 'value'))
-    print('-'*21+'+'+'-'*21)
+    param_names = sorted(params.keys())
+    param_values = []
+    for pname in param_names:
+        param_values.append(params[pname])
+
+    print(param_names)
+    print(param_values)
+
+    param_permutations = list(itertools.product(*param_values))
+    print(param_permutations)
 
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -92,17 +130,17 @@ def hyperpar_opt():
         pickle.dump(0, open(nr_steps_path, "wb"))
         bo = {}
 
-    for a in art_fractions:
-        val = target(a)
+    header_row = get_table_row(['DICE'] + param_names)
+    print(header_row)
+    print('-' * len(header_row))
 
-        bo[a] = val
+    for pperm in param_permutations:
+        val = target(param_names, pperm)
+        bo[pperm] = val
 
-        print('{:>20} | {:>20}'.format(a, val))
+        print(get_table_row([round(val, 3)] + list(pperm)))
 
         pickle.dump(bo, open(bo_path, "wb"))
-
-
-
 
 
 if __name__ == '__main__':

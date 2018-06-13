@@ -35,7 +35,7 @@ class Settings:
         self.PATH_TO_MODELS = '../results/models/'
         self.PATH_TO_AUG = self.PATH_TO_DATA + 'augmentations/'
         self.PATH_TO_ART = self.PATH_TO_DATA + 'augmentations/artificial/'
-        print(self.DATA_PRE)
+        # print(self.DATA_PRE)
 
         # Show demo images
         self.DEMO = True
@@ -95,7 +95,7 @@ class Settings:
         self.NR_VAL_PATCH_PER_ITER = 16
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
         self.FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
-        self.AUTO_CLASS_WEIGHT_N = 2000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
+        self.AUTO_CLASS_WEIGHT_N = 4000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
         # to 'auto'
         self.EARLY_STOPPING = True
         self.PATIENTCE_ES = 2000  # Patience of early stopping
@@ -109,6 +109,7 @@ class Settings:
         self.USE_ANY_SCAR_AUX = False
         self.USE_NORMALIZATION = True
         self.USE_LA_INPUT = False
+        self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
