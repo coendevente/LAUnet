@@ -53,8 +53,8 @@ class Test:
     # def save_metrics(self, metric_means, metric_sds, all_dice):
 
     def test(self):
-        # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
-        # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.4)
+        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         x_all_path, y_all_path = self.h.getImagePaths(self.s.VALTEST_SET, False)
 
