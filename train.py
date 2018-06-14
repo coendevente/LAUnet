@@ -344,8 +344,8 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
-        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+        # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
+        # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100
         # model = self.buildUNet()
@@ -463,13 +463,13 @@ class Train:
             pickle.dump(log, open(log_path, "wb"))
 
             # if lowest_val_loss > val_loss[0]:
-            lowest_loss_smooth = self.h.smooth(log['validation'][model.metrics_names[m]],
+            lowest_loss_smooth = self.h.smooth(log['validation']['loss'],
                                                self.s.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION)[-1]
             if lowest_val_loss > lowest_loss_smooth:
-                lowest_val_loss = val_loss[0]
+                lowest_val_loss = val_loss['loss']
                 model_path = self.h.getModelPath(self.s.MODEL_NAME)
                 model.save(model_path)
-                lowest_val_loss_i = lowest_loss_smooth
+                lowest_val_loss_i = i
                 log['lowest_val_loss'] = lowest_val_loss
                 log['lowest_val_loss_i'] = lowest_val_loss_i
                 es_j = 0

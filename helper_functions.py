@@ -386,7 +386,8 @@ class Helper():
         plt.imshow(img, cmap='Greys_r')
         plt.show()
 
-    def smooth(self, x, w):
+    def smooth(self, x_in, w):
+        x = copy.copy(x_in)
         pre = math.floor(w / 2)
         post = w - pre
         for i in range(len(x)):  # range(pre, len(x) - post):

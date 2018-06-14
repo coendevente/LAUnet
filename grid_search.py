@@ -65,7 +65,7 @@ def target(param_names, param_values):
     # print('s.LEARNING_RATE == {}'.format(s.LEARNING_RATE))
     # print('s.LOSS_FUNCTION == {}'.format(s.LOSS_FUNCTION))
 
-    # s.MODEL_NAME = MAIN_FOLDER + str(model_nr)
+    s.MODEL_NAME = MAIN_FOLDER + str(model_nr)
     # s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
     # s.ART_FRACTION = art_fraction
     h = Helper(s)
@@ -135,7 +135,18 @@ def hyperpar_opt():
     print('-' * len(header_row))
 
     for pperm in param_permutations:
-        val = target(param_names, pperm)
+        finished = False
+        first_retry = True
+        while not finished:
+            try:
+                if not first_retry:
+                    print('Retrying')
+                val = target(param_names, pperm)
+                finished = True
+            except Exception:
+                if first_retry:
+                    print('Failed')
+                first_retry = False
         bo[pperm] = val
 
         print(get_table_row([round(val, 3)] + list(pperm)))

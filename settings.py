@@ -21,8 +21,9 @@ class Settings:
         # self.MODEL_NAME = 'test'
         # self.MODEL_NAME = 'sf_without_la_input_lr4'
         # self.MODEL_NAME = 'la_2018_challenge_3_splits'
-        self.MODEL_NAME = 'la_2018_challenge_3_splits_2'
+        # self.MODEL_NAME = 'la_2018_challenge_3_splits_2'
         # self.MODEL_NAME = 'test'
+        self.MODEL_NAME = 'la_2018_challenge_0/1'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
