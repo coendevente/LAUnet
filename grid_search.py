@@ -41,7 +41,7 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'la_2018_challenge_0/'
+MAIN_FOLDER = 'la_2018_challenge_1/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
@@ -71,11 +71,14 @@ def target(param_names, param_values):
     h = Helper(s)
 
     with suppress_stdout():
-        not_model_nrs = []
+        # print('here1')
+        not_model_nrs = [2]
         if model_nr not in not_model_nrs:
+            # print('here2')
             Train(s, h).train()
             metric_means, metric_sds = Test(s, h).test()
         else:
+            # print('here3')
             s.CALC_PROBS = False
             metric_means, metric_sds = Test(s, h).test()
             s.CALC_PROBS = True
@@ -108,7 +111,7 @@ def hyperpar_opt():
     params = {
         'LEARNING_RATE': [1e-3, 1e-4, 1e-5],
         'DROPOUT': [0, .3, .6],
-        'LOSS_FUNCTION': ['dice', 'weighted_binary_cross_entropy']
+        'UNET_DEPTH': [4, 5]
     }
 
     param_names = sorted(params.keys())
@@ -147,6 +150,7 @@ def hyperpar_opt():
                 if first_retry:
                     print('Failed')
                 first_retry = False
+                # pickle.dump(pickle.load(open(nr_steps_path, "rb")) - 1, open(nr_steps_path, "wb"))
         bo[pperm] = val
 
         print(get_table_row([round(val, 3)] + list(pperm)))

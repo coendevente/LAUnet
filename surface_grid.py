@@ -19,7 +19,7 @@ def get_screenshot(path, view, center=False):
     ow.SetInstance(fow)
 
     surf = reader.GetOutput()
-    surf.ColorCells(1, 0, 0)
+    # surf.ColorCells(1, 0, 0)
 
     # create a rendering window and renderer
     ren = vtk.vtkRenderer()

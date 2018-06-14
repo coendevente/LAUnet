@@ -344,8 +344,8 @@ class Train:
         return y_aux
 
     def train(self):
-        # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
-        # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
+        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100
         # model = self.buildUNet()
@@ -378,9 +378,11 @@ class Train:
         self.updateSliceInformation(y_full_val, self.s.VALIDATION_SET)
 
         if self.s.FN_CLASS_WEIGHT == 'auto' and self.s.LOSS_FUNCTION == 'weighted_binary_cross_entropy':
+            self.s.USE_NORMALIZATION = False
             _, y_patches = self.getRandomPatches(x_full_train + x_full_val, y_full_train + y_full_val,
                                                  self.s.AUTO_CLASS_WEIGHT_N, list(self.s.TRAINING_SET)
                                                  + list(self.s.VALIDATION_SET))
+            # self.s.USE_NORMALIZATION = True
             self.s.FN_CLASS_WEIGHT = self.h.getClassWeightAuto(y_patches)
             self.h.s = self.s
 
@@ -466,7 +468,7 @@ class Train:
             lowest_loss_smooth = self.h.smooth(log['validation']['loss'],
                                                self.s.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION)[-1]
             if lowest_val_loss > lowest_loss_smooth:
-                lowest_val_loss = val_loss['loss']
+                lowest_val_loss = val_loss[0]
                 model_path = self.h.getModelPath(self.s.MODEL_NAME)
                 model.save(model_path)
                 lowest_val_loss_i = i

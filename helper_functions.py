@@ -332,6 +332,7 @@ class Helper():
         return (im - np.min(im)) / (np.max(im) - np.min(im))
 
     def normalize_multiple_ndarray(self, ls_in):
+        print(ls_in.shape)
         ls_out = np.zeros(ls_in.shape)
         for i in range(ls_in.shape[0]):
             ls_out[i] = self.normalize(ls_in[i])

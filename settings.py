@@ -23,7 +23,10 @@ class Settings:
         # self.MODEL_NAME = 'la_2018_challenge_3_splits'
         # self.MODEL_NAME = 'la_2018_challenge_3_splits_2'
         # self.MODEL_NAME = 'test'
-        self.MODEL_NAME = 'la_2018_challenge_0/1'
+        # self.MODEL_NAME = 'la_2018_challenge_0/1'
+        # self.MODEL_NAME = 'la_2018_loss_bce'
+        self.MODEL_NAME = 'la_2018_challenge_3_splits'
+        # self.MODEL_NAME = '-'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
@@ -93,7 +96,7 @@ class Settings:
         self.LEARNING_RATE = math.pow(10, -4)
         self.BATCH_SIZE = 4
         self.NR_BATCHES = 15000
-        self.NR_VAL_PATCH_PER_ITER = 16
+        self.NR_VAL_PATCH_PER_ITER = 4
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
         self.FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
         self.AUTO_CLASS_WEIGHT_N = 4000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
