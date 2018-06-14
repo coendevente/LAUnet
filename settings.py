@@ -26,7 +26,7 @@ class Settings:
         # self.MODEL_NAME = 'la_2018_challenge_0/1'
         # self.MODEL_NAME = 'la_2018_loss_bce'
         self.MODEL_NAME = 'la_2018_challenge_3_splits'
-        # self.MODEL_NAME = '-'
+        self.MODEL_NAME = 'la_2018_challenge_1/1'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
