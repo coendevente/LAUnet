@@ -41,7 +41,8 @@ def suppress_stdout():
             sys.stdout = old_stdout
 
 
-MAIN_FOLDER = 'la_2018_challenge_1/'
+# MAIN_FOLDER = 'la_2018_challenge_1/'
+MAIN_FOLDER = 'la_2018_challenge_convpl_depth/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
@@ -84,7 +85,7 @@ def target(param_names, param_values):
 
     pickle.dump(model_nr, open(nr_steps_path, "wb"))
 
-    return metric_means[s.MODEL_NAME]['Dice']
+    return metric_means[s.MODEL_NAME]['Dice'], metric_sds[s.MODEL_NAME]['Dice']
 
 
 def get_table_row(values):
@@ -92,7 +93,7 @@ def get_table_row(values):
     for v in values:
         if out != '':
             out += ' | '
-        out += '{:>15}'.format(v)
+        out += '{:>25}'.format(v)
     return out
 
 
@@ -107,21 +108,30 @@ def hyperpar_opt():
 
         return
 
-    params = {
-        'LEARNING_RATE': [1e-3, 1e-4, 1e-5],
-        'DROPOUT': [0, .3, .6],
-        'UNET_DEPTH': [4, 5]
-    }
+    # params = {
+    #     'LEARNING_RATE': [1e-3, 1e-4, 1e-5],
+    #     'DROPOUT': [0, .3, .6],
+    #     'UNET_DEPTH': [4, 5]
+    # }
+    #
+    # param_names = sorted(params.keys())
+    # param_values = []
+    # for pname in param_names:
+    #     param_values.append(params[pname])
+    #
+    # print(param_names)
+    # print(param_values)
+    # param_permutations = list(itertools.product(*param_values))
 
-    param_names = sorted(params.keys())
-    param_values = []
-    for pname in param_names:
-        param_values.append(params[pname])
+    param_names = ['NR_CONV_PER_CONV_BLOCK', 'UNET_DEPTH', 'START_CH']
+    param_permutations = [(1, 4, 64),
+                          (1, 5, 64),
+                          (1, 6, 32),
+                          (2, 4, 64),
+                          (2, 5, 64),
+                          (2, 6, 32)]
 
     print(param_names)
-    print(param_values)
-
-    param_permutations = list(itertools.product(*param_values))
     print(param_permutations)
 
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -143,16 +153,17 @@ def hyperpar_opt():
             try:
                 if not first_retry:
                     print('Retrying')
-                val = target(param_names, pperm)
+                mean, std = target(param_names, pperm)
                 finished = True
             except Exception:
                 if first_retry:
                     print('Failed')
                 first_retry = False
                 # pickle.dump(pickle.load(open(nr_steps_path, "rb")) - 1, open(nr_steps_path, "wb"))
+        val = '{} \pm {}'.format(round(mean, 4), round(std, 5))
         bo[pperm] = val
 
-        print(get_table_row([round(val, 3)] + list(pperm)))
+        print(get_table_row([val] + list(pperm)))
 
         pickle.dump(bo, open(bo_path, "wb"))
 

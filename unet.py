@@ -25,20 +25,20 @@ https://github.com/pietz/unet-keras/blob/master/unet.py
 '''
 
 
-def conv_block(m, dim, acti, bn, res, ndim, do=0):
+def conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do=0):
     """
     Builds a convolution block.
     :param: Similar to paramaters in UNet(...)
     :return: A block of two times a convolution and batch normalization
     """
-    n = Conv3D(dim, 3, activation=acti, padding='same')(m) if ndim == 3 else \
-        Conv2D(dim, 3, activation=acti, padding='same')(m)
-    n = BatchNormalization()(n) if bn else n
-    n = Dropout(do)(n) if do else n
-    # print('Added dropout') if do else n
-    n = Conv3D(dim, 3, activation=acti, padding='same')(n) if ndim == 3 else \
-        Conv2D(dim, 3, activation=acti, padding='same')(m)
-    n = BatchNormalization()(n) if bn else n
+
+    n = m
+    for i in range(nr_conv_per_block):
+        n = Conv3D(dim, 3, activation=acti, padding='same')(n) if ndim == 3 else \
+            Conv2D(dim, 3, activation=acti, padding='same')(n)
+        n = BatchNormalization()(n) if bn else n
+        n = Dropout(do)(n) if do and i == 0 else n
+
     return Concatenate()([m, n]) if res else n
 
 
@@ -54,7 +54,7 @@ def aux_loss_block(m, ndim, inc, dim, acti):
     return o
 
 
-def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al):
+def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al, nr_conv_per_block):
     """
     Builds one block in UNet. The function is recursive. The depth decreases with 1 every time.
     :param: Similar to paramaters in UNet(...)
@@ -63,11 +63,12 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
     o_aux = -1
 
     if depth > 0:
-        n = conv_block(m, dim, acti, bn, res, ndim, do) if doeverylevel else \
-            conv_block(m, dim, acti, bn, res, ndim)
+        n = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do) if doeverylevel else \
+            conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block)
         m = (MaxPooling3D((1, 2, 2))(n) if mp else Conv3D(dim, 3, strides=2, padding='same')(n)) if ndim == 3 else \
             (MaxPooling2D((2, 2))(n) if mp else Conv2D(dim, 3, strides=2, padding='same')(n))
-        m, o_aux = level_block(m, int(inc * dim), depth - 1, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al)
+        m, o_aux = level_block(m, int(inc * dim), depth - 1, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al,
+                               nr_conv_per_block)
         if up:
             m = UpSampling3D((1, 2, 2))(m) if ndim == 3 else \
                 UpSampling2D((2, 2))(m)
@@ -76,17 +77,18 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
         else:
             raise Exception('Unet in 3D does not work without upsampling')
         n = Concatenate()([n, m])
-        m = conv_block(n, dim, acti, bn, res, ndim, do) if doeverylevel else \
-            conv_block(n, dim, acti, bn, res, ndim)
+        m = conv_block(n, dim, acti, bn, res, ndim, nr_conv_per_block, do) if doeverylevel else \
+            conv_block(n, dim, acti, bn, res, ndim, nr_conv_per_block)
     else:
-        m = conv_block(m, dim, acti, bn, res, ndim, do)
+        m = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do)
         if al:
             o_aux = aux_loss_block(m, ndim, inc, dim, acti)
     return m, o_aux
 
 
 def UNet(img_shape, ndim, out_ch=1, start_ch=64, depth=4, inc_rate=2., activation='relu',
-         dropout=0.5, batchnorm=False, maxpool=True, upconv=True, residual=False, doeverylevel=False, aux_loss=True):
+         dropout=0.5, batchnorm=False, maxpool=True, upconv=True, residual=False, doeverylevel=False, aux_loss=True,
+         nr_conv_per_block=2):
     """
     Makes UNet model.
 
@@ -107,7 +109,7 @@ def UNet(img_shape, ndim, out_ch=1, start_ch=64, depth=4, inc_rate=2., activatio
     """
     i = Input(shape=img_shape)
     o_main, o_aux = level_block(i, start_ch, depth, inc_rate, activation, dropout, batchnorm, maxpool, upconv, residual,
-                                ndim, doeverylevel, aux_loss)
+                                ndim, doeverylevel, aux_loss, nr_conv_per_block)
     o_main = Conv3D(out_ch, 1, activation='sigmoid', name='main_output')(o_main) if ndim == 3 else \
              Conv2D(out_ch, 1, activation='sigmoid', name='main_output')(o_main)
     return Model(inputs=i, outputs=[o_main, o_aux]) if aux_loss else \

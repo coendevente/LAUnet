@@ -58,7 +58,8 @@ class Train:
             ps += (1, )
         model = UNet(ps, self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
                      doeverylevel=self.s.DROPOUT_AT_EVERY_LEVEL, inc_rate=self.s.FEATURE_MAP_INC_RATE,
-                     aux_loss=self.s.USE_ANY_SCAR_AUX)
+                     aux_loss=self.s.USE_ANY_SCAR_AUX, nr_conv_per_block=self.s.NR_CONV_PER_CONV_BLOCK,
+                     start_ch=self.s.START_CH)
 
         if self.s.USE_ANY_SCAR_AUX:
             model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss={'main_output': self.h.custom_loss,
@@ -464,10 +465,10 @@ class Train:
 
             pickle.dump(log, open(log_path, "wb"))
 
-            # if lowest_val_loss > val_loss[0]:
-            lowest_loss_smooth = self.h.smooth(log['validation']['loss'],
-                                               self.s.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION)[-1]
-            if lowest_val_loss > lowest_loss_smooth:
+            if lowest_val_loss > val_loss[0]:
+                # lowest_loss_smooth = self.h.smooth(log['validation']['loss'],
+                #                                    self.s.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION)[-1]
+                # if lowest_val_loss > lowest_loss_smooth:
                 lowest_val_loss = val_loss[0]
                 model_path = self.h.getModelPath(self.s.MODEL_NAME)
                 model.save(model_path)

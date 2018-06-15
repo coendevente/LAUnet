@@ -28,6 +28,8 @@ class UNet:
     def conv_block(self, tensor_in, Nc_in, Nc_out):
         ## Perform lifting convolution
         # The kernels used in the lifting layer
+        print(tensor_in.get_shape().as_list())
+        print('kernel: {}'.format([self.Nxy, self.Nxy, Nc_in, Nc_out]))
 
         with tf.variable_scope("Layer_{}".format(self.next_layer())):
             kernels_raw = tf.get_variable(
@@ -54,6 +56,8 @@ class UNet:
 
             tensor_in = tensor_out
 
+        print(tensor_in.get_shape().as_list())
+
         with tf.variable_scope("Layer_{}".format(self.next_layer())):
             ## Perform group convolution
             # The kernels used in the group convolution layer
@@ -79,6 +83,7 @@ class UNet:
 
             ## Apply ReLU
             tensor_out = tf.nn.relu(tensor_out)
+        print(tensor_out.get_shape().as_list())
         return tensor_out
 
     def conc(self, tensor_in):
@@ -98,6 +103,7 @@ class UNet:
     def level_block(self, m, depth, Nc_in, Nc_out):
         if depth > 0:
             n = self.conv_block(m, Nc_in, Nc_out)
+            print('here')
             m = self.max_pool(n)
             m = self.conc(m)
             m = self.level_block(m, depth - 1, Nc_out, Nc_out * self.inc)
