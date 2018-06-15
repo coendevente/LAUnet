@@ -66,8 +66,7 @@ def target(param_names, param_values):
     # print('s.LOSS_FUNCTION == {}'.format(s.LOSS_FUNCTION))
 
     s.MODEL_NAME = MAIN_FOLDER + str(model_nr)
-    # s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
-    # s.ART_FRACTION = art_fraction
+    s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
     h = Helper(s)
 
     with suppress_stdout():

@@ -10,23 +10,7 @@ class Settings:
         self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        # self.MODEL_NAME = 'la_seg_ps_480'
-        # self.MODEL_NAME = 'sf_less_contrast_enh'
-        # self.MODEL_NAME = 'gs_art_fraction_2/5'
-        # self.MODEL_NAME = 'la_seg_new_data'
-        # self.MODEL_NAME = 'la_seg_dynamic_input_size'a
-        # self.MODEL_NAME = 'la_challenge_data'
-        # self.MODEL_NAME = 'la_challenge_data_depth_5'
-        # self.MODEL_NAME = 'sf_with_la_input_lr3'
-        # self.MODEL_NAME = 'test'
-        # self.MODEL_NAME = 'sf_without_la_input_lr4'
-        # self.MODEL_NAME = 'la_2018_challenge_3_splits'
-        # self.MODEL_NAME = 'la_2018_challenge_3_splits_2'
-        # self.MODEL_NAME = 'test'
-        # self.MODEL_NAME = 'la_2018_challenge_0/1'
-        # self.MODEL_NAME = 'la_2018_loss_bce'
-        self.MODEL_NAME = 'la_2018_challenge_3_splits'
-        self.MODEL_NAME = 'la_2018_challenge_1/1'
+        self.MODEL_NAME = 'la_2018_2convperblock'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
@@ -92,9 +76,9 @@ class Settings:
         self.USE_PRE_PROCESSING = False
 
         # Training hyperparameters
-        self.UNET_DEPTH = 5
+        self.UNET_DEPTH = 4
         self.LEARNING_RATE = math.pow(10, -4)
-        self.BATCH_SIZE = 4
+        self.BATCH_SIZE = 1
         self.NR_BATCHES = 15000
         self.NR_VAL_PATCH_PER_ITER = 4
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
@@ -102,7 +86,7 @@ class Settings:
         self.AUTO_CLASS_WEIGHT_N = 4000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
         # to 'auto'
         self.EARLY_STOPPING = True
-        self.PATIENTCE_ES = 2000  # Patience of early stopping
+        self.PATIENTCE_ES = 4000  # Patience of early stopping
         self.DROPOUT_AT_EVERY_LEVEL = False
         self.DROPOUT = 0.3
         self.FEATURE_MAP_INC_RATE = 2.
