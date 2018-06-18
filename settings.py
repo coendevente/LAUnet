@@ -14,8 +14,12 @@ class Settings:
         # self.MODEL_NAME = 'la_2018_d_5_2_conv_start_ch_32'
         # self.MODEL_NAME = 'la_2018_d_6_1_conv'
         # self.MODEL_NAME = 'la_2018_d_6_2_conv'
-        self.MODEL_NAME = 'la_2018_challenge_convpl_depth/1'
-        # self.MODEL_NAME = 'la_2018_max_ps_512'
+        # self.MODEL_NAME = 'la_2018_challenge_convpl_depth/2'
+        # self.MODEL_NAME = 'la_2018_challenge_convpl_depth_1/2'
+        self.MODEL_NAME = '-'
+        self.MODEL_NAME = 'la_2018_challenge_convpl_depth_2/5'
+        # self.MODEL_NAME = 'la_2018_d_5_nv_1_do_0'
+        # self.MODEL_NAME = 'la_challenge_data_depth_5'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
@@ -72,7 +76,8 @@ class Settings:
         # self.PATCH_SIZE = (3, 64, 64)
         # self.PATCH_SIZE = (1, 480, 480)
         # self.PATCH_SIZE = (1, 448, 448)
-        self.PATCH_SIZE = (1, 512, 512)
+        # self.PATCH_SIZE = (1, 512, 512)
+        self.PATCH_SIZE = (1, 448, 448)
         # self.PATCH_SIZE = (1, 64, 64)
         # self.PATCH_SIZE = (1, 384, 384)
         # PATCH_SIZE = (1, 512, 512)
@@ -83,10 +88,10 @@ class Settings:
         self.USE_PRE_PROCESSING = False
 
         # Training hyperparameters
-        self.UNET_DEPTH = 6
+        self.UNET_DEPTH = 4
         self.LEARNING_RATE = math.pow(10, -4)
         self.NR_CONV_PER_CONV_BLOCK = 2
-        self.BATCH_SIZE = 1
+        self.BATCH_SIZE = 4
         self.NR_BATCHES = 30000
         self.NR_VAL_PATCH_PER_ITER = 4
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
@@ -96,7 +101,7 @@ class Settings:
         self.EARLY_STOPPING = True
         self.PATIENTCE_ES = 4000  # Patience of early stopping
         self.DROPOUT_AT_EVERY_LEVEL = False
-        self.DROPOUT = 0.5
+        self.DROPOUT = 0
         self.FEATURE_MAP_INC_RATE = 2.
         self.LOSS_FUNCTION = 'dice'  # 'weighted_binary_cross_entropy' OR 'dice'
         self.MAIN_OUTPUT_LOSS_WEIGHT = .8
@@ -106,7 +111,8 @@ class Settings:
         self.USE_NORMALIZATION = True
         self.USE_LA_INPUT = False
         self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
-        self.START_CH = 32
+        self.START_CH = 64
+        self.LOAD_MODEL = False  # Continue training with model file that already exists for model name
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False

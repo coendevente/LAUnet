@@ -24,6 +24,8 @@ import pickle
 
 import inspect
 
+import time
+
 from tabulate import tabulate
 
 import itertools
@@ -42,7 +44,7 @@ def suppress_stdout():
 
 
 # MAIN_FOLDER = 'la_2018_challenge_1/'
-MAIN_FOLDER = 'la_2018_challenge_convpl_depth/'
+MAIN_FOLDER = 'la_2018_challenge_convpl_depth_2/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)
@@ -72,10 +74,12 @@ def target(param_names, param_values):
 
     with suppress_stdout():
         # print('here1')
-        not_model_nrs = [2]
+        not_model_nrs = [1, 2, 3]
         if model_nr not in not_model_nrs:
             # print('here2')
-            Train(s, h).train()
+            t = Train(s, h)
+            t.train()
+            del t
             metric_means, metric_sds = Test(s, h).test()
         else:
             # print('here3')
@@ -124,7 +128,8 @@ def hyperpar_opt():
     # param_permutations = list(itertools.product(*param_values))
 
     param_names = ['NR_CONV_PER_CONV_BLOCK', 'UNET_DEPTH', 'START_CH']
-    param_permutations = [(1, 4, 64),
+    param_permutations = [
+                          (1, 4, 64),
                           (1, 5, 64),
                           (1, 6, 32),
                           (2, 4, 64),
@@ -159,6 +164,7 @@ def hyperpar_opt():
                 if first_retry:
                     print('Failed')
                 first_retry = False
+                time.sleep(30)
                 # pickle.dump(pickle.load(open(nr_steps_path, "rb")) - 1, open(nr_steps_path, "wb"))
         val = '{} \pm {}'.format(round(mean, 4), round(std, 5))
         bo[pperm] = val

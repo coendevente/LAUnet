@@ -12,9 +12,11 @@ import os
 os.environ["PATH"] += os.pathsep + 'C:/Anaconda3/Library/bin/graphviz/'
 
 from tensorflow.python.client import device_lib
+import keras
 from keras.optimizers import *
 from keras.utils import plot_model
 import tensorflow as tf
+from keras.models import load_model
 
 from online_augment import OnlineAugmenter
 from offline_augment import OfflineAugmenter
@@ -387,7 +389,11 @@ class Train:
             self.s.FN_CLASS_WEIGHT = self.h.getClassWeightAuto(y_patches)
             self.h.s = self.s
 
-        model = self.buildUNet()
+        if self.s.LOAD_MODEL:
+            keras.losses.custom_loss = self.h.custom_loss
+            model = load_model(self.h.getModelPath(self.s.MODEL_NAME))
+        else:
+            model = self.buildUNet()
         print(model.summary())
 
         log = {'training': {}, 'validation': {}}
@@ -417,6 +423,9 @@ class Train:
         log['stopped_early'] = False
         print("self.s.EARLY_STOPPING == {}".format(self.s.EARLY_STOPPING))
         print("self.s.PATIENTCE_ES == {}".format(self.s.PATIENTCE_ES))
+
+        if self.s.LOAD_MODEL:
+            log = log_path
 
         pickle.dump(log, open(log_path, "wb"))
         for i in range(self.s.NR_BATCHES):
