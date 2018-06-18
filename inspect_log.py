@@ -41,8 +41,8 @@ class LogInspector:
             except:
                 print('s.{:>25} = absent in this log file'.format(name))
 
-        # w = 50
-        w = int(round(len(log['training']['loss'])/10))
+        w = 50
+        # w = int(round(len(log['training']['loss'])/10))
         orig_lw = 1
         smooth_lw = 2
 

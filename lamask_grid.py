@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from settings import Settings
 from helper_functions import Helper
 import copy
+from PIL import ImageFont
+from PIL import Image
+from PIL import ImageDraw
 
 
 def crop_around(im, new_size, center):
@@ -35,7 +38,7 @@ def normalize(im):
     return (im - np.min(im)) / (np.max(im) - np.min(im))
 
 
-def get_grid(perc):
+def get_grid():
     s = Settings()
     h = Helper(s)
 
@@ -43,7 +46,9 @@ def get_grid(perc):
     gt = []
     an = []
 
-    nrs = s.VALIDATION_SET
+    nrs = s.TESTING_SET
+    dice = np.array([0.9006973680422561, 0.910006143806372, 0.9112106116568368, 0.8601871142224925, 0.7259960147934539, 0.7628879251385949, 0.8283370968273197, 0.914378003436467, 0.9261529957159189, 0.8196490038357094, 0.9119802222766654, 0.8743586059357887, 0.8684744959632821, 0.9153005083364386, 0.9223461250934463, 0.8978720592122654, 0.931094379993213, 0.8323133596744007, 0.8952515304300879, 0.7863649833930516, 0.6610801486199576, 0.9001830952523773, 0.905672853299284, 0.8840102160996202, 0.8836265065576483])
+    nrs = np.flip(nrs[np.argsort(dice)], 0)  # Sort nrs by Dice score, high to low
 
     for nr in nrs:
         path = '{}input_image_{}_-1.nii'.format(h.getModelPredictPath(s.MODEL_NAME), nr)
@@ -63,23 +68,28 @@ def get_grid(perc):
     yx_size = (200, 200)
 
     for i in range(len(nrs)):
-        nz = np.argwhere(np.sum(gt[i], axis=(1, 2)) > 0)
-        nz = list(np.reshape(nz, nz.shape[:1]))
-        print(nz)
-        s = nz[int(round(len(nz) * perc))]
-        print(s)
+        # nz = np.argwhere(np.sum(gt[i], axis=(1, 2)) > 0)
+        # nz = list(np.reshape(nz, nz.shape[:1]))
+        # print(nz)
+        # s = nz[int(round(len(nz) * perc))]
+        # print(s)
+        s = 44
         filter = sitk.LabelShapeStatisticsImageFilter()
         filter.Execute(sitk.GetImageFromArray(gt[i][s]))
         center = list(reversed(filter.GetCentroid(1)))
 
-        n = normalize(ip[i][s])
-        print(np.min(n))
-        print(np.max(n))
-        ip_rgb = grey2rgb(n)
-        gt_masked = get_mask_overlay(ip_rgb, gt[i][s], [1, 0, 0], 0.5)
-        gt_an_masked = get_mask_overlay(gt_masked, an[i][s], [0, 1, 0], 0.5)
-        cropped = crop_around(gt_an_masked, yx_size, center)
-        grid_all.append(cropped)
+        # print(np.min(n))
+        # print(np.max(n))
+        ip_rgb = grey2rgb(ip[i][s])
+        cropped = crop_around(ip_rgb, yx_size, center)
+        cropped = normalize(cropped)
+        gt_cropped = crop_around(gt[i][s], yx_size, center)
+        an_cropped = crop_around(an[i][s], yx_size, center)
+        gt_masked = get_mask_overlay(cropped, gt_cropped, [1, 0, 0], 0.5)
+        gt_an_masked = get_mask_overlay(gt_masked, an_cropped, [0, 1, 0], 0.5)
+
+        gt_an_masked = np.pad(gt_an_masked, ((10, 10), (10, 10), (0, 0)), mode='constant', constant_values=255)
+        grid_all.append(gt_an_masked)
         # grid_all.append(crop_around(ip_rgb, yx_size, center))
         # grid_all.append(crop_around(get_mask_overlay(ip_rgb, gt[i][s]), yx_size, center))
         # grid_all.append(crop_around(get_mask_overlay(ip_rgb, an[i][s]), yx_size, center))
@@ -101,12 +111,13 @@ def get_grid(perc):
 
 if __name__ == '__main__':
     plt.figure()
-    plt.subplot(1, 3, 1)
-    plt.imshow(get_grid(.25), cmap='Greys_r')
+    # plt.subplot(1, 3, 1)
+    # plt.imshow(get_grid(.25), cmap='Greys_r')
 
-    plt.subplot(1, 3, 2)
-    plt.imshow(get_grid(.5), cmap='Greys_r')
+    # plt.subplot(1, 3, 2)
+    plt.imshow(get_grid(), cmap='Greys_r')
 
-    plt.subplot(1, 3, 3)
-    plt.imshow(get_grid(.75), cmap='Greys_r')
+    # plt.subplot(1, 3, 3)
+    # plt.imshow(get_grid(.75), cmap='Greys_r')
+    plt.axis('off')
     plt.show()

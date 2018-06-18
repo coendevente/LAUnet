@@ -10,16 +10,9 @@ class Settings:
         self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        # self.MODEL_NAME = 'la_2018_d_4_2_conv'
-        # self.MODEL_NAME = 'la_2018_d_5_2_conv_start_ch_32'
-        # self.MODEL_NAME = 'la_2018_d_6_1_conv'
-        # self.MODEL_NAME = 'la_2018_d_6_2_conv'
-        # self.MODEL_NAME = 'la_2018_challenge_convpl_depth/2'
-        # self.MODEL_NAME = 'la_2018_challenge_convpl_depth_1/2'
-        self.MODEL_NAME = '-'
-        self.MODEL_NAME = 'la_2018_challenge_convpl_depth_2/5'
-        # self.MODEL_NAME = 'la_2018_d_5_nv_1_do_0'
-        # self.MODEL_NAME = 'la_challenge_data_depth_5'
+        # self.MODEL_NAME = '-'
+        # self.MODEL_NAME = 'la_2018_challenge_3_splits'
+        self.MODEL_NAME = 'la_2018_challenge_convpl_depth_2/2'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
@@ -74,21 +67,14 @@ class Settings:
         self.VARIABLE_PATCH_SIZE = False
 
         # self.PATCH_SIZE = (3, 64, 64)
-        # self.PATCH_SIZE = (1, 480, 480)
-        # self.PATCH_SIZE = (1, 448, 448)
-        # self.PATCH_SIZE = (1, 512, 512)
+        self.PATCH_SIZE = (1, 480, 480)
         self.PATCH_SIZE = (1, 448, 448)
-        # self.PATCH_SIZE = (1, 64, 64)
-        # self.PATCH_SIZE = (1, 384, 384)
-        # PATCH_SIZE = (1, 512, 512)
-        # PATCH_SIZE = (3, 128, 128)
-        # PATCH_SIZE = (1, 400, 400)
         self.NR_DIM = 2  # Only 2D and 3D are supported
 
         self.USE_PRE_PROCESSING = False
 
         # Training hyperparameters
-        self.UNET_DEPTH = 4
+        self.UNET_DEPTH = 6
         self.LEARNING_RATE = math.pow(10, -4)
         self.NR_CONV_PER_CONV_BLOCK = 2
         self.BATCH_SIZE = 4
@@ -128,9 +114,9 @@ class Settings:
             raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
-        self.USE_POST_PROCESSING = True
+        self.USE_POST_PROCESSING = False
         self.SAVE_METRICS = True
-        self.VALTEST_SET = self.VALIDATION_SET  # VALIDATION_SET OR TESTING_SET
+        self.VALTEST_SET = self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
         # VOXEL_OVERLAP = (0, 200, 200)

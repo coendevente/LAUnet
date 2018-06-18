@@ -25,11 +25,11 @@ class LossInspector:
         plt.figure()
         legend = []
 
-        w = 600
+        w = 3000
         orig_lw = 1
         smooth_lw = 2
 
-        show_non_smooth = True
+        show_non_smooth = False
 
         for j in range(len(model_names)):
             model_name = model_names[j]
@@ -37,7 +37,7 @@ class LossInspector:
             log_path = self.h.getLogPath(model_name)
             log = pickle.load(open(log_path, "rb"))
 
-            legend.append('{} = {}'.format(legend_parameter_name, eval("log['settings'].{}".format(legend_parameter))))
+            # legend.append('{} = {}'.format(legend_parameter_name, eval("log['settings'].{}".format(legend_parameter))))
 
             m = len(log['training'].keys())
 
@@ -53,7 +53,7 @@ class LossInspector:
                     plt.title('train: ' + i, fontsize=8)
 
                     plt.subplot(2, m, m + cnt)
-                    plt.plot(log['validation'][i], lw=orig_lw, alpha=.3, color=color, label=log['settings'].MODEL_NAME)
+                    plt.plot(log['validation'][i], lw=orig_lw, alpha=.3, color=color)
                     plt.title('val: ' + i, fontsize=8)
 
                     cnt += 1
@@ -67,11 +67,13 @@ class LossInspector:
                 plt.title('train: ' + i, fontsize=8)
 
                 plt.subplot(2, m, m + cnt)
-                plt.plot(self.h.smooth(log['validation'][i], w), lw=smooth_lw, color=color)
+
+                lab = 'Model {}'.format(j+1)
+                plt.plot(self.h.smooth(log['validation'][i], w), lw=smooth_lw, color=color, label=lab, alpha=.6)
                 plt.title('val: ' + i, fontsize=8)
 
                 cnt += 1
-        # plt.legend(legend)
+            plt.legend()
         plt.show()
 
 

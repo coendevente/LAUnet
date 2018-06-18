@@ -74,7 +74,7 @@ def target(param_names, param_values):
 
     with suppress_stdout():
         # print('here1')
-        not_model_nrs = [1, 2, 3]
+        not_model_nrs = [1, 2, 3, 4, 5, 6]
         if model_nr not in not_model_nrs:
             # print('here2')
             t = Train(s, h)

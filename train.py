@@ -350,11 +350,11 @@ class Train:
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
-        # self.s.FN_CLASS_WEIGHT = 100
-        # model = self.buildUNet()
-        # plot_model(model, to_file='model.png')
-        # model = self.buildUNet()
-        # print(model.summary())
+        self.s.FN_CLASS_WEIGHT = 100
+        model = self.buildUNet()
+        plot_model(model, to_file='model.png')
+        model = self.buildUNet()
+        print(model.summary())
 
         self.h.s = self.s
 
