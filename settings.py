@@ -116,7 +116,7 @@ class Settings:
         # Testing and validation procedure
         self.USE_POST_PROCESSING = False
         self.SAVE_METRICS = True
-        self.VALTEST_SET = self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
+        self.VALTEST_SET = []  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
         # VOXEL_OVERLAP = (0, 200, 200)
