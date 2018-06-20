@@ -13,7 +13,8 @@ class Settings:
         # self.MODEL_NAME = '-'
         # self.MODEL_NAME = 'la_2018_challenge_3_splits'
         # self.MODEL_NAME = 'la_2018_challenge_convpl_depth_2/2'
-        self.MODEL_NAME = 'se2_test'
+        # self.MODEL_NAME = 'se2_test'
+        self.MODEL_NAME = 'la_2018_challenge_convpl_depth_2/2'
 
         self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
 
@@ -116,10 +117,11 @@ class Settings:
             raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
-        self.USE_POST_PROCESSING = False
+        self.USE_POST_PROCESSING = True
         self.SAVE_METRICS = True
-        self.VALTEST_SET = []  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
+        self.VALTEST_SET = self.TESTING_SET #  self.VALIDATION_SET  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
+        # self.VALTEST_MODEL_NAMES = ['la_2018_challenge_convpl_depth_2/{}'.format(i) for i in range(1, 7)]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
         # VOXEL_OVERLAP = (0, 200, 200)
         self.VOXEL_OVERLAP = (0, 32, 32)
@@ -127,7 +129,7 @@ class Settings:
         self.METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN',
                         'volume_diff']
 
-        self.CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras
+        self.CALC_PROBS = False  # If True, the probability images will be calculated with the predict function of Keras
         # and results will be saved to the disk. If False, the probability images will be loaded from disk. An error
         # will occur if these images do not exist on the disk.
 

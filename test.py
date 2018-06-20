@@ -119,7 +119,16 @@ class Test:
                         prob_thresh = self.h.post_process_la_seg(prob_thresh)
 
                     predict_path = self.h.getModelPredictPath(model_name)
-                    sitk.WriteImage(sitk.GetImageFromArray(prob_thresh),
+
+                    anno_out = sitk.GetImageFromArray(anno)
+                    anno_out.SetSpacing((0.625, 0.625, 1.25))
+                    print(sitk.GetImageFromArray(anno).GetSpacing())
+                    sitk.WriteImage(anno_out,
+                                    '{}anno_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
+
+                    prob_out = sitk.GetImageFromArray(prob_thresh)
+                    prob_out.SetSpacing((0.625, 0.625, 1.25))
+                    sitk.WriteImage(prob_out,
                                     '{}prob_thresh_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
 
                     metrics = self.calcMetrics(prob_thresh, anno)
@@ -138,8 +147,8 @@ class Test:
             print('Means of metrics: {}'.format(metric_means[model_name]))
             print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
 
-        all_dice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
-        print('All Dice values: {}'.format(all_dice))
+            all_dice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
+            print('All Dice values: {}'.format(all_dice))
 
         # plt.figure()
         # plt.hist(all_dice)
