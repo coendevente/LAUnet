@@ -6,7 +6,6 @@ from itertools import chain
 import matplotlib.pyplot as plt
 
 from helper_functions import *
-from unet import UNet
 
 import os
 os.environ["PATH"] += os.pathsep + 'C:/Anaconda3/Library/bin/graphviz/'
@@ -25,6 +24,11 @@ import random
 import time
 
 import pickle
+
+if Settings().USE_SE2:
+    from se2unet import UNet
+else:
+    from unet import UNet
 
 from imshow_3D import imshow3D
 
@@ -347,14 +351,13 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
-        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+        # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
+        # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
-        self.s.FN_CLASS_WEIGHT = 100
-        model = self.buildUNet()
-        plot_model(model, to_file='model.png')
-        model = self.buildUNet()
-        print(model.summary())
+        # self.s.FN_CLASS_WEIGHT = 100
+        # model = self.buildUNet()
+        # plot_model(model, to_file='model.png')
+        # print(model.summary())
 
         self.h.s = self.s
 
