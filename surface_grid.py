@@ -3,9 +3,6 @@ import SimpleITK as sitk
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy
-from helper_functions import Helper
-from vtk import vtkStructuredPointsReader
-from vtk.util import numpy_support as VN
 import math
 
 
