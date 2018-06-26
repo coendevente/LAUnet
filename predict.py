@@ -133,10 +133,13 @@ class Predict:
 
     def predict(self, im, model):
         did_rescale = False
-        if im.shape[1] < self.s.PATCH_SIZE[1]:
+        if im.shape[1] < self.s.PATCH_SIZE[1] or self.s.RESIZE_BEFORE_PREDICTION:
+            # and self.s.RESIZE_BEFORE_PREDICTION[1] < im.shape[1]):
+            print(self.s.RESIZE_BEFORE_PREDICTION)
             did_rescale = True
             old_input_shape = im.shape
-            im = self.h.rescaleImage(im, self.s.PATCH_SIZE[1:])
+            im = self.h.rescaleImage(im, self.s.PATCH_SIZE[1:]) if not self.s.RESIZE_BEFORE_PREDICTION else \
+                self.h.rescaleImage(im, self.s.RESIZE_BEFORE_PREDICTION)
 
         patch_corners = self.patchCornersFullImage(im.shape)
         patches = self.patchesFromCorners(im, patch_corners)
@@ -168,6 +171,8 @@ class Predict:
 
 
 if __name__ == '__main__':
+    import easygui
+
     s = Settings()
     h = Helper(s)
     p = Predict(s, h)
@@ -178,14 +183,25 @@ if __name__ == '__main__':
         model_path = h.getModelPath(s.MODEL_NAME)
         model = load_model(model_path)
 
-        Tk().withdraw()
-        im_path = askopenfilename(title='Select LGE image')
+        # Tk().withdraw()
+        # im_path = askopenfilename(title='Select LGE image')
 
-        Tk().withdraw()
-        output_file = asksaveasfilename(title='Select output folder')
+        # Tk().withdraw()
+        # output_file = asksaveasfilename(title='Select output folder')
 
         # folder = '{}extra/Dataset_case{}/'.format(s.PATH_TO_DATA, i)
         # im_path = '{}lge.nii'.format(folder)
+
+        # Input
+        # im_path = '../data/vu_sample/icmr_rhc_pt4.nii.gz'
+        # im_path = easygui.fileopenbox()
+        # print(im_path)
+        im_path = input('Specify input file:')
+
+        # Output
+        # output_file = 'la_seg_icmr_rhc_pt4.nii.gz'
+        output_file = input('Specify output file (including extension):')
+
 
         sim = sitk.ReadImage(im_path)
         im = sitk.GetArrayFromImage(sim)
@@ -203,4 +219,4 @@ if __name__ == '__main__':
 
         sitk.WriteImage(sitk.GetImageFromArray(prob_thresh), output_file)
 
-        print('Predicting took {}'.format(time.time() - t0))
+        print('Predicting took {} seconds.'.format(time.time() - t0))

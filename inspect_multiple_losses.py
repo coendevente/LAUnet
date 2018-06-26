@@ -13,11 +13,11 @@ class LossInspector:
     def inspect_loss(self):
         # model_names = ['gs_art_fraction_2/1', 'gs_art_fraction_2/2', 'gs_art_fraction_2/3', 'gs_art_fraction_2/4']
         # model_names = ['la_challenge_data', 'la_challenge_data_depth_5']
-        model_names = ['sf_with_la_input', 'sf_with_la_input_lr3']  # , 'sf_with_la_input_lr3']
-        model_names = ['la_2018_challenge_convpl_depth_2/1', 'la_2018_challenge_convpl_depth_2/2',
-                       'la_2018_challenge_convpl_depth_2/3', 'la_2018_challenge_convpl_depth_2/4',
-                       'la_2018_challenge_convpl_depth_2/5', 'la_2018_challenge_convpl_depth_2/6']
-        # model_names = ['la_2018_d_5_nv_1_do_0', 'la_2018_challenge_convpl_depth_2/2']
+        # model_names = ['sf_with_la_input', 'sf_with_la_input_lr3']  # , 'sf_with_la_input_lr3']
+        # model_names = ['la_2018_challenge_convpl_depth_2/1', 'la_2018_challenge_convpl_depth_2/2',
+        #                'la_2018_challenge_convpl_depth_2/3', 'la_2018_challenge_convpl_depth_2/4',
+        #                'la_2018_challenge_convpl_depth_2/5', 'la_2018_challenge_convpl_depth_2/6']
+        model_names = ['la_2018_challenge_convpl_depth_2/2', 'se2_test_2']
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         legend_parameter = 'ART_FRACTION'
         legend_parameter_name = 'Artificial data fraction'
@@ -25,7 +25,7 @@ class LossInspector:
         plt.figure()
         legend = []
 
-        w = 3000
+        w = 20
         orig_lw = 1
         smooth_lw = 2
 

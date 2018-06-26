@@ -117,6 +117,7 @@ class OfflineAugmenter:
                 x = x_full_all[i]
                 s_la_pred = copy.copy(self.s)
                 s_la_pred.PATCH_SIZE = self.s.MODEL_PS_FOR_LA_SEG
+                s_la_pred.USE_LA_INPUT = False
                 prob = Predict(s_la_pred, self.h).predict(x, la_model)
                 prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
                 lap = self.h.post_process_la_seg(prob_thresh)
@@ -142,7 +143,7 @@ class OfflineAugmenter:
                 inputs.append([i, j, x_full_all[i], y_full_all[i], la_full_all[i], lap_full_all[i], t0,
                                len(x_full_all)])
 
-        num_cores = min(5, multiprocessing.cpu_count())
+        num_cores = min(6, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
         Parallel(n_jobs=num_cores)(delayed(self.doOneAug)(i) for i in inputs)
         # for i in inputs:

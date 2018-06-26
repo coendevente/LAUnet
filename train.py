@@ -65,7 +65,7 @@ class Train:
         model = UNet(ps, self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
                      doeverylevel=self.s.DROPOUT_AT_EVERY_LEVEL, inc_rate=self.s.FEATURE_MAP_INC_RATE,
                      aux_loss=self.s.USE_ANY_SCAR_AUX, nr_conv_per_block=self.s.NR_CONV_PER_CONV_BLOCK,
-                     start_ch=self.s.START_CH)
+                     start_ch=self.s.START_CH, n_theta=self.s.SE2_N_THETA)
 
         if self.s.USE_ANY_SCAR_AUX:
             model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss={'main_output': self.h.custom_loss,

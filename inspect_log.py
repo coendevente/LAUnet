@@ -41,8 +41,8 @@ class LogInspector:
             except:
                 print('s.{:>25} = absent in this log file'.format(name))
 
-        w = 50
-        # w = int(round(len(log['training']['loss'])/10))
+        # w = 50
+        w = int(round(len(log['training']['loss'])/20))
         orig_lw = 1
         smooth_lw = 2
 
@@ -52,7 +52,7 @@ class LogInspector:
         cnt = 1
         for i in log['training']:
             plt.subplot(2, m, cnt)
-            plt.plot(log['training'][i], lw=orig_lw, alpha=.3)
+            # plt.plot(log['training'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.h.smooth(log['training'][i], w), lw=smooth_lw)
 
             # plt.plot(np.log10(log['training'][i]), lw=orig_lw, alpha=.3)
@@ -60,7 +60,7 @@ class LogInspector:
             plt.title('train: ' + i, fontsize=8)
 
             plt.subplot(2, m, m + cnt)
-            plt.plot(log['validation'][i], lw=orig_lw, alpha=.3)
+            # plt.plot(log['validation'][i], lw=orig_lw, alpha=.3)
             plt.plot(self.h.smooth(log['validation'][i], w), lw=smooth_lw)
 
             # plt.plot(np.log10(log['validation'][i]), lw=orig_lw, alpha=.3)

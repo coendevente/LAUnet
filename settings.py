@@ -7,18 +7,14 @@ import platform
 class Settings:
     def __init__(self):
         # Model to train
-        self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
+        self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        # self.MODEL_NAME = '-'
-        # self.MODEL_NAME = 'la_2018_challenge_3_splits'
-        # self.MODEL_NAME = 'la_2018_challenge_convpl_depth_2/2'
-        self.MODEL_NAME = 'se2_test'
+        self.MODEL_NAME = 'sf_la_input'
 
-        self.DATA_SET = 'challenge_2018'  # 'original' OR 'challenge_2018'
+        self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
         # Path to folders
-
         self.DATA_PRE = '/data/cwdevente/LAUnet/' if platform.system() == 'Linux' else '../'
         self.PATH_TO_DATA = '{}challenge_2018_data/'.format(self.DATA_PRE) \
             if self.DATA_SET == 'challenge_2018' else '{}data/'.format(self.DATA_PRE)
@@ -41,17 +37,19 @@ class Settings:
             self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3]
 
             if self.GROUND_TRUTH == 'left_atrium':
+                self.ALL_NATURAL_SET = [x for x in self.ALL_NATURAL_SET if x not in self.YALE_NRS_POST]
                 self.TRAINING_SET = [x for x in self.TRAINING_SET if x not in self.YALE_NRS_POST]
                 self.VALIDATION_SET = [x for x in self.VALIDATION_SET if x not in self.YALE_NRS_POST]
                 self.TESTING_SET = [x for x in self.TESTING_SET if x not in self.YALE_NRS_POST]
 
-                self.ALL_NATURAL_SET = list(self.ALL_NATURAL_SET) + list(range(31, 44))
+                # self.ALL_NATURAL_SET = list(self.ALL_NATURAL_SET) + list(range(31, 44))
+                # self.ALL_NATURAL_SET = list(range(31, 44))
+                #
+                # self.TRAINING_SET += [40, 39, 42, 34, 37, 32, 36]
+                # self.VALIDATION_SET += [31, 38, 33]
+                # self.TESTING_SET += [41, 43, 35]
 
-                self.TRAINING_SET += [40, 39, 42, 34, 37, 32, 36]
-                self.VALIDATION_SET += [31, 38, 33]
-                self.TESTING_SET += [41, 43, 35]
-
-                print(self.VALIDATION_SET)
+                # print(self.VALIDATION_SET)
         elif self.DATA_SET == 'challenge_2018':
             self.ALL_NATURAL_SET = range(1, 101)
             # self.TRAINING_SET = range(1, 51)
@@ -76,8 +74,8 @@ class Settings:
 
         # Training hyperparameters
         self.USE_SE2 = True
-        self.UNET_DEPTH = 3
-        self.LEARNING_RATE = math.pow(10, -4)
+        self.UNET_DEPTH = 4
+        self.LEARNING_RATE = math.pow(10, -3)
         self.NR_CONV_PER_CONV_BLOCK = 2
         self.BATCH_SIZE = 4
         self.NR_BATCHES = 30000
@@ -97,14 +95,15 @@ class Settings:
         self.ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
         self.USE_ANY_SCAR_AUX = False
         self.USE_NORMALIZATION = True
-        self.USE_LA_INPUT = False
+        self.USE_LA_INPUT = True
         self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
-        self.START_CH = 4
+        self.START_CH = 16
+        self.SE2_N_THETA = 8
         self.LOAD_MODEL = False  # Continue training with model file that already exists for model name
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
-        self.NR_AUG = 10
+        self.NR_AUG = 100
 
         if self.USE_LA_INPUT and self.AUGMENT_ONLINE:
             raise Exception('USE_LA_INPUT with AUGMENT_ONLINE is not yet implemented')
@@ -116,9 +115,9 @@ class Settings:
             raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
-        self.USE_POST_PROCESSING = False
+        self.USE_POST_PROCESSING = True
         self.SAVE_METRICS = True
-        self.VALTEST_SET = []  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
+        self.VALTEST_SET = self.VALIDATION_SET  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
         # VOXEL_OVERLAP = (0, 200, 200)
@@ -130,6 +129,8 @@ class Settings:
         self.CALC_PROBS = True  # If True, the probability images will be calculated with the predict function of Keras
         # and results will be saved to the disk. If False, the probability images will be loaded from disk. An error
         # will occur if these images do not exist on the disk.
+        self.CALC_PROB_THRESH = True
+        self.RESIZE_BEFORE_PREDICTION = (576, 576)  # EITHER False or nD tuple where n == self.NR_DIM
 
         # Data augmentation
         self.FLIP_PROB = 0
@@ -158,8 +159,8 @@ class Settings:
         self.CONTRAST_POWER_MAX = 1.5
 
         # Scar applier
-        self.MODEL_NAME_FOR_LA_SEG = 'la_challenge_data_depth_5'
-        self.MODEL_PS_FOR_LA_SEG = (1, 480, 480)
+        self.MODEL_NAME_FOR_LA_SEG = 'la_2018_challenge_convpl_depth_2/2'
+        self.MODEL_PS_FOR_LA_SEG = (1, 448, 448)
 
         self.PATH_TO_NO_SCAR_POST = '../data/input/post/'
         self.PATH_TO_NO_SCAR_PRE = '../data/input/pre/'

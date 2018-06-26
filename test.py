@@ -66,10 +66,18 @@ class Test:
         self.h.s = self.s
         keras.losses.custom_loss = self.h.custom_loss
 
+        if s.USE_SE2:
+            from se2unet import se2conv
+            keras.layers.se2conv = se2conv
+
         if self.s.CALC_PROBS:
             for model_name in self.s.VALTEST_MODEL_NAMES:
                 model_path = self.h.getModelPath(model_name)
-                model = load_model(model_path)
+                if s.USE_SE2:
+                    from se2unet import se2conv
+                    model = load_model(model_path, custom_objects={'se2conv': se2conv})
+                else:
+                    model = load_model(model_path)
 
                 for i in range(len(x_full_all)):
                     for j in [-1] + list(range(self.s.VALTEST_AUG_NR)):
@@ -106,21 +114,23 @@ class Test:
             for i in range(len(x_full_all)):
                 for j in [-1] + list(range(self.s.VALTEST_AUG_NR)):
                     predict_path = self.h.getModelPredictPath(model_name)
-                    prob = sitk.ReadImage('{}prob_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
                     anno = sitk.ReadImage('{}anno_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
-
-                    prob = sitk.GetArrayFromImage(prob)
                     anno = sitk.GetArrayFromImage(anno)
 
-                    # print(np.unique(prob))
-                    prob_thresh = (prob > self.s.BIN_THRESH).astype(np.uint8)
+                    prob_thresh_path = '{}prob_thresh_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j)
+                    if self.s.CALC_PROB_THRESH:
+                        prob = sitk.ReadImage('{}prob_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i],
+                                                                                 j))
+                        prob = sitk.GetArrayFromImage(prob)
+                        # print(np.unique(prob))
+                        prob_thresh = (prob > self.s.BIN_THRESH).astype(np.uint8)
 
-                    if self.s.USE_POST_PROCESSING:
-                        prob_thresh = self.h.post_process_la_seg(prob_thresh)
+                        if self.s.USE_POST_PROCESSING:
+                            prob_thresh = self.h.post_process_la_seg(prob_thresh)
 
-                    predict_path = self.h.getModelPredictPath(model_name)
-                    sitk.WriteImage(sitk.GetImageFromArray(prob_thresh),
-                                    '{}prob_thresh_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
+                        sitk.WriteImage(sitk.GetImageFromArray(prob_thresh), prob_thresh_path)
+                    else:
+                        prob_thresh = sitk.GetArrayFromImage(sitk.ReadImage(prob_thresh_path))
 
                     metrics = self.calcMetrics(prob_thresh, anno)
                     all_metrics[model_name].append(metrics)
@@ -134,7 +144,7 @@ class Test:
                 metric_sds[model_name][metric[0]] = np.std(all)
 
             print('=========== Results of {} ==========='.format(model_name))
-            print('Image nrs: {}'.format(self.s.VALTEST_SET))
+            print('Image nrs: {}'.format(list(self.s.VALTEST_SET)))
             print('Means of metrics: {}'.format(metric_means[model_name]))
             print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
 

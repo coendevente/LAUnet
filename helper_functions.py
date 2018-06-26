@@ -153,7 +153,8 @@ class Helper():
         return model_folder
 
     def getModelPredictPath(self, model_name):
-        predict_folder = '{}predict/'.format(self.getModelResultsPath(model_name))
+        predict_folder = '{}predict_{}/'.format(self.getModelResultsPath(model_name), self.s.DATA_SET)
+        # predict_folder = '{}predict_miccai_2018_challenge/'.format(self.getModelResultsPath(model_name))
         if not os.path.exists(predict_folder):
             os.makedirs(predict_folder)
         return predict_folder

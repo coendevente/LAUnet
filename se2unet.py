@@ -29,10 +29,12 @@ residual: add residual connections around each conv block if true
 https://github.com/pietz/unet-keras/blob/master/unet.py
 '''
 
+
 # Xavier's/He-Rang-Zhen-Sun initialization for layers that are followed ReLU
 def weight_initializer(n_in, n_out):
     return tf.random_normal_initializer(mean=0.0, stddev=m.sqrt(2.0 / (n_in))
     )
+
 
 def size_of(tensor):
     # Multiply elements one by one
@@ -41,17 +43,19 @@ def size_of(tensor):
          result = result * x
     return result
 
+
 global layer_nr
 layer_nr = 0
+
+
 def next_layer():
     global layer_nr
     l = layer_nr
     layer_nr += 1
     return l
 
-def se2conv(tensor_in, Nxy, Nc_out):
-    Ntheta = 4
 
+def se2conv(tensor_in, Nxy, Nc_out, Ntheta):
     Nc_in = tensor_in.get_shape().as_list()[-1]
 
     with tf.variable_scope("Layer_{}".format(next_layer())) as _scope:
@@ -137,7 +141,7 @@ def se2conv(tensor_in, Nxy, Nc_out):
             input=tensor_in,
             filter=kernels_raw,
             strides=[1, 1, 1, 1],
-            padding="VALID")
+            padding="SAME")
         tensor_out = tensor_out + bias
 
         ## Apply ReLU
@@ -152,7 +156,7 @@ def se2conv(tensor_in, Nxy, Nc_out):
     return tensor_out
 
 
-def conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do=0):
+def conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, n_theta, do=0):
     """
     Builds a convolution block.
     :param: Similar to paramaters in UNet(...)
@@ -160,9 +164,9 @@ def conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do=0):
     """
 
     n = m
+
     for i in range(nr_conv_per_block):
-        n = Lambda(lambda x: se2conv(x, 3, dim))(n)
-        n = Lambda(lambda x: se2conv(x, 3, dim))(n)
+        n = Lambda(lambda x: se2conv(x, 3, dim, n_theta))(n)
         n = BatchNormalization()(n) if bn else n
         n = Dropout(do)(n) if do and i == 0 else n
 
@@ -181,7 +185,7 @@ def aux_loss_block(m, ndim, inc, dim, acti):
     return o
 
 
-def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al, nr_conv_per_block):
+def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al, nr_conv_per_block, n_theta):
     """
     Builds one block in UNet. The function is recursive. The depth decreases with 1 every time.
     :param: Similar to paramaters in UNet(...)
@@ -190,12 +194,12 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
     o_aux = -1
 
     if depth > 0:
-        n = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do) if doeverylevel else \
-            conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block)
+        n = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, n_theta, do) if doeverylevel else \
+            conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, n_theta)
         m = (MaxPooling3D((1, 2, 2))(n) if mp else Conv3D(dim, 3, strides=2, padding='same')(n)) if ndim == 3 else \
             (MaxPooling2D((2, 2))(n) if mp else Conv2D(dim, 3, strides=2, padding='same')(n))
         m, o_aux = level_block(m, int(inc * dim), depth - 1, inc, acti, do, bn, mp, up, res, ndim, doeverylevel, al,
-                               nr_conv_per_block)
+                               nr_conv_per_block, n_theta)
         if up:
             m = UpSampling3D((1, 2, 2))(m) if ndim == 3 else \
                 UpSampling2D((2, 2))(m)
@@ -204,10 +208,10 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
         else:
             raise Exception('Unet in 3D does not work without upsampling')
         n = Concatenate()([n, m])
-        m = conv_block(n, dim, acti, bn, res, ndim, nr_conv_per_block, do) if doeverylevel else \
-            conv_block(n, dim, acti, bn, res, ndim, nr_conv_per_block)
+        m = conv_block(n, dim, acti, bn, res, ndim, nr_conv_per_block, n_theta, do) if doeverylevel else \
+            conv_block(n, dim, acti, bn, res, ndim, nr_conv_per_block, n_theta)
     else:
-        m = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do)
+        m = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, n_theta, do)
         if al:
             o_aux = aux_loss_block(m, ndim, inc, dim, acti)
     return m, o_aux
@@ -215,7 +219,7 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
 
 def UNet(img_shape, ndim, out_ch=1, start_ch=64, depth=4, inc_rate=2., activation='relu',
          dropout=0.5, batchnorm=False, maxpool=True, upconv=True, residual=False, doeverylevel=False, aux_loss=False,
-         nr_conv_per_block=2):
+         nr_conv_per_block=2, n_theta=4):
     """
     Makes UNet model.
 
@@ -236,7 +240,7 @@ def UNet(img_shape, ndim, out_ch=1, start_ch=64, depth=4, inc_rate=2., activatio
     """
     i = Input(shape=img_shape)
     o_main, o_aux = level_block(i, start_ch, depth, inc_rate, activation, dropout, batchnorm, maxpool, upconv, residual,
-                                ndim, doeverylevel, aux_loss, nr_conv_per_block)
+                                ndim, doeverylevel, aux_loss, nr_conv_per_block, n_theta)
     o_main = Conv2D(out_ch, 1, activation='sigmoid', name='main_output')(o_main)
     return Model(inputs=i, outputs=[o_main, o_aux]) if aux_loss else \
            Model(inputs=i, outputs=o_main)
