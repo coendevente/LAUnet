@@ -3,9 +3,6 @@ import SimpleITK as sitk
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy
-from helper_functions import Helper
-from vtk import vtkStructuredPointsReader
-from vtk.util import numpy_support as VN
 import math
 
 
@@ -54,10 +51,9 @@ def get_screenshot(path, view, center=False):
     camera = vtk.vtkCamera()
 
     dist_x = 0
-    dist_z = 400
+    dist_z = 300
 
     if view == 'posterior':
-
         pos = (center[0] - dist_x, center[1] + 400, center[2] - dist_z)
     elif view == 'anterior':
         pos = (center[0] + dist_x, center[1] + 0, center[2] + dist_z)
@@ -88,20 +84,20 @@ def get_screenshot(path, view, center=False):
     # iren.Start()
 
     im = sitk.GetArrayFromImage(sitk.ReadImage('screenshots/screenshot.png'))
-    return im[50:430, 25:605], center
+    return im[100:400, 25:605], center
 
 
 if __name__ == '__main__':
     nrs = np.array([70, 21, 95, 73, 78, 26, 38, 82, 47, 40, 66, 59, 13, 89, 71, 88, 37, 22, 84, 10, 97, 68, 65, 48,
  45])
 
-    d = np.array([0.9006973680422561, 0.910006143806372, 0.9112106116568368, 0.8601871142224925, 0.7259960147934539, 0.7628879251385949, 0.8283370968273197, 0.914378003436467, 0.9261529957159189, 0.8196490038357094, 0.9119802222766654, 0.8743586059357887, 0.8684744959632821, 0.9153005083364386, 0.9223461250934463, 0.8978720592122654, 0.931094379993213, 0.8323133596744007, 0.8952515304300879, 0.7863649833930516, 0.6610801486199576, 0.9001830952523773, 0.905672853299284, 0.8840102160996202, 0.8836265065576483])
+    d = np.array([0.9009270902037788, 0.9104197765530493, 0.9128334854875481, 0.8607061285160114, 0.726180976928685, 0.7618735476244846, 0.8426088283800738, 0.9227242238885163, 0.9267448462842333, 0.8202146853529186, 0.9124323842524247, 0.8758631939535643, 0.8686964143471794, 0.9156216299184503, 0.9226021312080136, 0.8982460315886207, 0.9316061013262126, 0.8248859357030646, 0.8955985800466059, 0.7870071142712975, 0.6458948916498899, 0.9089561365052262, 0.9061868164772646, 0.8842184960264304, 0.8842468629005924])
     nrs = np.flip(nrs[np.argsort(d)], 0)
 
     # nrs = nrs[:8]
     # nrs = nrs[-1:-9:-1]
 
-    shell_paths = '../data/shells_predictions_testcase25/'
+    shell_paths = '../challenge_2018_data/test_vtk/'
 
     # nrs = [11]
     # paths = []
