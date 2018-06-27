@@ -8,6 +8,7 @@ import time
 from tkinter import Tk # askopenfilename, asksaveasfilename
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 import copy
+import tensorflow as tf
 
 
 class Predict:
@@ -132,6 +133,9 @@ class Predict:
         return prob_image
 
     def predict(self, im, model):
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.5)
+        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
         did_rescale = False
         if im.shape[1] < self.s.PATCH_SIZE[1] or self.s.RESIZE_BEFORE_PREDICTION:
             # and self.s.RESIZE_BEFORE_PREDICTION[1] < im.shape[1]):
@@ -148,7 +152,8 @@ class Predict:
             s_lap = copy.copy(self.s)
             s_lap.USE_LA_INPUT = False
             lap_model = load_model(self.h.getModelPath(self.s.MODEL_NAME_FOR_LA_SEG))
-            lap_prob = Predict(s_lap, self.h).predict(im, lap_model)
+            predict = Predict(s_lap, self.h)
+            lap_prob = predict.predict(im, lap_model)
 
             lap = (lap_prob > self.s.BIN_THRESH).astype(np.uint8)
 
@@ -167,6 +172,8 @@ class Predict:
             print(old_input_shape)
             prob_image = self.h.rescaleImage(prob_image, old_input_shape[1:])
             print(prob_image.shape)
+
+        del sess
         return prob_image
 
 

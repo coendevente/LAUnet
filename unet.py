@@ -88,7 +88,7 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
 
 def UNet(img_shape, ndim, out_ch=1, start_ch=64, depth=4, inc_rate=2., activation='relu',
          dropout=0.5, batchnorm=False, maxpool=True, upconv=True, residual=False, doeverylevel=False, aux_loss=True,
-         nr_conv_per_block=2):
+         nr_conv_per_block=2, n_theta=0):
     """
     Makes UNet model.
 

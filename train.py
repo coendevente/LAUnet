@@ -64,10 +64,10 @@ class Train:
             ps += (1, )
         model = UNet(ps, self.s.NR_DIM, dropout=self.s.DROPOUT, batchnorm=True, depth=self.s.UNET_DEPTH,
                      doeverylevel=self.s.DROPOUT_AT_EVERY_LEVEL, inc_rate=self.s.FEATURE_MAP_INC_RATE,
-                     aux_loss=self.s.USE_ANY_SCAR_AUX, nr_conv_per_block=self.s.NR_CONV_PER_CONV_BLOCK,
+                     aux_loss=self.s.USE_LA_AUX_LOSS, nr_conv_per_block=self.s.NR_CONV_PER_CONV_BLOCK,
                      start_ch=self.s.START_CH, n_theta=self.s.SE2_N_THETA)
 
-        if self.s.USE_ANY_SCAR_AUX:
+        if self.s.USE_LA_AUX_LOSS:
             model.compile(optimizer=Adam(lr=self.s.LEARNING_RATE), loss={'main_output': self.h.custom_loss,
                                                                          'aux_output': 'mean_squared_error'},
                           metrics=['binary_accuracy'], loss_weights={'main_output': self.s.MAIN_OUTPUT_LOSS_WEIGHT,
@@ -453,7 +453,7 @@ class Train:
             y_train_all = {'main_output': y_train}
             y_val_all = {'main_output': y_val}
 
-            if self.s.USE_ANY_SCAR_AUX:
+            if self.s.USE_LA_AUX_LOSS:
                 y_train_aux = self.get_aux(y_train)
                 y_val_aux = self.get_aux(y_val)
 

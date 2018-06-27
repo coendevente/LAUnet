@@ -53,10 +53,6 @@ class Test:
     # def save_metrics(self, metric_means, metric_sds, all_dice):
 
     def test(self):
-        if self.s.CALC_PROBS:
-            gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.2)
-            sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
-
         x_all_path, y_all_path = self.h.getImagePaths(self.s.VALTEST_SET, False)
 
         x_full_all = self.h.loadImages(x_all_path)
@@ -90,7 +86,9 @@ class Test:
                         if j != -1:  # No augmentation
                             input, anno = OnlineAugmenter(self.s, self.h).augment(input, anno, False, None)
 
-                        prob = Predict(self.s, self.h).predict(input, model)
+                        predict = Predict(self.s, self.h)
+                        prob = predict.predict(input, model)
+                        del predict
 
                         predict_path = self.h.getModelPredictPath(model_name)
                         sitk.WriteImage(sitk.GetImageFromArray(input),
