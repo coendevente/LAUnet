@@ -10,7 +10,11 @@ class Settings:
         self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        self.MODEL_NAME = 'sf_without_la_input_lr4'  # 'sf_no_input'
+        # self.MODEL_NAME = 'test'  # 'sf_no_input'
+        # self.MODEL_NAME = 'sf_no_input'  # 'sf_no_input'
+        # self.MODEL_NAME = 'sf_la_input_2'  # 'sf_no_input'
+        # self.MODEL_NAME = 'sf_with_la_aux_d5_nc_1_k_32'
+        self.MODEL_NAME = 'sf_with_la_aux'
 
         self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
@@ -93,11 +97,11 @@ class Settings:
         self.MAIN_OUTPUT_LOSS_WEIGHT = .8
         self.AUX_OUTPUT_LOSS_WEIGHT = .2
         self.ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
-        self.USE_LA_AUX_LOSS = False
+        self.USE_LA_AUX_LOSS = True
         self.USE_NORMALIZATION = True
         self.USE_LA_INPUT = False
         self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
-        self.START_CH = 64
+        self.START_CH = 32
         self.SE2_N_THETA = 8
         self.LOAD_MODEL = False  # Continue training with model file that already exists for model name
 
@@ -115,7 +119,7 @@ class Settings:
             raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
-        self.USE_POST_PROCESSING = True
+        self.USE_POST_PROCESSING = False
         self.SAVE_METRICS = True
         self.VALTEST_SET = self.VALIDATION_SET  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]

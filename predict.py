@@ -87,7 +87,7 @@ class Predict:
 
             prob_p = model.predict(p)
 
-            if self.s.USE_ANY_SCAR_AUX:
+            if self.s.USE_LA_AUX_LOSS:
                 prob_p = prob_p[0]
 
             prop_p_s = prob_p.shape[1:4]
