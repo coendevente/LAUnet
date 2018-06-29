@@ -16,7 +16,7 @@ class LogInspector:
 
         print(log)
 
-        logs_to_output = ['stopped_early', 'lowest_val_loss', 'lowest_val_loss_i']
+        logs_to_output = ['stopped_early', 'lowest_val_loss', 'lowest_val_loss_i', 'training_duration']
         for log_name in logs_to_output:
             if log_name in log:
                 print('{:>27} = {}'.format(log_name, log[log_name]))

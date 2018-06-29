@@ -13,8 +13,8 @@ class Settings:
         # self.MODEL_NAME = 'test'  # 'sf_no_input'
         # self.MODEL_NAME = 'sf_no_input'  # 'sf_no_input'
         # self.MODEL_NAME = 'sf_la_input_2'  # 'sf_no_input'
-        # self.MODEL_NAME = 'sf_with_la_aux_d5_nc_1_k_32'
-        self.MODEL_NAME = 'sf_with_la_aux'
+        self.MODEL_NAME = 'sf_with_la_aux_d5_nc_1_k_32'
+        # self.MODEL_NAME = 'sf_with_la_aux'
 
         self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
@@ -24,12 +24,13 @@ class Settings:
             if self.DATA_SET == 'challenge_2018' else '{}data/'.format(self.DATA_PRE)
         self.PATH_TO_RESULTS = '../results/'
         self.PATH_TO_MODELS = '../results/models/'
+        # self.PATH_TO_MODELS = '/data/cwdevente/old_models/'
         self.PATH_TO_AUG = self.PATH_TO_DATA + 'augmentations/'
         self.PATH_TO_ART = self.PATH_TO_DATA + 'augmentations/artificial/'
         # print(self.DATA_PRE)
 
         # Show demo images
-        self.DEMO = True
+        self.DEMO = False
 
         self.YALE_NRS_POST = [7, 17, 23, 26, 21, 3, 12, 14, 28, 5, 18]
 
@@ -82,7 +83,7 @@ class Settings:
         self.LEARNING_RATE = math.pow(10, -4)
         self.NR_CONV_PER_CONV_BLOCK = 1
         self.BATCH_SIZE = 4
-        self.NR_BATCHES = 30000
+        self.NR_BATCHES = 50000
         self.NR_VAL_PATCH_PER_ITER = 4
         self.POS_NEG_PATCH_PROP = .5  # with 1, all is positive, with 0 all is negative, in between values give a mix
         self.FN_CLASS_WEIGHT = 'auto'  # custom number OR 'auto'
@@ -103,7 +104,7 @@ class Settings:
         self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
         self.START_CH = 32
         self.SE2_N_THETA = 8
-        self.LOAD_MODEL = False  # Continue training with model file that already exists for model name
+        self.LOAD_MODEL = True  # Continue training with model file that already exists for model name
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
@@ -123,6 +124,10 @@ class Settings:
         self.SAVE_METRICS = True
         self.VALTEST_SET = self.VALIDATION_SET  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
+        # self.VALTEST_MODEL_NAMES = ['sf_without_la_input_lr4', 'sf_without_la_input_lr3', 'sf_with_la_input_lr3',
+        #                             'sf_with_la_aux_d5_nc_1_k_32', 'sf_with_la_aux_d5_nc_1',
+        #                             'sf_with_la_aux', 'sf_no_input', 'sf_la_input_2']
+        # self.VALTEST_MODEL_NAMES = ['ps_512_lr_1e4', 'ps_480_01_normalization']
         # self.VALTEST_MODEL_NAMES = ['la_2018_challenge_convpl_depth_2/{}'.format(i) for i in range(1, 7)]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
         # VOXEL_OVERLAP = (0, 200, 200)
@@ -136,6 +141,7 @@ class Settings:
         # will occur if these images do not exist on the disk.
         self.CALC_PROB_THRESH = True
         self.RESIZE_BEFORE_PREDICTION = False  # EITHER False or nD tuple where n == self.NR_DIM
+        self.PREDICT_AUX_OUTPUT = True  # Predict the auxiliary output during test time, instead of the main output
 
         # Data augmentation
         self.FLIP_PROB = 0

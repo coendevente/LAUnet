@@ -441,11 +441,21 @@ class Train:
         print("self.s.EARLY_STOPPING == {}".format(self.s.EARLY_STOPPING))
         print("self.s.PATIENTCE_ES == {}".format(self.s.PATIENTCE_ES))
 
+        start_i = 0
+        training_duration = 0
         if self.s.LOAD_MODEL:
-            log = log_path
+            log = pickle.load(open(log_path, "rb"))
+
+            lowest_val_loss = log['lowest_val_loss']
+            start_i = len(log['training'][model.metrics_names[0]])
+
+            es_j = start_i - log['lowest_val_loss_i']
+
+            if 'training_duration' in log.keys():
+                start_time = time.time() - log['training_duration']
 
         pickle.dump(log, open(log_path, "wb"))
-        for i in range(self.s.NR_BATCHES):
+        for i in range(start_i, self.s.NR_BATCHES):
             if self.s.EARLY_STOPPING and self.s.PATIENTCE_ES <= es_j:
                 print("Stopped early at iteration {}".format(i))
                 log['stopped_early'] = True
@@ -454,15 +464,10 @@ class Train:
 
             print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
             x_train, y_train, la_train = self.getRandomPatches(x_full_train, y_full_train, self.s.BATCH_SIZE,
-                                                                self.s.TRAINING_SET)
+                                                               self.s.TRAINING_SET)
             x_val, y_val, la_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
                                                  self.s.VALIDATION_SET)
             print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
-
-            # r = random.randint(1, 100000)
-            # print(x_train[0].shape)
-            # sitk.WriteImage(sitk.GetImageFromArray(x_train[0]), 'trainx{}.nii.gz'.format(r))
-            # sitk.WriteImage(sitk.GetImageFromArray(y_train[0]), 'trainy{}.nii.gz'.format(r))
 
             y_train_all = {'main_output': y_train}
             y_val_all = {'main_output': y_val}
@@ -472,8 +477,6 @@ class Train:
                 y_val_all['aux_output'] = la_val
 
             train_loss = model.train_on_batch(x_train, y_train_all)
-            # if not self.s.VARIABLE_PATCH_SIZE else \
-            # model.train_on_batch(x_train[0], {'main_output': y_train_all['main_output'][0]})
 
             if self.s.VARIABLE_PATCH_SIZE:
                 val_losses = []
@@ -487,12 +490,7 @@ class Train:
                 log['training'][model.metrics_names[m]].append(train_loss[m])
                 log['validation'][model.metrics_names[m]].append(val_loss[m])
 
-            pickle.dump(log, open(log_path, "wb"))
-
             if lowest_val_loss > val_loss[0]:
-                # lowest_loss_smooth = self.h.smooth(log['validation']['loss'],
-                #                                    self.s.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION)[-1]
-                # if lowest_val_loss > lowest_loss_smooth:
                 lowest_val_loss = val_loss[0]
                 model_path = self.h.getModelPath(self.s.MODEL_NAME)
                 model.save(model_path)
@@ -500,22 +498,25 @@ class Train:
                 log['lowest_val_loss'] = lowest_val_loss
                 log['lowest_val_loss_i'] = lowest_val_loss_i
                 es_j = 0
+                lowest_train_loss = min(log['training']['loss']) if len(log['training']['loss']) > 0 else float("inf")
 
             if lowest_train_loss > train_loss[0]:
                 lowest_train_loss = train_loss[0]
 
             ETA = round(time.time() - start_time) * (1/((i + 1) / self.s.NR_BATCHES) - 1)
 
+            training_duration = round(time.time() - start_time)
+            log['training_duration'] = training_duration
             print(('{}s passed. ETA is {}s. Finished training on batch {}/{} ({}%). Latest, lowest validation loss:' +
                   ' {}, {}. Latest, lowest training loss: {}, {}.').format(
-                round(time.time() - start_time), ETA, i + 1, self.s.NR_BATCHES, (i + 1) /
+                training_duration, ETA, i + 1, self.s.NR_BATCHES, (i + 1) /
                       self.s.NR_BATCHES * 100, val_loss[0],
                 lowest_val_loss, train_loss[0], lowest_train_loss))
 
-        training_duration = round(time.time() - start_time)
+            pickle.dump(log, open(log_path, "wb"))
+
         print('Training took {} seconds.'.format(training_duration))
 
-        log['training_duration'] = training_duration
         pickle.dump(log, open(log_path, "wb"))
 
 

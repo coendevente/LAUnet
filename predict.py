@@ -88,7 +88,7 @@ class Predict:
             prob_p = model.predict(p)
 
             if self.s.USE_LA_AUX_LOSS:
-                prob_p = prob_p[0]
+                prob_p = prob_p[0] if not self.s.PREDICT_AUX_OUTPUT else prob_p[1]
 
             prop_p_s = prob_p.shape[1:4]
             if self.s.NR_DIM == 2:

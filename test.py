@@ -62,6 +62,8 @@ class Test:
         self.h.s = self.s
         keras.losses.custom_loss = self.h.custom_loss
 
+        ext = 'nii.gz'
+
         if s.USE_SE2:
             from se2unet import se2conv
             keras.layers.se2conv = se2conv
@@ -90,15 +92,16 @@ class Test:
                         prob = predict.predict(input, model)
                         del predict
 
-                        predict_path = self.h.getModelPredictPath(model_name)
+                        predict_path = self.h.getModelPredictPath(model_name, self.s.PREDICT_AUX_OUTPUT)
+
                         sitk.WriteImage(sitk.GetImageFromArray(input),
-                                        '{}input_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
+                                        '{}input_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
 
                         sitk.WriteImage(sitk.GetImageFromArray(prob),
-                                        '{}prob_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
+                                        '{}prob_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
 
                         sitk.WriteImage(sitk.GetImageFromArray(anno),
-                                        '{}anno_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
+                                        '{}anno_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
                         print("Saved in {}".format(predict_path))
 
         # Calculate the metrics
@@ -111,14 +114,15 @@ class Test:
 
             for i in range(len(x_full_all)):
                 for j in [-1] + list(range(self.s.VALTEST_AUG_NR)):
-                    predict_path = self.h.getModelPredictPath(model_name)
-                    anno = sitk.ReadImage('{}anno_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j))
+                    predict_path = self.h.getModelPredictPath(model_name, self.s.PREDICT_AUX_OUTPUT)
+                    anno = sitk.ReadImage('{}anno_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
                     anno = sitk.GetArrayFromImage(anno)
 
-                    prob_thresh_path = '{}prob_thresh_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i], j)
+                    prob_thresh_path = '{}prob_thresh_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j
+                                                                                 , ext)
                     if self.s.CALC_PROB_THRESH:
-                        prob = sitk.ReadImage('{}prob_image_{}_{}.nii.gz'.format(predict_path, self.s.VALTEST_SET[i],
-                                                                                 j))
+                        prob = sitk.ReadImage('{}prob_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i],
+                                                                                 j, ext))
                         prob = sitk.GetArrayFromImage(prob)
                         # print(np.unique(prob))
                         prob_thresh = (prob > self.s.BIN_THRESH).astype(np.uint8)
