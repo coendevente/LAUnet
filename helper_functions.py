@@ -146,6 +146,12 @@ class Helper():
         z, y, x = c
         return I[z:z+d, y:y+h, x:x+w]
 
+    def getOfflineAugLAPredictionsPath(self):
+        folder = '{}offline_aug_la_predictions/'.format(self.s.PATH_TO_RESULTS)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        return folder
+
     def getModelResultsPath(self, model_name):
         model_folder = '{}{}/'.format(self.s.PATH_TO_MODELS, model_name)
         if not os.path.exists(model_folder):

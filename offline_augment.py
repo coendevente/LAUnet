@@ -26,6 +26,7 @@ class OfflineAugmenter:
         for z in slices:
             x_aug_path_z, y_aug_path_z, la_aug_path_z, lap_aug_path_z = \
                 self.h.getAugImagesPath(img_nr, random.randint(0, self.s.NR_AUG - 1), z, True)
+
             x_aug_path.append(x_aug_path_z)
             y_aug_path.append(y_aug_path_z)
             la_aug_path.append(la_aug_path_z)
@@ -63,6 +64,12 @@ class OfflineAugmenter:
         l = input[7]
 
         x_aug, y_aug, la_aug, lap_aug = self.online_augmenter.augment(x, y, False, la, lap)
+
+        if self.s.RESIZE_AFTER_AUG:
+            x_aug = self.h.rescaleImage(x_aug, self.s.RESIZE_AFTER_AUG)
+            y_aug = self.h.rescaleImage(y_aug, self.s.RESIZE_AFTER_AUG)
+            la_aug = self.h.rescaleImage(la_aug, self.s.RESIZE_AFTER_AUG)
+            lap_aug = self.h.rescaleImage(lap_aug, self.s.RESIZE_AFTER_AUG)
 
         for z in range(x_aug.shape[0]):
             x_aug_path, y_aug_path, la_aug_path, lap_aug_path = self.h.getAugImagesPath(i + 1, j, z, True)
@@ -113,26 +120,36 @@ class OfflineAugmenter:
         la_model = load_model(self.h.getModelPath(self.s.MODEL_NAME_FOR_LA_SEG))
         for i in range(len(x_full_all)):
             if self.s.USE_LA_INPUT:
-                print('Predicting {}'.format(i))
-                x = x_full_all[i]
-                s_la_pred = copy.copy(self.s)
-                s_la_pred.PATCH_SIZE = self.s.MODEL_PS_FOR_LA_SEG
-                s_la_pred.USE_LA_INPUT = False
-                prob = Predict(s_la_pred, self.h).predict(x, la_model)
-                prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
-                lap = self.h.post_process_la_seg(prob_thresh)
+                lap_path = '{}predicted{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(), i)
+                if False:
+                    print('Predicting {}'.format(i))
+                    x = x_full_all[i]
+                    s_la_pred = copy.copy(self.s)
+                    s_la_pred.PATCH_SIZE = self.s.MODEL_PS_FOR_LA_SEG
+                    s_la_pred.USE_LA_INPUT = False
+                    s_la_pred.GROUND_TRUTH = 'left_atrium'
+                    s_la_pred.PREDICT_AUX_OUTPUT = False
+                    s_la_pred.USE_LA_AUX_LOSS = False
+                    s_la_pred.USE_POST_PROCESSING = True
+                    prob = Predict(s_la_pred, self.h).predict(x, la_model)
+                    prob_thresh = (prob > s.BIN_THRESH).astype(np.uint8)
+                    lap = self.h.post_process_la_seg(prob_thresh)
+
+                    sitk.WriteImage(
+                        sitk.GetImageFromArray(lap),
+                        lap_path
+                    )
+
+                    sitk.WriteImage(
+                        sitk.GetImageFromArray(x),
+                        '{}lge{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(), i)
+                    )
+                else:
+                    lap = sitk.GetArrayFromImage(sitk.ReadImage(lap_path))
 
                 lap_full_all.append(lap)
 
-                sitk.WriteImage(
-                    sitk.GetImageFromArray(lap),
-                    'predicted{}.nrrd'.format(i)
-                )
 
-                sitk.WriteImage(
-                    sitk.GetImageFromArray(x),
-                    'lge{}.nrrd'.format(i)
-                )
             else:
                 lap_full_all.append(y_full_all[i])
 

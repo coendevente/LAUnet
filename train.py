@@ -365,8 +365,8 @@ class Train:
         return y_aux
 
     def train(self):
-        # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.7)
-        # sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.45)
+        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100
         # model = self.buildUNet()
@@ -518,6 +518,8 @@ class Train:
         print('Training took {} seconds.'.format(training_duration))
 
         pickle.dump(log, open(log_path, "wb"))
+
+        del sess
 
 
 if __name__ == "__main__":

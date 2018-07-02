@@ -17,7 +17,8 @@ class LossInspector:
         # model_names = ['la_2018_challenge_convpl_depth_2/1', 'la_2018_challenge_convpl_depth_2/2',
         #                'la_2018_challenge_convpl_depth_2/3', 'la_2018_challenge_convpl_depth_2/4',
         #                'la_2018_challenge_convpl_depth_2/5', 'la_2018_challenge_convpl_depth_2/6']
-        model_names = ['sf_no_input', 'sf_la_input_2']
+        # model_names = ['sf_no_input', 'sf_la_input_2']
+        model_names = ['sf_with_la_aux_d5_nc_1_k_32', 'sf_with_la_aux_d5_nc_1_k_32_do50']
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         legend_parameter = 'ART_FRACTION'
         legend_parameter_name = 'Artificial data fraction'
@@ -25,7 +26,7 @@ class LossInspector:
         plt.figure()
         legend = []
 
-        w = 20
+        w = 500
         orig_lw = 1
         smooth_lw = 2
 
@@ -41,7 +42,7 @@ class LossInspector:
 
             m = len(log['training'].keys())
 
-            w = int(round(len(log['training']['loss'])/20))
+            # w = int(round(len(log['training']['loss'])/20))
 
             if show_non_smooth:
                 cnt = 1
