@@ -45,7 +45,7 @@ def suppress_stdout():
 
 
 # MAIN_FOLDER = 'la_2018_challenge_1/'
-MAIN_FOLDER = 'sf_grid_search_02July2018/'
+MAIN_FOLDER = 'sf_grid_search_05July2018/'
 h = Helper(Settings())
 bo_path = h.getBOPath(MAIN_FOLDER)
 # nr_steps_path = h.getNrStepsPath(MAIN_FOLDER)

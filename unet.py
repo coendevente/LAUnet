@@ -89,6 +89,7 @@ def level_block(m, dim, depth, inc, acti, do, bn, mp, up, res, ndim, doeveryleve
                     conv_block(n_aux, dim, acti, bn, res, ndim, nr_conv_per_block)
     else:
         m_main = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do)
+        # m_aux = m_main
         m_aux = conv_block(m, dim, acti, bn, res, ndim, nr_conv_per_block, do)
     return m_main, m_aux
 

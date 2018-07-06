@@ -10,12 +10,9 @@ class Settings:
         self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        # self.MODEL_NAME = 'test'  # 'sf_no_input'
-        # self.MODEL_NAME = 'sf_no_input'  # 'sf_no_input'
-        # self.MODEL_NAME = 'sf_la_input_2'  # 'sf_no_input'
-        # self.MODEL_NAME = 'sf_with_la_aux_d5_nc_1_k_32_do50'
-        # self.MODEL_NAME = 'sf_with_la_aux'
         self.MODEL_NAME = '-'
+        self.MODEL_NAME = 'sf_grid_search_05July2018/0/'
+        # self.MODEL_NAME = 'sf_grid_search_05July2018/1/'
 
         self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
 
@@ -99,11 +96,11 @@ class Settings:
         self.MAIN_OUTPUT_LOSS_WEIGHT = .8
         self.AUX_OUTPUT_LOSS_WEIGHT = .2
         self.ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
-        self.USE_LA_AUX_LOSS = True
+        self.USE_LA_AUX_LOSS = False
         self.USE_NORMALIZATION = True
-        self.USE_LA_INPUT = True
+        self.USE_LA_INPUT = False
         self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
-        self.START_CH = 64
+        self.START_CH = 32
         self.SE2_N_THETA = 8
         self.LOAD_MODEL = False  # Continue training with model file that already exists for model name
 
@@ -123,15 +120,9 @@ class Settings:
         # Testing and validation procedure
         self.USE_POST_PROCESSING = False
         self.SAVE_METRICS = True
-        self.VALTEST_SET = self.VALIDATION_SET  #  self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
+        self.VALTEST_SET = self.VALIDATION_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
-        # self.VALTEST_MODEL_NAMES = ['sf_without_la_input_lr4', 'sf_without_la_input_lr3', 'sf_with_la_input_lr3',
-        #                             'sf_with_la_aux_d5_nc_1_k_32', 'sf_with_la_aux_d5_nc_1',
-        #                             'sf_with_la_aux', 'sf_no_input', 'sf_la_input_2']
-        # self.VALTEST_MODEL_NAMES = ['ps_512_lr_1e4', 'ps_480_01_normalization']
-        # self.VALTEST_MODEL_NAMES = ['la_2018_challenge_convpl_depth_2/{}'.format(i) for i in range(1, 7)]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
-        # VOXEL_OVERLAP = (0, 200, 200)
         self.VOXEL_OVERLAP = (0, 32, 32)
         self.BIN_THRESH = .5  # Threshold to binarize the probability images
         self.METRICS = ['Dice', 'accuracy', 'sensitivity', 'specificity', 'precision', 'TP', 'FP', 'TN', 'FN',
@@ -141,11 +132,11 @@ class Settings:
         # and results will be saved to the disk. If False, the probability images will be loaded from disk. An error
         # will occur if these images do not exist on the disk.
         self.CALC_PROB_THRESH = True
-        self.RESIZE_BEFORE_PREDICTION = (576, 576)  # EITHER False or nD tuple where n == self.NR_DIM
-        self.PREDICT_AUX_OUTPUT = True  # Predict the auxiliary output during test time, instead of the main output
+        self.RESIZE_BEFORE_PREDICTION = False  # EITHER False or nD tuple where n == self.NR_DIM
+        self.PREDICT_AUX_OUTPUT = False  # Predict the auxiliary output during test time, instead of the main output
 
         # Data augmentation
-        self.RESIZE_AFTER_AUG = (864, 864)  # False or 2D tuple which represents image size in x- and y-direction
+        self.RESIZE_AFTER_AUG = False  # False or 2D tuple which represents image size in x- and y-direction
 
         self.FLIP_PROB = 0
 

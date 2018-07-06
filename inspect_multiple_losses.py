@@ -18,7 +18,7 @@ class LossInspector:
         #                'la_2018_challenge_convpl_depth_2/3', 'la_2018_challenge_convpl_depth_2/4',
         #                'la_2018_challenge_convpl_depth_2/5', 'la_2018_challenge_convpl_depth_2/6']
         # model_names = ['sf_no_input', 'sf_la_input_2']
-        model_names = ['sf_with_la_aux_d5_nc_1_k_32', 'sf_with_la_aux_d5_nc_1_k_32_do50']
+        model_names = ['sf_grid_search_05July2018/0/', 'sf_grid_search_05July2018/1/']
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         legend_parameter = 'ART_FRACTION'
         legend_parameter_name = 'Artificial data fraction'

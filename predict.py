@@ -5,10 +5,10 @@ import numpy as np
 import keras
 from keras.models import load_model
 import time
-from tkinter import Tk # askopenfilename, asksaveasfilename
-from tkinter.filedialog import askopenfilename, asksaveasfilename
 import copy
 import tensorflow as tf
+import argparse
+
 
 
 class Predict:
@@ -178,8 +178,6 @@ class Predict:
 
 
 if __name__ == '__main__':
-    import easygui
-
     s = Settings()
     h = Helper(s)
     p = Predict(s, h)
@@ -203,12 +201,17 @@ if __name__ == '__main__':
         # im_path = '../data/vu_sample/icmr_rhc_pt4.nii.gz'
         # im_path = easygui.fileopenbox()
         # print(im_path)
-        im_path = input('Specify input file:')
+        # im_path = input('Specify input file:')
+        parser = argparse.ArgumentParser()
+        parser.add_argument("im_path")
+        args = parser.parse_args()
+        im_path = args.im_path
 
         # Output
         # output_file = 'la_seg_icmr_rhc_pt4.nii.gz'
-        output_file = input('Specify output file (including extension):')
+        # output_file = input('Specify output file (including extension):')
 
+        output_file = im_path.replace('.', '_prediction.')
 
         sim = sitk.ReadImage(im_path)
         im = sitk.GetArrayFromImage(sim)

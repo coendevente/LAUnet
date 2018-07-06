@@ -166,7 +166,7 @@ class Train:
 
     def getRandomPositivePatchAllSlices(self, x, lap, y, la):
         if np.sum(y) == 0:
-            return 0, 0, 0, False
+            return 0, 0, 0, 0, False
 
         if self.s.VARIABLE_PATCH_SIZE:
             x_patch, lap_patch, y_patch, la_patch = x, lap, y, la
