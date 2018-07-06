@@ -121,7 +121,7 @@ class OfflineAugmenter:
         for i in range(len(x_full_all)):
             if self.s.USE_LA_INPUT:
                 lap_path = '{}predicted{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(), i)
-                if False:
+                if True:
                     print('Predicting {}'.format(i))
                     x = x_full_all[i]
                     s_la_pred = copy.copy(self.s)

@@ -102,9 +102,9 @@ class Helper():
         la_all_path = []
 
         for i in nrs:
-            x_all_path.append('{}p{}/lge.nii'.format(self.s.PATH_TO_DATA, i))
-            y_all_path.append('{}p{}/scar_seg.nii'.format(self.s.PATH_TO_DATA, i))
-            la_all_path.append('{}p{}/LA-reg.nii'.format(self.s.PATH_TO_DATA, i))
+            x_all_path.append('{}input/p{}/lge.nii'.format(self.s.PATH_TO_DATA, i))
+            y_all_path.append('{}input/p{}/scar_seg.nii'.format(self.s.PATH_TO_DATA, i))
+            la_all_path.append('{}input/p{}/LA-reg.nii'.format(self.s.PATH_TO_DATA, i))
 
         if get_all:
             return x_all_path, y_all_path, la_all_path
