@@ -120,8 +120,8 @@ class OfflineAugmenter:
         la_model = load_model(self.h.getModelPath(self.s.MODEL_NAME_FOR_LA_SEG))
         for i in range(len(x_full_all)):
             if self.s.USE_LA_INPUT:
-                lap_path = '{}predicted{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(), i)
-                if True:
+                lap_path = '{}predicted{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(self.s.DATA_SET), i)
+                if self.s.USE_READ_FILE_FOR_LAP:
                     print('Predicting {}'.format(i))
                     x = x_full_all[i]
                     s_la_pred = copy.copy(self.s)
@@ -148,8 +148,6 @@ class OfflineAugmenter:
                     lap = sitk.GetArrayFromImage(sitk.ReadImage(lap_path))
 
                 lap_full_all.append(lap)
-
-
             else:
                 lap_full_all.append(y_full_all[i])
 
@@ -160,7 +158,7 @@ class OfflineAugmenter:
                 inputs.append([i, j, x_full_all[i], y_full_all[i], la_full_all[i], lap_full_all[i], t0,
                                len(x_full_all)])
 
-        num_cores = min(6, multiprocessing.cpu_count())
+        num_cores = min(24, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
         Parallel(n_jobs=num_cores)(delayed(self.doOneAug)(i) for i in inputs)
         # for i in inputs:

@@ -165,8 +165,8 @@ class Helper():
         z, y, x = c
         return I[z:z+d, y:y+h, x:x+w]
 
-    def getOfflineAugLAPredictionsPath(self):
-        folder = '{}offline_aug_la_predictions/'.format(self.s.PATH_TO_RESULTS)
+    def getOfflineAugLAPredictionsPath(self, data_set):
+        folder = '{}offline_aug_la_predictions_{}/'.format(self.s.PATH_TO_RESULTS, data_set)
         if not os.path.exists(folder):
             os.makedirs(folder)
         return folder

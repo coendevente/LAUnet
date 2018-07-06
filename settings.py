@@ -112,7 +112,7 @@ class Settings:
         self.ART_FRACTION = 0  # with 1, all is artificial, with 0 all is natural, in between values give a mix
         self.USE_LA_AUX_LOSS = False
         self.USE_NORMALIZATION = True
-        self.USE_LA_INPUT = False
+        self.USE_LA_INPUT = True
         self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
         self.START_CH = 32
         self.SE2_N_THETA = 8
@@ -120,6 +120,7 @@ class Settings:
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
+        self.USE_READ_FILE_FOR_LAP = True
         self.NR_AUG = 100
 
         if self.USE_LA_INPUT and self.AUGMENT_ONLINE:
