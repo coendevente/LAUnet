@@ -96,11 +96,30 @@ class Helper():
         else:
             return x_path, la_path
 
+    def get_image_paths_data_july_2018(self, nrs, get_all):
+        x_all_path = []
+        y_all_path = []
+        la_all_path = []
+
+        for i in nrs:
+            x_all_path.append('{}p{}/lge.nii'.format(self.s.PATH_TO_DATA, i))
+            y_all_path.append('{}p{}/scar_seg.nii'.format(self.s.PATH_TO_DATA, i))
+            la_all_path.append('{}p{}/LA-reg.nii'.format(self.s.PATH_TO_DATA, i))
+
+        if get_all:
+            return x_all_path, y_all_path, la_all_path
+        elif self.s.GROUND_TRUTH == 'scar_fibrosis':
+            return x_all_path, y_all_path
+        elif self.s.GROUND_TRUTH == 'left_atrium':
+            return x_all_path, la_all_path
+
     def getImagePaths(self, nrs, get_all):
         if self.s.DATA_SET == 'original':
             return self.get_image_paths_original(nrs, get_all)
         elif self.s.DATA_SET == 'challenge_2018':
             return self.get_image_paths_challenge_2018(nrs, get_all)
+        elif self.s.DATA_SET == 'data_july_2018':
+            return self.get_image_paths_data_july_2018(nrs, get_all)
 
     def loadImages(self, pathNames):
         im_out = []

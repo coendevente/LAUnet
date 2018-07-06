@@ -14,12 +14,18 @@ class Settings:
         self.MODEL_NAME = 'sf_grid_search_05July2018/0/'
         # self.MODEL_NAME = 'sf_grid_search_05July2018/1/'
 
-        self.DATA_SET = 'original'  # 'original' OR 'challenge_2018'
+        self.DATA_SET = 'data_july_2018'  # 'data_july_2018' OR 'original' OR 'challenge_2018'
 
         # Path to folders
         self.DATA_PRE = '/data/cwdevente/LAUnet/' if platform.system() == 'Linux' else '../'
-        self.PATH_TO_DATA = '{}challenge_2018_data/'.format(self.DATA_PRE) \
-            if self.DATA_SET == 'challenge_2018' else '{}data/'.format(self.DATA_PRE)
+
+        if self.DATA_SET == 'challenge_2018':
+            self.PATH_TO_DATA = '{}challenge_2018_data/'.format(self.DATA_PRE)
+        elif self.DATA_SET == 'data_july_2018':
+            self.PATH_TO_DATA = '{}data_july_2018/'.format(self.DATA_PRE)
+        else:
+            self.PATH_TO_DATA = '{}data/'.format(self.DATA_PRE)
+
         self.PATH_TO_RESULTS = '../results/'
         self.PATH_TO_MODELS = '../results/models/'
         # self.PATH_TO_MODELS = '/data/cwdevente/old_models/'
@@ -64,6 +70,14 @@ class Settings:
             self.TRAINING_SET = r_p[range(0, 50)]
             self.VALIDATION_SET = r_p[range(50, 75)]
             self.TESTING_SET = r_p[range(75, 100)]
+        elif self.DATA_SET == 'data_july_2018':
+            self.ALL_NATURAL_SET = range(1, 25)
+
+            np.random.seed(0)
+            r_p = np.random.permutation(self.ALL_NATURAL_SET)
+            self.TRAINING_SET = r_p[range(0, 12)]
+            self.VALIDATION_SET = r_p[range(12, 18)]
+            self.TESTING_SET = r_p[range(18, 24)]
 
         # Patchsize
         self.VARIABLE_PATCH_SIZE = False
