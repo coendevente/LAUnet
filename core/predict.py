@@ -10,7 +10,6 @@ import tensorflow as tf
 import argparse
 
 
-
 class Predict:
     def __init__(self, s, h):
         self.s = s
