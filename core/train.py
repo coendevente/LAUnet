@@ -1,11 +1,4 @@
-from settings import *
-import numpy as np
-import h5py
-import SimpleITK as sitk
-from itertools import chain
-import matplotlib.pyplot as plt
-
-from helper_functions import *
+from core.helper_functions import *
 
 import os
 os.environ["PATH"] += os.pathsep + 'C:/Anaconda3/Library/bin/graphviz/'
@@ -13,12 +6,11 @@ os.environ["PATH"] += os.pathsep + 'C:/Anaconda3/Library/bin/graphviz/'
 from tensorflow.python.client import device_lib
 import keras
 from keras.optimizers import *
-from keras.utils import plot_model
 import tensorflow as tf
 from keras.models import load_model
 
-from online_augment import OnlineAugmenter
-from offline_augment import OfflineAugmenter
+from core.augmentations.online_augment import OnlineAugmenter
+from core.augmentations.offline_augment import OfflineAugmenter
 
 import random
 import time
@@ -26,18 +18,21 @@ import time
 import pickle
 
 if Settings().USE_SE2:
-    from se2unet import UNet
+    from core.architectures.se2unet import UNet
 else:
-    from unet import UNet
+    from core.architectures.unet import UNet
 
-from imshow_3D import imshow3D
+from keras.callbacks import TensorBoard
 
-from shutil import copyfile
 
-from skimage import img_as_bool
-
-import multiprocessing
-from joblib import Parallel, delayed
+def write_log(callback, names, logs, batch_no):
+    for name, value in zip(names, logs):
+        summary = tf.Summary()
+        summary_value = summary.value.add()
+        summary_value.simple_value = value
+        summary_value.tag = name
+        callback.writer.add_summary(summary, batch_no)
+        callback.writer.flush()
 
 
 class Train:
@@ -299,18 +294,39 @@ class Train:
             x.append(x_j)
             y.append(y_j)
             lap.append(lap_j)
-            la.append(lap_j)
+            la.append(la_j)
 
         if self.s.VARIABLE_PATCH_SIZE:
             for i in range(len(x)):
                 x[i] = np.reshape(x[i], x[i].shape + (1,))
                 y[i] = np.reshape(y[i], y[i].shape + (1,))
+                la[i] = np.reshape(la[i], la[i].shape + (1,))
                 lap[i] = np.reshape(lap[i], lap[i].shape + (1,))
         else:
             x = np.array(x)
             y = np.array(y)
             lap = np.array(lap)
             la = np.array(la)
+
+            if self.s.RESIZE_BEFORE_TRAIN:
+                # sitk.WriteImage(sitk.GetImageFromArray(x[:, 0, :, :]), 'xb.nrrd')
+                # sitk.WriteImage(sitk.GetImageFromArray(y[:, 0, :, :]), 'yb.nrrd')
+                # sitk.WriteImage(sitk.GetImageFromArray(lap[:, 0, :, :]), 'lapb.nrrd')
+                # sitk.WriteImage(sitk.GetImageFromArray(la[:, 0, :, :]), 'lab.nrrd')
+
+                # print('before')
+                # print(np.unique(y))
+                x[:, 0, :, :] = self.h.rescaleImage(x[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+                y[:, 0, :, :] = self.h.rescaleImage(y[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+                # print('after')
+                # print(np.unique(y))
+                lap[:, 0, :, :] = self.h.rescaleImage(lap[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+                la[:, 0, :, :] = self.h.rescaleImage(la[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+
+                # sitk.WriteImage(sitk.GetImageFromArray(x[:, 0, :, :]), 'x.nrrd')
+                # sitk.WriteImage(sitk.GetImageFromArray(y[:, 0, :, :]), 'y.nrrd')
+                # sitk.WriteImage(sitk.GetImageFromArray(lap[:, 0, :, :]), 'lap.nrrd')
+                # sitk.WriteImage(sitk.GetImageFromArray(la[:, 0, :, :]), 'la.nrrd')
 
             sh = x.shape
             if self.s.NR_DIM == 2:
@@ -441,6 +457,11 @@ class Train:
         print("self.s.EARLY_STOPPING == {}".format(self.s.EARLY_STOPPING))
         print("self.s.PATIENTCE_ES == {}".format(self.s.PATIENTCE_ES))
 
+        tb_log_path = self.h.getTbLogFolder(self.s.MODEL_NAME)
+
+        tb_callback = TensorBoard(tb_log_path)
+        tb_callback.set_model(model)
+
         start_i = 0
         training_duration = 0
         if self.s.LOAD_MODEL:
@@ -455,6 +476,10 @@ class Train:
                 start_time = time.time() - log['training_duration']
 
         pickle.dump(log, open(log_path, "wb"))
+
+        train_names = ['train_'+m for m in model.metrics_names]
+        val_names = ['val_'+m for m in model.metrics_names]
+
         for i in range(start_i, self.s.NR_BATCHES):
             if self.s.EARLY_STOPPING and self.s.PATIENTCE_ES <= es_j:
                 print("Stopped early at iteration {}".format(i))
@@ -462,43 +487,79 @@ class Train:
                 break
             es_j += 1
 
+            validate_in_this_step = i % self.s.VALIDATE_EVERY_ITER == 0
+
             print('{}s passed. Starting getRandomPatches.'.format(round(time.time() - start_time)))
             x_train, y_train, la_train = self.getRandomPatches(x_full_train, y_full_train, self.s.BATCH_SIZE,
                                                                self.s.TRAINING_SET)
-            x_val, y_val, la_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
-                                                 self.s.VALIDATION_SET)
             print('{}s passed. Ended getRandomPatches.'.format(round(time.time() - start_time)))
 
+            # sitk.WriteImage(sitk.GetImageFromArray(x_train[:, :, :, 0]), 'x.nii.gz')
+            # sitk.WriteImage(sitk.GetImageFromArray(y_train[:, :, :, 0]), 'y.nii.gz')
+            #
+            # return
+
             y_train_all = {'main_output': y_train}
-            y_val_all = {'main_output': y_val}
 
             if self.s.USE_LA_AUX_LOSS:
                 y_train_all['aux_output'] = la_train
-                y_val_all['aux_output'] = la_val
 
             train_loss = model.train_on_batch(x_train, y_train_all)
+            write_log(tb_callback, train_names, train_loss, i)
 
-            if self.s.VARIABLE_PATCH_SIZE:
-                val_losses = []
-                for j in range(len(y_val_all)):
-                     val_losses.append(model.test_on_batch(x_val[j], {'main_output': y_train_all['main_output'][j]}))
-                val_loss = np.mean(val_losses)
-            else:
-                val_loss = model.test_on_batch(x_val, y_val_all)
+            if validate_in_this_step:
+                x_val, y_val, la_val = self.getRandomPatches(x_full_val, y_full_val, self.s.NR_VAL_PATCH_PER_ITER,
+                                                     self.s.VALIDATION_SET)
+                y_val_all = {'main_output': y_val}
+
+                if self.s.USE_LA_AUX_LOSS:
+                    y_val_all['aux_output'] = la_val
+                if self.s.VARIABLE_PATCH_SIZE:
+                    raise Exception('Still to be implemented')
+                    val_losses = []
+                    for j in range(len(y_val_all)):
+                         val_losses.append(
+                             model.test_on_batch(x_val[j], {'main_output': y_train_all['main_output'][j]})
+                         )
+                    val_loss = np.mean(val_losses)
+                else:
+                    val_loss = []
+                    for j in range(0, self.s.NR_VAL_PATCH_PER_ITER, self.s.BATCH_SIZE_VAL):
+                        x_val_j = x_val[j:j+self.s.BATCH_SIZE_VAL]
+                        y_val_j = {}
+                        for n in list(y_val_all.keys()):
+                            y_val_j[n] = y_val_all[n][j:j+self.s.BATCH_SIZE_VAL]
+                        val_loss_j = model.test_on_batch(x_val_j, y_val_j)
+                        if j == 0:
+                            for n in range(len(val_loss_j)):
+                                val_loss.append([val_loss_j[n]])
+                        else:
+                            for n in range(len(val_loss_j)):
+                                # print('val_loss[n] == {}'.format(val_loss[n]))
+                                val_loss[n].append(val_loss_j[n])
+                        # print('val_loss == {}'.format(val_loss))
+                    for n in range(len(val_loss_j)):
+                        val_loss[n] = np.mean(val_loss[n])
+                    # print('mean val_loss == {}'.format(val_loss))
+                write_log(tb_callback, val_names, val_loss, i)
+
+                loss_i = model.metrics_names.index('loss')
+                if lowest_val_loss > val_loss[loss_i]:
+                    lowest_val_loss = val_loss[loss_i]
+                    model_path = self.h.getModelPath(self.s.MODEL_NAME)
+                    model.save(model_path)
+                    lowest_val_loss_i = i
+                    log['lowest_val_loss'] = lowest_val_loss
+                    log['lowest_val_loss_i'] = lowest_val_loss_i
+                    es_j = 0
+                    lowest_train_loss = min(log['training']['loss']) if len(log['training']['loss']) > 0 else float("inf")
 
             for m in range(len(model.metrics_names)):
                 log['training'][model.metrics_names[m]].append(train_loss[m])
-                log['validation'][model.metrics_names[m]].append(val_loss[m])
-
-            if lowest_val_loss > val_loss[0]:
-                lowest_val_loss = val_loss[0]
-                model_path = self.h.getModelPath(self.s.MODEL_NAME)
-                model.save(model_path)
-                lowest_val_loss_i = i
-                log['lowest_val_loss'] = lowest_val_loss
-                log['lowest_val_loss_i'] = lowest_val_loss_i
-                es_j = 0
-                lowest_train_loss = min(log['training']['loss']) if len(log['training']['loss']) > 0 else float("inf")
+                if validate_in_this_step:
+                    log['validation'][model.metrics_names[m]].append(val_loss[m])
+                else:
+                    val_loss = ['none']
 
             if lowest_train_loss > train_loss[0]:
                 lowest_train_loss = train_loss[0]

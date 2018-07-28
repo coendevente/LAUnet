@@ -1,27 +1,12 @@
-from helper_functions import Helper
-from settings import Settings
+from core.helper_functions import Helper
+from core.settings import Settings
 import numpy as np
 import SimpleITK as sitk
-from scipy.spatial import Delaunay
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.tri as mtri
-import plotly.plotly as py
-import plotly.graph_objs as go
-import matplotlib.cm as cm
-from mayavi import mlab
-import plotly.plotly as py
-import plotly.graph_objs as go
-from plotly.tools import FigureFactory as FF
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from skimage import measure
-from skimage.draw import ellipsoid
-from matplotlib.colors import LightSource
 import vtk
-from vtk.util import numpy_support
 
 from vtk.util.numpy_support import numpy_to_vtk
-from IPython.display import Image, display
+from IPython.display import Image
+
 
 def vtk_show(renderer, width=400, height=300):
     """

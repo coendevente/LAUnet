@@ -1,12 +1,10 @@
-from settings import *
-from online_augment import OnlineAugmenter
-from helper_functions import *
+from core.augmentations.online_augment import OnlineAugmenter
+from core.helper_functions import *
 import time
 from joblib import Parallel, delayed
 import multiprocessing
 import random
-import matplotlib.pyplot as plt
-from predict import Predict
+from core.predict import Predict
 import keras
 from keras.models import load_model
 
@@ -65,12 +63,6 @@ class OfflineAugmenter:
 
         x_aug, y_aug, la_aug, lap_aug = self.online_augmenter.augment(x, y, False, la, lap)
 
-        if self.s.RESIZE_AFTER_AUG:
-            x_aug = self.h.rescaleImage(x_aug, self.s.RESIZE_AFTER_AUG)
-            y_aug = self.h.rescaleImage(y_aug, self.s.RESIZE_AFTER_AUG)
-            la_aug = self.h.rescaleImage(la_aug, self.s.RESIZE_AFTER_AUG)
-            lap_aug = self.h.rescaleImage(lap_aug, self.s.RESIZE_AFTER_AUG)
-
         for z in range(x_aug.shape[0]):
             x_aug_path, y_aug_path, la_aug_path, lap_aug_path = self.h.getAugImagesPath(i + 1, j, z, True)
 
@@ -121,7 +113,9 @@ class OfflineAugmenter:
         for i in range(len(x_full_all)):
             if self.s.USE_LA_INPUT:
                 lap_path = '{}predicted{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(self.s.DATA_SET), i)
-                if self.s.USE_READ_FILE_FOR_LAP:
+
+                print('Loaded {}'.format(lap_path))
+                if not self.s.USE_READ_FILE_FOR_LAP:
                     print('Predicting {}'.format(i))
                     x = x_full_all[i]
                     s_la_pred = copy.copy(self.s)
@@ -142,7 +136,7 @@ class OfflineAugmenter:
 
                     sitk.WriteImage(
                         sitk.GetImageFromArray(x),
-                        '{}lge{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(), i)
+                        '{}lge{}.nrrd'.format(self.h.getOfflineAugLAPredictionsPath(self.s.DATA_SET), i)
                     )
                 else:
                     lap = sitk.GetArrayFromImage(sitk.ReadImage(lap_path))
@@ -158,7 +152,7 @@ class OfflineAugmenter:
                 inputs.append([i, j, x_full_all[i], y_full_all[i], la_full_all[i], lap_full_all[i], t0,
                                len(x_full_all)])
 
-        num_cores = min(24, multiprocessing.cpu_count())
+        num_cores = min(8, multiprocessing.cpu_count())
         print('num_cores == {}'.format(num_cores))
         Parallel(n_jobs=num_cores)(delayed(self.doOneAug)(i) for i in inputs)
         # for i in inputs:

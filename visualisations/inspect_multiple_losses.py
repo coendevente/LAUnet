@@ -1,8 +1,7 @@
-from helper_functions import *
+from core.helper_functions import *
 # from settings import *
 import pickle
 import matplotlib.pyplot as plt
-import math
 
 
 class LossInspector:
@@ -18,7 +17,7 @@ class LossInspector:
         #                'la_2018_challenge_convpl_depth_2/3', 'la_2018_challenge_convpl_depth_2/4',
         #                'la_2018_challenge_convpl_depth_2/5', 'la_2018_challenge_convpl_depth_2/6']
         # model_names = ['sf_no_input', 'sf_la_input_2']
-        model_names = ['sf_grid_search_05July2018/0/', 'sf_grid_search_05July2018/1/']
+        model_names = ['sf_july_data_vanilla_ps384', 'sf_july_data_vanilla_ps384_newlgedata2']
         colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         legend_parameter = 'ART_FRACTION'
         legend_parameter_name = 'Artificial data fraction'

@@ -1,6 +1,5 @@
 import SimpleITK as sitk
 import numpy as np
-from imshow_3D import imshow3D
 
 kcl_nrs = [9,
 29,

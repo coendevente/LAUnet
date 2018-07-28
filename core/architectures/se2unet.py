@@ -2,11 +2,9 @@
 
 from keras.models import Input, Model
 from keras.layers import Conv3D, Conv2D, Concatenate, MaxPooling3D, MaxPooling2D, UpSampling3D, UpSampling2D, Dropout, \
-    BatchNormalization, GlobalMaxPooling2D, GlobalMaxPooling3D, Dense, Lambda
-from settings import *
+    BatchNormalization, GlobalMaxPooling2D, Dense, Lambda
 
 # Import the library
-import se2cnn.layers
 import tensorflow as tf
 import math as m
 
@@ -74,7 +72,7 @@ def se2conv(tensor_in, Nxy, Nc_out, Ntheta):
             [1, 1, 1, 1, Nc_out],
             initializer=tf.constant_initializer(value=0.01))
         # Lifting layer
-        tensor_out, kernels_formatted = se2cnn.layers.z2_se2n(
+        tensor_out, kernels_formatted = core.architectures.se2cnn.layers.z2_se2n(
             input_tensor=tensor_in,
             kernel=kernels_raw,
             orientations_nb=Ntheta)
@@ -104,7 +102,7 @@ def se2conv(tensor_in, Nxy, Nc_out, Ntheta):
             [1, 1, 1, 1, Nc_out],
             initializer=tf.constant_initializer(value=0.01))
         # The group convolution layer
-        tensor_out, kernels_formatted = se2cnn.layers.se2n_se2n(
+        tensor_out, kernels_formatted = core.architectures.se2cnn.layers.se2n_se2n(
             input_tensor=tensor_in,
             kernel=kernels_raw)
         tensor_out = tensor_out + bias

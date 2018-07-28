@@ -1,15 +1,11 @@
 import SimpleITK as sitk
-import numpy as np
-from settings import *
+from core.settings import *
 import os
 from keras import backend as K
-from imshow_3D import imshow3D
 import copy
-import time
 import matplotlib.pyplot as plt
 import glob
 import random
-from skimage import io
 from skimage.transform import resize
 
 
@@ -113,6 +109,23 @@ class Helper():
         elif self.s.GROUND_TRUTH == 'left_atrium':
             return x_all_path, la_all_path
 
+    def get_image_paths_new_lge_2(self, nrs, get_all):
+        x_all_path = []
+        y_all_path = []
+        la_all_path = []
+
+        for i in nrs:
+            x_all_path.append('{0}input/p{1}/de_b_{1}.nrrd'.format(self.s.PATH_TO_DATA, i))
+            y_all_path.append('{0}input/p{1}/scar_b_{1}.nrrd'.format(self.s.PATH_TO_DATA, i))
+            la_all_path.append('{0}input/p{1}/la_seg_b_{1}.nrrd'.format(self.s.PATH_TO_DATA, i))
+
+        if get_all:
+            return x_all_path, y_all_path, la_all_path
+        elif self.s.GROUND_TRUTH == 'scar_fibrosis':
+            return x_all_path, y_all_path
+        elif self.s.GROUND_TRUTH == 'left_atrium':
+            return x_all_path, la_all_path
+
     def getImagePaths(self, nrs, get_all):
         if self.s.DATA_SET == 'original':
             return self.get_image_paths_original(nrs, get_all)
@@ -120,12 +133,18 @@ class Helper():
             return self.get_image_paths_challenge_2018(nrs, get_all)
         elif self.s.DATA_SET == 'data_july_2018':
             return self.get_image_paths_data_july_2018(nrs, get_all)
+        elif self.s.DATA_SET == 'new_lge_data_2':
+            return self.get_image_paths_new_lge_2(nrs, get_all)
+        elif self.s.DATA_SET == 'set_of_54':
+            return self.get_image_paths_data_july_2018(nrs, get_all)
 
     def loadImages(self, pathNames):
         im_out = []
         for p in pathNames:
+            # print(p)
             im_sitk = sitk.ReadImage(p)
             im = sitk.GetArrayFromImage(im_sitk)
+            # print('im.shape == {}'.format(im.shape))
 
             self.set_image_spacing_xy(self.loadImageSpacing([p])[0])
             im_out.append(im)
@@ -142,10 +161,12 @@ class Helper():
         return spacing
 
     def rescaleImage(self, I, dims):
-        I = self.normalize(I)
+        # I = self.normalize(I) if np.min(I) != 0 and np.max(I) != 0 else I
+        I = I.astype(np.float)
         I_out = np.zeros(tuple([I.shape[0]]) + dims)
         for i in range(I.shape[0]):
-            I_out[i] = resize(I[i], dims)
+            # print(i)
+            I_out[i] = resize(I[i], dims, mode='constant', preserve_range=True)
 
         return I_out
 
@@ -176,6 +197,12 @@ class Helper():
         if not os.path.exists(model_folder):
             os.makedirs(model_folder)
         return model_folder
+
+    def getTbLogFolder(self, model_name):
+        tb_log_folder = './log/{}'.format(model_name)
+        if not os.path.exists(tb_log_folder):
+            os.makedirs(tb_log_folder)
+        return tb_log_folder
 
     def getModelPredictPath(self, model_name, aux_out):
         postfix = self.s.DATA_SET if not aux_out else self.s.DATA_SET + '_aux'

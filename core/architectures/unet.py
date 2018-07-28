@@ -2,8 +2,7 @@
 
 from keras.models import Input, Model
 from keras.layers import Conv3D, Conv2D, Concatenate, MaxPooling3D, MaxPooling2D, UpSampling3D, UpSampling2D, Dropout, \
-    BatchNormalization, GlobalMaxPooling2D, GlobalMaxPooling3D, Dense
-from settings import *
+    BatchNormalization
 
 '''
 U-Net: Convolutional Networks for Biomedical Image Segmentation

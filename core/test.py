@@ -1,13 +1,9 @@
-from settings import *
-from helper_functions import *
+from core.helper_functions import *
 import keras
 from keras.models import load_model
-from online_augment import OnlineAugmenter
+from core.augmentations.online_augment import OnlineAugmenter
 import SimpleITK as sitk
-from imshow_3D import imshow3D
-import matplotlib.pyplot as plt
-import tensorflow as tf
-from predict import Predict
+from core.predict import Predict
 
 
 class Test:
@@ -64,15 +60,15 @@ class Test:
 
         ext = 'nii.gz'
 
-        if s.USE_SE2:
-            from se2unet import se2conv
+        if self.s.USE_SE2:
+            from core.architectures.se2unet import se2conv
             keras.layers.se2conv = se2conv
 
         if self.s.CALC_PROBS:
             for model_name in self.s.VALTEST_MODEL_NAMES:
                 model_path = self.h.getModelPath(model_name)
-                if s.USE_SE2:
-                    from se2unet import se2conv
+                if self.s.USE_SE2:
+                    from core.architectures.se2unet import se2conv
                     model = load_model(model_path, custom_objects={'se2conv': se2conv})
                 else:
                     model = load_model(model_path)
@@ -134,6 +130,10 @@ class Test:
                     else:
                         prob_thresh = sitk.GetArrayFromImage(sitk.ReadImage(prob_thresh_path))
 
+                    if self.s.DISCARD_LAST_SLICE:
+                        prob_thresh[-1, :, :] = 0
+                        sitk.WriteImage(sitk.GetImageFromArray(prob_thresh), prob_thresh_path)
+
                     metrics = self.calcMetrics(prob_thresh, anno)
                     all_metrics[model_name].append(metrics)
 
@@ -150,8 +150,8 @@ class Test:
             print('Means of metrics: {}'.format(metric_means[model_name]))
             print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
 
-        all_dice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
-        print('All Dice values: {}'.format(all_dice))
+            all_dice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
+            print('All Dice values: {}'.format(all_dice))
 
         # plt.figure()
         # plt.hist(all_dice)

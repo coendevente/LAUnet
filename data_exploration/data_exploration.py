@@ -1,8 +1,5 @@
-import numpy as np
 import SimpleITK as sitk
-from itertools import chain
-import matplotlib.pyplot as plt
-from settings import *
+from core.settings import *
 
 
 class DataExploration:

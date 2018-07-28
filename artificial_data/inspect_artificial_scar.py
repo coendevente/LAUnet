@@ -1,9 +1,9 @@
-from settings import Settings
-from helper_functions import Helper
+from core.settings import Settings
+from core.helper_functions import Helper
 import SimpleITK as sitk
 import numpy as np
 import matplotlib.pyplot as plt
-from train import Train
+from core.train import Train
 
 
 class ArtificialScarInspecter:

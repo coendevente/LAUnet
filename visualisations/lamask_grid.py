@@ -1,12 +1,9 @@
 import SimpleITK as sitk
 import numpy as np
 import matplotlib.pyplot as plt
-from settings import Settings
-from helper_functions import Helper
+from core.settings import Settings
+from core.helper_functions import Helper
 import copy
-from PIL import ImageFont
-from PIL import Image
-from PIL import ImageDraw
 
 
 def crop_around(im, new_size, center):

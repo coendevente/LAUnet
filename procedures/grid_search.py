@@ -3,32 +3,18 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 
-from bayes_opt import BayesianOptimization
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import gridspec
-from train import Train
-from helper_functions import Helper
-from settings import Settings
-from test import Test
+from core.train import Train
+from core.helper_functions import Helper
+from core.settings import Settings
+from core.test import Test
 
 from contextlib import contextmanager
 import sys
 sys.path.append("./")
 
 import os
-import tensorflow as tf
 
-import math
 import pickle
-
-import inspect
-
-import time
-
-from tabulate import tabulate
-
-import itertools
 
 from joblib import Parallel, delayed
 
@@ -74,20 +60,20 @@ def target(param_names, param_values, model_nr):
     s.VALTEST_MODEL_NAMES = [s.MODEL_NAME]
     h = Helper(s)
 
-    with suppress_stdout():
-        # print('here1')
-        not_model_nrs = []
-        if model_nr not in not_model_nrs:
-            # print('here2')
-            t = Train(s, h)
-            t.train()
-            del t
-            metric_means, metric_sds = Test(s, h).test()
-        else:
-            # print('here3')
-            s.CALC_PROBS = False
-            metric_means, metric_sds = Test(s, h).test()
-            s.CALC_PROBS = True
+    # with suppress_stdout():
+    # print('here1')
+    not_model_nrs = []
+    if model_nr not in not_model_nrs:
+        # print('here2')
+        t = Train(s, h)
+        t.train()
+        del t
+        metric_means, metric_sds = Test(s, h).test()
+    else:
+        # print('here3')
+        s.CALC_PROBS = False
+        metric_means, metric_sds = Test(s, h).test()
+        s.CALC_PROBS = True
 
     return metric_means[s.MODEL_NAME]['Dice'], metric_sds[s.MODEL_NAME]['Dice']
 
@@ -107,16 +93,16 @@ def par_one(input):
     finished = False
     first_retry = True
     while not finished:
-        try:
-            if not first_retry:
-                print('Retrying')
-            mean, std = target(param_names, pperm, model_nr)
-            finished = True
-        except Exception:
-            if first_retry:
-                print('Failed')
-            first_retry = False
-            time.sleep(30)
+        # try:
+        if not first_retry:
+            print('Retrying')
+        mean, std = target(param_names, pperm, model_nr)
+        finished = True
+        # except Exception:
+        #     if first_retry:
+        #         print('Failed')
+        #     first_retry = False
+        #     time.sleep(30)
     val = '{} \pm {}'.format(round(mean, 4), round(std, 5))
 
     bo = pickle.load(open(bo_path, "rb"))

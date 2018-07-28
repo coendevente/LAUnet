@@ -1,10 +1,4 @@
-from settings import *
-import random
-import numpy as np
-import SimpleITK as sitk
-import math
-from helper_functions import *
-from imshow_3D import imshow3D
+from core.helper_functions import *
 import skimage
 
 
@@ -41,9 +35,9 @@ class OnlineAugmenter():
         # im = np.power(im, pw)
         # im = self.h.normalize(im) * amplitude_pre + min_pre
 
-        im = self.h.normalize(im)
-        # im = (im.astype(np.float) - np.mean(im)) / (sd_times * np.std(im)) + 1
-        im = np.power(im, pw)
+        # im = self.h.normalize(im)
+        # # im = (im.astype(np.float) - np.mean(im)) / (sd_times * np.std(im)) + 1
+        # im = np.power(im, pw)
         return im
 
 

@@ -4,20 +4,16 @@ import warnings
 warnings.warn = warn
 
 from bayes_opt import BayesianOptimization
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import gridspec
-from train import Train
-from helper_functions import Helper
-from settings import Settings
-from test import Test
+from core.train import Train
+from core.helper_functions import Helper
+from core.settings import Settings
+from core.test import Test
 
 from contextlib import contextmanager
 import sys
 sys.path.append("./")
 
 import os
-import tensorflow as tf
 
 import math
 import pickle

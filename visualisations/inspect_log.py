@@ -1,8 +1,7 @@
-from helper_functions import *
+from core.helper_functions import *
 # from settings import *
 import pickle
 import matplotlib.pyplot as plt
-import math
 
 
 class LogInspector:
@@ -33,7 +32,8 @@ class LogInspector:
         settings_to_output = ['MODEL_NAME', 'FN_CLASS_WEIGHT', 'UNET_DEPTH', 'LEARNING_RATE', 'PATCH_SIZE', 'DROPOUT',
                               'FEATURE_MAP_INC_RATE', 'LOSS_FUNCTION', 'BATCH_SIZE', 'NR_AUG', 'NR_DIM', 'ART_FRACTION',
                               'POS_NEG_PATCH_PROP', 'PATIENTCE_ES', 'USE_ANY_SCAR_AUX', 'MAIN_OUTPUT_LOSS_WEIGHT',
-                              'AUX_OUTPUT_LOSS_WEIGHT', 'NR_CONV_PER_CONV_BLOCK', 'START_CH']
+                              'AUX_OUTPUT_LOSS_WEIGHT', 'NR_CONV_PER_CONV_BLOCK', 'START_CH', 'USE_LA_AUX_LOSS',
+                              'USE_LA_INPUT', 'RESIZE_BEFORE_PREDICTION', 'RESIZE_BEFORE_TRAIN']
         for name in settings_to_output:
             try:
                 expr = "log['settings'].{}".format(name)

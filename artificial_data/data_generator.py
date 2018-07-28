@@ -1,7 +1,7 @@
-from helper_functions import Helper
-from settings import Settings
+from core.helper_functions import Helper
+from core.settings import Settings
 import numpy as np
-from imshow_3D import imshow3D
+from core.imshow_3D import imshow3D
 import SimpleITK as sitk
 
 

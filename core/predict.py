@@ -1,5 +1,5 @@
-from settings import Settings
-from helper_functions import Helper
+from core.settings import Settings
+from core.helper_functions import Helper
 import SimpleITK as sitk
 import numpy as np
 import keras
@@ -133,7 +133,7 @@ class Predict:
         return prob_image
 
     def predict(self, im, model):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.5)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.9)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         did_rescale = False
@@ -149,6 +149,8 @@ class Predict:
         patches = self.patchesFromCorners(im, patch_corners)
 
         if self.s.USE_LA_INPUT:
+            sess.close()
+
             s_lap = copy.copy(self.s)
             s_lap.USE_LA_INPUT = False
             lap_model = load_model(self.h.getModelPath(self.s.MODEL_NAME_FOR_LA_SEG))
@@ -165,6 +167,9 @@ class Predict:
             for i in range(len(patches)):
                 patches[i] = np.concatenate((patches[i], lap_patches[i]), axis=self.s.NR_DIM+1)
 
+            gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.9)
+            sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
         prob_patches = self.probPatches(patches, model)
         prob_image = self.fullImageFromPatches(im.shape, prob_patches, patch_corners)
 
@@ -173,7 +178,7 @@ class Predict:
             prob_image = self.h.rescaleImage(prob_image, old_input_shape[1:])
             print(prob_image.shape)
 
-        del sess
+        sess.close()
         return prob_image
 
 
