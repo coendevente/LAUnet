@@ -1,7 +1,7 @@
 # LAUnet
 Deep learning program for left atrial and scar segmentation in GE-MRI images.
 
-## File and directory architecture
+## File and directory structure
 - artifical_data/: Generate artificial scar in images
 - core/: Main scripts of the repository
   - architectures/: different network architectures
