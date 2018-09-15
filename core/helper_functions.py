@@ -74,6 +74,24 @@ class Helper():
         elif self.s.GROUND_TRUTH == 'left_atrium':
             return x_all_path, la_all_path
 
+    def get_image_paths_atriaseg_2018_testing(self, nrs, get_all):
+        if self.s.GROUND_TRUTH == 'scar_fibrosis':
+            raise Exception('No scar annotations in challenge 2018 data')
+
+        x_path = []
+        la_path = []
+
+        x_all_path = sorted(glob.glob('{}input/*/lgemri.nrrd'.format(self.s.PATH_TO_DATA)))
+
+        for i in np.array(nrs) - 1:
+            x_path.append(x_all_path[i])
+            la_path.append(x_all_path[i])
+
+        if get_all:
+            return x_path, la_path, la_path
+        else:
+            return x_path, la_path
+
     def get_image_paths_challenge_2018(self, nrs, get_all):
         if self.s.GROUND_TRUTH == 'scar_fibrosis':
             raise Exception('No scar annotations in challenge 2018 data')
@@ -131,6 +149,8 @@ class Helper():
             return self.get_image_paths_original(nrs, get_all)
         elif self.s.DATA_SET == 'challenge_2018':
             return self.get_image_paths_challenge_2018(nrs, get_all)
+        elif self.s.DATA_SET == 'atriaseg_2018_testing':
+            return self.get_image_paths_atriaseg_2018_testing(nrs, get_all)
         elif self.s.DATA_SET == 'data_july_2018':
             return self.get_image_paths_data_july_2018(nrs, get_all)
         elif self.s.DATA_SET == 'new_lge_data_2':

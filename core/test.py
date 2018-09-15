@@ -1,3 +1,6 @@
+import sys
+sys.path.append("./")
+
 from core.helper_functions import *
 import keras
 from keras.models import load_model
@@ -52,7 +55,8 @@ class Test:
         x_all_path, y_all_path = self.h.getImagePaths(self.s.VALTEST_SET, False)
 
         x_full_all = self.h.loadImages(x_all_path)
-        y_full_all = self.h.loadImages(y_all_path)
+        if self.s.USE_ANNO_FOR_TEST:
+            y_full_all = self.h.loadImages(y_all_path)
 
         self.s.FN_CLASS_WEIGHT = 0  # Needs to be set for Keras, but is not used when testing and validating
         self.h.s = self.s
@@ -76,7 +80,8 @@ class Test:
                 for i in range(len(x_full_all)):
                     for j in [-1] + list(range(self.s.VALTEST_AUG_NR)):
                         input = x_full_all[i]
-                        anno = y_full_all[i]
+                        if self.s.USE_ANNO_FOR_TEST:
+                            anno = y_full_all[i]
 
                         # sitk.WriteImage(sitk.GetImageFromArray(input), 'input.nrrd')
                         # sitk.WriteImage(sitk.GetImageFromArray(anno), 'anno.nrrd')
@@ -96,8 +101,9 @@ class Test:
                         sitk.WriteImage(sitk.GetImageFromArray(prob),
                                         '{}prob_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
 
-                        sitk.WriteImage(sitk.GetImageFromArray(anno),
-                                        '{}anno_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
+                        if self.s.USE_ANNO_FOR_TEST:
+                            sitk.WriteImage(sitk.GetImageFromArray(anno),
+                                            '{}anno_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
                         print("Saved in {}".format(predict_path))
 
         # Calculate the metrics
@@ -111,14 +117,17 @@ class Test:
             for i in range(len(x_full_all)):
                 for j in [-1] + list(range(self.s.VALTEST_AUG_NR)):
                     predict_path = self.h.getModelPredictPath(model_name, self.s.PREDICT_AUX_OUTPUT)
-                    anno = sitk.ReadImage('{}anno_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j, ext))
-                    anno = sitk.GetArrayFromImage(anno)
 
-                    prob_thresh_path = '{}prob_thresh_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j
-                                                                                 , ext)
+                    if self.s.USE_ANNO_FOR_TEST:
+                        anno = sitk.ReadImage('{}anno_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j,
+                                                                             ext))
+                        anno = sitk.GetArrayFromImage(anno)
+
+                    prob_thresh_path = '{}prob_thresh_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j,
+                                                                             ext)
                     if self.s.CALC_PROB_THRESH:
-                        prob = sitk.ReadImage('{}prob_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i],
-                                                                                 j, ext))
+                        prob = sitk.ReadImage('{}prob_image_{}_{}.{}'.format(predict_path, self.s.VALTEST_SET[i], j,
+                                                                             ext))
                         prob = sitk.GetArrayFromImage(prob)
                         # print(np.unique(prob))
                         prob_thresh = (prob > self.s.BIN_THRESH).astype(np.uint8)
@@ -134,24 +143,26 @@ class Test:
                         prob_thresh[-1, :, :] = 0
                         sitk.WriteImage(sitk.GetImageFromArray(prob_thresh), prob_thresh_path)
 
-                    metrics = self.calcMetrics(prob_thresh, anno)
-                    all_metrics[model_name].append(metrics)
+                    if self.s.USE_ANNO_FOR_TEST:
+                        metrics = self.calcMetrics(prob_thresh, anno)
+                        all_metrics[model_name].append(metrics)
 
-            # Calculate averages of metrics
-            metric_means[model_name] = {}
-            metric_sds[model_name] = {}
-            for metric in all_metrics[model_name][0].items():
-                all = [all_metrics[model_name][i][metric[0]] for i in range(len(all_metrics[model_name]))]
-                metric_means[model_name][metric[0]] = np.mean(all)
-                metric_sds[model_name][metric[0]] = np.std(all)
+            if self.s.USE_ANNO_FOR_TEST:
+                # Calculate averages of metrics
+                metric_means[model_name] = {}
+                metric_sds[model_name] = {}
+                for metric in all_metrics[model_name][0].items():
+                    all = [all_metrics[model_name][i][metric[0]] for i in range(len(all_metrics[model_name]))]
+                    metric_means[model_name][metric[0]] = np.mean(all)
+                    metric_sds[model_name][metric[0]] = np.std(all)
 
-            print('=========== Results of {} ==========='.format(model_name))
-            print('Image nrs: {}'.format(list(self.s.VALTEST_SET)))
-            print('Means of metrics: {}'.format(metric_means[model_name]))
-            print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
+                print('=========== Results of {} ==========='.format(model_name))
+                print('Image nrs: {}'.format(list(self.s.VALTEST_SET)))
+                print('Means of metrics: {}'.format(metric_means[model_name]))
+                print('Standard deviations of metrics: {}'.format(metric_sds[model_name]))
 
-            all_dice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
-            print('All Dice values: {}'.format(all_dice))
+                all_dice = [all_metrics[model_name][i]['Dice'] for i in range(len(all_metrics[model_name]))]
+                print('All Dice values: {}'.format(all_dice))
 
         # plt.figure()
         # plt.hist(all_dice)

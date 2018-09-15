@@ -90,7 +90,8 @@ class Train:
                 s_nr = random.randint(0, zl - 1 - self.s.PATCH_SIZE[0])
 
             x, y, la, lap = self.offline_augmenter.offline_augment(set_idx[i], range(s_nr, s_nr + self.s.PATCH_SIZE[0]),
-                                                                  True, get_lap=self.s.USE_LA_INPUT)
+                                                                  True, get_lap=self.s.USE_LA_INPUT,
+                                                                  resize=self.s.RESIZE_BEFORE_TRAIN)
 
             if self.s.GROUND_TRUTH == 'left_atrium':
                 y = la
@@ -233,7 +234,8 @@ class Train:
 
             x_s, y_s, la_s, lap_s = self.offline_augmenter.offline_augment(img_nr, range(s_nr, s_nr +
                                                                                          self.s.PATCH_SIZE[0]), True,
-                                                                           get_lap=self.s.USE_LA_INPUT)
+                                                                           get_lap=self.s.USE_LA_INPUT,
+                                                                           resize=self.s.RESIZE_BEFORE_TRAIN)
             x_s = self.h.pre_process(x_s)
 
             if self.s.GROUND_TRUTH == 'left_atrium':
@@ -308,25 +310,25 @@ class Train:
             lap = np.array(lap)
             la = np.array(la)
 
-            if self.s.RESIZE_BEFORE_TRAIN:
-                # sitk.WriteImage(sitk.GetImageFromArray(x[:, 0, :, :]), 'xb.nrrd')
-                # sitk.WriteImage(sitk.GetImageFromArray(y[:, 0, :, :]), 'yb.nrrd')
-                # sitk.WriteImage(sitk.GetImageFromArray(lap[:, 0, :, :]), 'lapb.nrrd')
-                # sitk.WriteImage(sitk.GetImageFromArray(la[:, 0, :, :]), 'lab.nrrd')
+            # if self.s.RESIZE_BEFORE_TRAIN:
+            # sitk.WriteImage(sitk.GetImageFromArray(x[:, 0, :, :]), 'xb.nrrd')
+            # sitk.WriteImage(sitk.GetImageFromArray(y[:, 0, :, :]), 'yb.nrrd')
+            # sitk.WriteImage(sitk.GetImageFromArray(lap[:, 0, :, :]), 'lapb.nrrd')
+            # sitk.WriteImage(sitk.GetImageFromArray(la[:, 0, :, :]), 'lab.nrrd')
 
-                # print('before')
-                # print(np.unique(y))
-                x[:, 0, :, :] = self.h.rescaleImage(x[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
-                y[:, 0, :, :] = self.h.rescaleImage(y[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
-                # print('after')
-                # print(np.unique(y))
-                lap[:, 0, :, :] = self.h.rescaleImage(lap[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
-                la[:, 0, :, :] = self.h.rescaleImage(la[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+            # print('before')
+            # print(np.unique(y))
+            # x[:, 0, :, :] = self.h.rescaleImage(x[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+            # y[:, 0, :, :] = self.h.rescaleImage(y[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+            # # print('after')
+            # # print(np.unique(y))
+            # lap[:, 0, :, :] = self.h.rescaleImage(lap[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
+            # la[:, 0, :, :] = self.h.rescaleImage(la[:, 0, :, :], self.s.RESIZE_BEFORE_TRAIN)
 
-                # sitk.WriteImage(sitk.GetImageFromArray(x[:, 0, :, :]), 'x.nrrd')
-                # sitk.WriteImage(sitk.GetImageFromArray(y[:, 0, :, :]), 'y.nrrd')
-                # sitk.WriteImage(sitk.GetImageFromArray(lap[:, 0, :, :]), 'lap.nrrd')
-                # sitk.WriteImage(sitk.GetImageFromArray(la[:, 0, :, :]), 'la.nrrd')
+            # sitk.WriteImage(sitk.GetImageFromArray(x[:, 0, :, :]), 'x.nrrd')
+            # sitk.WriteImage(sitk.GetImageFromArray(y[:, 0, :, :]), 'y.nrrd')
+            # sitk.WriteImage(sitk.GetImageFromArray(lap[:, 0, :, :]), 'lap.nrrd')
+            # sitk.WriteImage(sitk.GetImageFromArray(la[:, 0, :, :]), 'la.nrrd')
 
             sh = x.shape
             if self.s.NR_DIM == 2:
@@ -381,7 +383,7 @@ class Train:
         return y_aux
 
     def train(self):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=.45)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
         # self.s.FN_CLASS_WEIGHT = 100
@@ -455,7 +457,7 @@ class Train:
 
         log['stopped_early'] = False
         print("self.s.EARLY_STOPPING == {}".format(self.s.EARLY_STOPPING))
-        print("self.s.PATIENTCE_ES == {}".format(self.s.PATIENTCE_ES))
+        print("self.s.PATIENCE_ES == {}".format(self.s.PATIENCE_ES))
 
         tb_log_path = self.h.getTbLogFolder(self.s.MODEL_NAME)
 
@@ -467,10 +469,11 @@ class Train:
         if self.s.LOAD_MODEL:
             log = pickle.load(open(log_path, "rb"))
 
-            lowest_val_loss = log['lowest_val_loss']
+            if not self.s.RESET_VAL_LOSS:
+                lowest_val_loss = log['lowest_val_loss']
             start_i = len(log['training'][model.metrics_names[0]])
 
-            es_j = start_i - log['lowest_val_loss_i']
+            es_j = start_i - log['lowest_val_loss_i'] if not self.s.RESET_PATIENCE_ES else 0
 
             if 'training_duration' in log.keys():
                 start_time = time.time() - log['training_duration']
@@ -481,7 +484,7 @@ class Train:
         val_names = ['val_'+m for m in model.metrics_names]
 
         for i in range(start_i, self.s.NR_BATCHES):
-            if self.s.EARLY_STOPPING and self.s.PATIENTCE_ES <= es_j:
+            if self.s.EARLY_STOPPING and self.s.PATIENCE_ES <= es_j:
                 print("Stopped early at iteration {}".format(i))
                 log['stopped_early'] = True
                 break

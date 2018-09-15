@@ -1,7 +1,9 @@
 from core.settings import Settings
 from core.helper_functions import Helper
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use('Agg')
 import copy
 import SimpleITK as sitk
 
@@ -38,8 +40,11 @@ def max_intensity_mask(img, msk):
     return np.max(img[msk == 1])
 
 
-def img_size_xy(img, _):
-    assert img.shape[1] == img.shape[2]
+def img_size_x(img, _):
+    return img.shape[2]
+
+
+def img_size_y(img, _):
     return img.shape[1]
 
 
@@ -80,16 +85,20 @@ def std_dilated_mask(img, msk):
 
 
 if __name__ == '__main__':
-    interest_nr = 32
+    interest_nr = 22
 
     s = Settings()
+    s.GROUND_TRUTH = 'left_atrium'
     h = Helper(s)
 
-    img_paths, msk_paths = h.getImagePaths(s.VALIDATION_SET, False)
+    explore_set = s.TESTING_SET
+    print('explore_set == {}'.format(explore_set))
+
+    img_paths, msk_paths = h.getImagePaths(explore_set, False)
     imgs = h.loadImages(img_paths)
     msks = h.loadImages(msk_paths)
 
-    interest_idx = int(np.argwhere(s.VALIDATION_SET == interest_nr))
+    interest_idx = int(np.argwhere(np.array(explore_set) == interest_nr))
 
     props = {
              'Mean intensity': lambda img, msk: mean_intensity(img, msk),
@@ -100,7 +109,8 @@ if __name__ == '__main__':
              'Max intensity': lambda img, msk: max_intensity(img, msk),
              'Min intensity mask': lambda img, msk: min_intensity_mask(img, msk),
              'Max intensity mask': lambda img, msk: max_intensity_mask(img, msk),
-             'Image size xy': lambda img, msk: img_size_xy(img, msk),
+             'Image size x': lambda img, msk: img_size_x(img, msk),
+             'Image size y': lambda img, msk: img_size_y(img, msk),
              'Image size z': lambda img, msk: img_size_z(img, msk),
              # 'Mean / std image': lambda img, msk: mean_per_std_img(img, msk),
              # 'Mean / std mask': lambda img, msk: mean_per_std_mask(img, msk),
@@ -151,4 +161,5 @@ if __name__ == '__main__':
             bottom=False,  # ticks along the bottom edge are off
             top=False,  # ticks along the top edge are off
             labelbottom=False)  # labels along the bottom edge are off
-    plt.show()
+    plt.savefig('../results/image_probs.png')
+    # plt.show()

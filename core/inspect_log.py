@@ -2,6 +2,8 @@ from core.helper_functions import Helper
 from core.settings import *
 import pickle
 import matplotlib.pyplot as plt
+import os
+os.chdir('../')
 
 
 class LogInspector:

@@ -7,20 +7,13 @@ import platform
 class Settings:
     def __init__(self):
         # Model to train
-        self.GROUND_TRUTH = 'scar_fibrosis'  # 'left_atrium' / 'scar_fibrosis'
+        self.GROUND_TRUTH = 'left_atrium'  # 'left_atrium' / 'scar_fibrosis'
         self.PRE_OR_POST_NAME = 'post'  # 'post' / 'pre'
         self.PRE_OR_POST_XX = 'b'  # 'a' / 'b'
-        # self.MODEL_NAME = '-'
-        # self.MODEL_NAME = 'sf_july_data_vanilla_ps448_newlgedata2'
-        # self.MODEL_NAME = 'sf_july_data_auxloss_ps448_newlgedata2'
-        # self.MODEL_NAME = 'sf_originalanddatajuly2018_vanilla'
-        # self.MODEL_NAME = 'sf_originalanddatajuly2018_auxloss'
-        # self.MODEL_NAME = 'sf_set52_auxloss'
-        # self.MODEL_NAME = 'sf_set52_vanilla'
-        self.MODEL_NAME = 'test'
+        self.MODEL_NAME = 'la_all_100_data_do25'
 
-        self.DATA_SET = 'set_of_54'  # 'new_lge_data_2' OR 'data_july_2018' OR 'original' OR 'challenge_2018'
-        # OR 'set_of_54'
+        self.DATA_SET = 'atriaseg_2018_testing'  # 'new_lge_data_2' OR 'data_july_2018' OR 'original'
+        # OR 'set_of_54' OR 'atriaseg_2018_testing' OR 'challenge_2018'
 
         # Path to folders
         self.DATA_PRE = '/data/cwdevente/LAUnet/' if platform.system() == 'Linux' else '../'
@@ -33,11 +26,13 @@ class Settings:
             self.PATH_TO_DATA = '{}new_lge_data_2/'.format(self.DATA_PRE)
         elif self.DATA_SET == 'set_of_54':
             self.PATH_TO_DATA = '{}set_of_54/'.format(self.DATA_PRE)
+        elif self.DATA_SET == 'atriaseg_2018_testing':
+            self.PATH_TO_DATA = '{}atriaseg_2018_testing/'.format(self.DATA_PRE)
         else:
             self.PATH_TO_DATA = '{}data/'.format(self.DATA_PRE)
 
-        self.PATH_TO_RESULTS = '../../results/'
-        self.PATH_TO_MODELS = '../../results/models/'
+        self.PATH_TO_RESULTS = '../results/'
+        self.PATH_TO_MODELS = '../results/models/'
         # self.PATH_TO_MODELS = '/data/cwdevente/old_models/'
         self.PATH_TO_AUG = self.PATH_TO_DATA + 'augmentations/'
         self.PATH_TO_ART = self.PATH_TO_DATA + 'augmentations/artificial/'
@@ -50,26 +45,31 @@ class Settings:
 
         if self.DATA_SET == 'original':
             # Division of datasets
+            # self.ALL_NATURAL_SET = list(range(1, 31))
+            # self.TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 5, 26]  # 18 left out because of orientation
+            # self.VALIDATION_SET = [25, 24, 16, 2, 14, 28, 12]  # 21 left out, since duplicate of 26
+            # self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3]
+            #
+            # if False:
+            #     a = list(range(31, 55))
+            #     self.ALL_NATURAL_SET += a
+            #
+            #     np.random.seed(0)
+            #     r_p = np.random.permutation(a)
+            #     self.TRAINING_SET += list(r_p[range(0, 12)])
+            #     self.VALIDATION_SET += list(r_p[range(12, 18)])
+            #     self.TESTING_SET += list(r_p[range(18, 24)])
+            #
+            # if self.GROUND_TRUTH == 'left_atrium':
+            #     self.ALL_NATURAL_SET = [x for x in self.ALL_NATURAL_SET if x not in self.YALE_NRS_POST]
+            #     self.TRAINING_SET = [x for x in self.TRAINING_SET if x not in self.YALE_NRS_POST]
+            #     self.VALIDATION_SET = [x for x in self.VALIDATION_SET if x not in self.YALE_NRS_POST]
+            #     self.TESTING_SET = [x for x in self.TESTING_SET if x not in self.YALE_NRS_POST]
+
             self.ALL_NATURAL_SET = list(range(1, 31))
-            self.TRAINING_SET = [10, 19, 30, 13, 6, 8, 17, 1, 23, 22, 4, 7, 5, 26]  # 18 left out because of orientation
-            self.VALIDATION_SET = [25, 24, 16, 2, 14, 28, 12]  # 21 left out, since duplicate of 26
-            self.TESTING_SET = [20, 29, 11, 15, 27, 9, 3]
-
-            if True:
-                a = list(range(31, 55))
-                self.ALL_NATURAL_SET += a
-
-                np.random.seed(0)
-                r_p = np.random.permutation(a)
-                self.TRAINING_SET += list(r_p[range(0, 12)])
-                self.VALIDATION_SET += list(r_p[range(12, 18)])
-                self.TESTING_SET += list(r_p[range(18, 24)])
-
-            if self.GROUND_TRUTH == 'left_atrium':
-                self.ALL_NATURAL_SET = [x for x in self.ALL_NATURAL_SET if x not in self.YALE_NRS_POST]
-                self.TRAINING_SET = [x for x in self.TRAINING_SET if x not in self.YALE_NRS_POST]
-                self.VALIDATION_SET = [x for x in self.VALIDATION_SET if x not in self.YALE_NRS_POST]
-                self.TESTING_SET = [x for x in self.TESTING_SET if x not in self.YALE_NRS_POST]
+            self.TRAINING_SET = [1, 2, 4, 6, 8, 9, 10, 13]
+            self.VALIDATION_SET = [15, 16, 19, 20, 11]
+            self.TESTING_SET = [24, 25, 27, 29, 30]
         elif self.DATA_SET == 'challenge_2018':
             self.ALL_NATURAL_SET = range(1, 101)
             # self.TRAINING_SET = range(1, 51)
@@ -78,9 +78,15 @@ class Settings:
 
             np.random.seed(0)
             r_p = np.random.permutation(self.ALL_NATURAL_SET)
-            self.TRAINING_SET = r_p[range(0, 50)]
-            self.VALIDATION_SET = r_p[range(50, 75)]
-            self.TESTING_SET = r_p[range(75, 100)]
+            self.TRAINING_SET = r_p[range(0, 75)]
+            self.VALIDATION_SET = r_p[range(75, 100)]
+            self.TESTING_SET = np.array([])
+            # self.TESTING_SET = r_p[range(75, 100)]
+        elif self.DATA_SET == 'atriaseg_2018_testing':
+            self.ALL_NATURAL_SET = range(1, 55)
+            self.TRAINING_SET = []
+            self.VALIDATION_SET = []
+            self.TESTING_SET = self.ALL_NATURAL_SET
         elif self.DATA_SET == 'data_july_2018':
             self.ALL_NATURAL_SET = range(1, 25)
 
@@ -115,7 +121,7 @@ class Settings:
         self.LEARNING_RATE = math.pow(10, -4)
         self.NR_CONV_PER_CONV_BLOCK = 1
         self.BATCH_SIZE = 4
-        self.NR_BATCHES = 25000
+        self.NR_BATCHES = 60000
         self.VALIDATE_EVERY_ITER = 25
         self.NR_VAL_PATCH_PER_ITER = 100
         self.BATCH_SIZE_VAL = 4
@@ -124,7 +130,9 @@ class Settings:
         self.AUTO_CLASS_WEIGHT_N = 4000  # number of samples to use for the calculation of FN_CLASS_WEIGHT if it is set
         # to 'auto'
         self.EARLY_STOPPING = True
-        self.PATIENTCE_ES = 4000  # Patience of early stopping
+        self.PATIENCE_ES = 4000  # Patience of early stopping
+        self.RESET_PATIENCE_ES = True
+        self.RESET_VAL_LOSS = True
         self.DROPOUT_AT_EVERY_LEVEL = False
         self.DROPOUT = 0.5
         self.FEATURE_MAP_INC_RATE = 2.
@@ -136,14 +144,14 @@ class Settings:
         self.USE_NORMALIZATION = True
         self.USE_LA_INPUT = False
         self.VAL_LOSS_SMOOTH_WINDOW_MODEL_SELECTION = 50
-        self.START_CH = 32
+        self.START_CH = 64
         self.SE2_N_THETA = 8
-        self.LOAD_MODEL = False  # Continue training with model file that already exists for model name
+        self.LOAD_MODEL = True  # Continue training with model file that already exists for model name
 
         # Offline augmentation
         self.AUGMENT_ONLINE = False
         self.USE_READ_FILE_FOR_LAP = False
-        self.NR_AUG = 100
+        self.NR_AUG = 10
 
         if self.USE_LA_INPUT and self.AUGMENT_ONLINE:
             raise Exception('USE_LA_INPUT with AUGMENT_ONLINE is not yet implemented')
@@ -155,10 +163,10 @@ class Settings:
             raise Exception('Should not be using USE_LA_INPUT with GROUND_TRUTH == \'left_atrium\'')
 
         # Testing and validation procedure
-        self.RESIZE_BEFORE_TRAIN = (448, 448)  # False or 2D tuple which represents image size in x- and y-direction
-        self.USE_POST_PROCESSING = False
+        self.RESIZE_BEFORE_TRAIN = False  # False or 2D tuple which represents image size in x- and y-direction
+        self.USE_POST_PROCESSING = True
         self.SAVE_METRICS = True
-        self.VALTEST_SET = self.VALIDATION_SET  # VALIDATION_SET OR TESTING_SET
+        self.VALTEST_SET = self.TESTING_SET  # VALIDATION_SET OR TESTING_SET
         self.VALTEST_MODEL_NAMES = [self.MODEL_NAME]
         self.VALTEST_AUG_NR = 0  # Number of augmentations per image in PREDICT_SET
         self.VOXEL_OVERLAP = (0, 32, 32)
@@ -170,7 +178,9 @@ class Settings:
         # and results will be saved to the disk. If False, the probability images will be loaded from disk. An error
         # will occur if these images do not exist on the disk.
         self.CALC_PROB_THRESH = True
-        self.RESIZE_BEFORE_PREDICTION = (448, 448)  # EITHER False or nD tuple where n == self.NR_DIM
+        self.USE_ANNO_FOR_TEST = False  # Iff True, metrics will be calculated and manual annotations will be saved in
+                                        # same folder as model predictions
+        self.RESIZE_BEFORE_PREDICTION = False  # EITHER False or nD tuple where n == self.NR_DIM
         self.PREDICT_AUX_OUTPUT = False  # Predict the auxiliary output during test time, instead of the main output
         self.DISCARD_LAST_SLICE = False  # Set prediction of last slice to zero
 
@@ -205,8 +215,8 @@ class Settings:
         self.MODEL_NAME_FOR_LA_SEG = 'la_2018_challenge_convpl_depth_2/2'
         self.MODEL_PS_FOR_LA_SEG = (1, 448, 448)
 
-        self.PATH_TO_NO_SCAR_POST = '../../data/input/post/'
-        self.PATH_TO_NO_SCAR_PRE = '../../data/input/pre/'
+        self.PATH_TO_NO_SCAR_POST = '../data/input/post/'
+        self.PATH_TO_NO_SCAR_PRE = '../data/input/pre/'
         self.NO_SCAR_NRS_PRE = range(1, 31)
         self.NO_SCAR_NRS_PRE = \
             [x for x in self.NO_SCAR_NRS_PRE if x not in [3, 5, 7, 9, 11, 12, 19, 20, 23, 25, 26, 28]]
@@ -214,7 +224,7 @@ class Settings:
         self.NO_SCAR_NRS_POST = [x for x in self.NO_SCAR_NRS_POST if x not in self.YALE_NRS_POST]
 
         self.NR_ART = 100
-        self.PATH_TO_ARTIFICIAL_SCAR = '../../data/artificial_scar/'
+        self.PATH_TO_ARTIFICIAL_SCAR = '../data/artificial_scar/'
         self.WALL_THICKNESS_MIN_MM = 1  # mm
         self.WALL_THICKNESS_MAX_MM = 2  # mm
         self.NB_GROUPS_ODDS = [0, .2, .6, .2]

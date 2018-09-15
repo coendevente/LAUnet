@@ -49,14 +49,14 @@ class Test:
 rater1 = []
 rater2 = []
 
-nrs = [1, 3, 5, 7, 11, 31, 38, 44, 47, 49]
+nrs = [13, 42, 25, 7, 24, 37, 40, 51, 4, 45, 48, 10, 22]
 
 for nr in nrs:
     rater1.append(
         '/Users/coendevente/Desktop/Master/jaar_1/Stage/LAUnet/set_of_54/input/p{0}/scar_seg.nii'.format(nr)
     )
     rater2.append(
-        '/Users/coendevente/Downloads/thresholded_mri done/p{0} done/scar_seg done.nii'.format(nr)
+        '/Users/coendevente/Downloads/thresholded_mri done/scar_seg{}.nii'.format(nr)
     )
 
 s = Settings()
